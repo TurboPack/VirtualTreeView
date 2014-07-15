@@ -89,12 +89,12 @@ type
   TVTMenuItem = TMenuItem;
 
   TVTHeaderPopupMenu = class(TPopupMenu)
-  private
+  strict private
     FOptions: TVTHeaderPopupOptions;
 
     FOnAddHeaderPopupItem: TAddHeaderPopupItemEvent;
     FOnColumnChange: TColumnChangeEvent;
-  protected
+  strict protected
     procedure DoAddHeaderPopupItem(const Column: TColumnIndex; out Cmd: TAddPopupItemType); virtual;
     procedure DoColumnChange(Column: TColumnIndex; Visible: Boolean); virtual;
     procedure OnMenuItemClick(Sender: TObject);

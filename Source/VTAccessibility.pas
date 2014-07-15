@@ -71,9 +71,9 @@ type
   end;
 
   TVTMultiColumnItemAccessibility = class(TVirtualTreeItemAccessibility, IAccessible)
-    private
+  strict private
     function GetItemDescription(varChild: OleVariant; out pszDescription: WideString; IncludeMainColumn: boolean): HResult; stdcall;
-    public
+  public
     { IAccessibility }
     function Get_accName(varChild: OleVariant; out pszName: WideString): HResult; stdcall;
     function Get_accDescription(varChild: OleVariant; out pszDescription: WideString): HResult; stdcall;

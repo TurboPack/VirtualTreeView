@@ -22,7 +22,7 @@ type
   end;
 
   TVTAccessibilityFactory = class(TObject)
-  private
+  strict private
     FAccessibleProviders: TInterfaceList;
   public
     constructor Create;
