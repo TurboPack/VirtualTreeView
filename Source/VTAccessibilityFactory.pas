@@ -14,10 +14,7 @@ unit VTAccessibilityFactory;
 interface
 
 uses
-  {$if CompilerVersion >= 18}
-    oleacc, // MSAA support in Delphi 2006 or higher
-  {$ifend}
-  Classes, VirtualTrees;
+  Winapi.oleacc, System.Classes, VirtualTrees;
 
 type
   IVTAccessibleProvider = interface

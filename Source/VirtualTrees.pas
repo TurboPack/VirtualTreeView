@@ -59,14 +59,10 @@ interface
 {$WARN UNSAFE_CAST OFF}
 {$WARN UNSAFE_CODE OFF}
 
-{$IF CompilerVersion >= 24}
-  {$LEGACYIFEND ON}
-{$IFEND}
+{$LEGACYIFEND ON}
 
-{$if CompilerVersion >= 20}
-  {$WARN IMPLICIT_STRING_CAST       OFF}
-  {$WARN IMPLICIT_STRING_CAST_LOSS  OFF}
-{$ifend}
+{$WARN IMPLICIT_STRING_CAST       OFF}
+{$WARN IMPLICIT_STRING_CAST_LOSS  OFF}
 
 {$HPPEMIT '#include <objidl.h>'}
 {$HPPEMIT '#include <oleidl.h>'}
@@ -75,61 +71,13 @@ interface
 {$HPPEMIT '#pragma link "VirtualTreesR.lib"'}
 
 uses
-  Windows,
-  {$if CompilerVersion >= 18}
-    oleacc,   // MSAA support in Delphi 2006 or higher
-  {$ifend}
-  Messages, SysUtils, Graphics, Controls, Forms, ImgList, ActiveX, StdCtrls, Classes, Menus, Printers, Types,
-  CommCtrl, // image lists, common controls tree structures
-  Themes, UxTheme, ShlObj
-  {$ifdef TntSupport}
-    , TntStdCtrls       // Unicode aware inplace editor.
-  {$endif TntSupport}
-  {$IF CompilerVersion >= 24}
-  ,UITypes
-  {$IFEND}
-  ;
+  Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.ImgList, Winapi.ActiveX, Vcl.StdCtrls, System.Classes,
+  Vcl.Menus, Vcl.Printers, System.Types, Winapi.CommCtrl, Vcl.Themes, Winapi.UxTheme,
+  Winapi.ShlObj, System.UITypes;
 
 const
   VTVersion = '5.3.2';
-
-{$if CompilerVersion < 20}
-type
-  UnicodeString = WideString;
-  RawByteString = AnsiString;
-  PByte = PAnsiChar;
-{$ifend}
-
-{$if CompilerVersion < 18}
-  //MSAA interfaces not included in Delphi 7
-  {$WARN BOUNDS_ERROR OFF}
-  IAccessible = interface(IDispatch)
-    ['{618736E0-3C3D-11CF-810C-00AA00389B71}']
-    function Get_accParent(out ppdispParent: IDispatch): HResult; stdcall;
-    function Get_accChildCount(out pcountChildren: Integer): HResult; stdcall;
-    function Get_accChild(varChild: OleVariant; out ppdispChild: IDispatch): HResult; stdcall;
-    function Get_accName(varChild: OleVariant; out pszName: WideString): HResult; stdcall;
-    function Get_accValue(varChild: OleVariant; out pszValue: WideString): HResult; stdcall;
-    function Get_accDescription(varChild: OleVariant; out pszDescription: WideString): HResult; stdcall;
-    function Get_accRole(varChild: OleVariant; out pvarRole: OleVariant): HResult; stdcall;
-    function Get_accState(varChild: OleVariant; out pvarState: OleVariant): HResult; stdcall;
-    function Get_accHelp(varChild: OleVariant; out pszHelp: WideString): HResult; stdcall;
-    function Get_accHelpTopic(out pszHelpFile: WideString; varChild: OleVariant;
-                              out pidTopic: Integer): HResult; stdcall;
-    function Get_accKeyboardShortcut(varChild: OleVariant; out pszKeyboardShortcut: WideString): HResult; stdcall;
-    function Get_accFocus(out pvarChild: OleVariant): HResult; stdcall;
-    function Get_accSelection(out pvarChildren: OleVariant): HResult; stdcall;
-    function Get_accDefaultAction(varChild: OleVariant; out pszDefaultAction: WideString): HResult; stdcall;
-    function accSelect(flagsSelect: Integer; varChild: OleVariant): HResult; stdcall;
-    function accLocation(out pxLeft: Integer; out pyTop: Integer; out pcxWidth: Integer;
-                         out pcyHeight: Integer; varChild: OleVariant): HResult; stdcall;
-    function accNavigate(navDir: Integer; varStart: OleVariant; out pvarEndUpAt: OleVariant): HResult; stdcall;
-    function accHitTest(xLeft: Integer; yTop: Integer; out pvarChild: OleVariant): HResult; stdcall;
-    function accDoDefaultAction(varChild: OleVariant): HResult; stdcall;
-    function Set_accName(varChild: OleVariant; const pszName: WideString): HResult; stdcall;
-    function Set_accValue(varChild: OleVariant; const pszValue: WideString): HResult; stdcall;
-  end;
-{$ifend}
 
 const
   VTTreeStreamVersion = 2;
@@ -213,16 +161,6 @@ const
   IID_IDragSourceHelper: TGUID = (D1: $DE5BF786; D2: $477A; D3: $11D2; D4: ($83, $9D, $00, $C0, $4F, $D9, $18, $D0));
   IID_IDropTarget: TGUID = (D1: $00000122; D2: $0000; D3: $0000; D4: ($C0, $00, $00, $00, $00, $00, $00, $46));
 
-{$if CompilerVersion<21}
-  CLSID_DragDropHelper: TGUID = (D1: $4657278A; D2: $411B; D3: $11D2; D4: ($83, $9A, $00, $C0, $4F, $D9, $18, $D0));
-  DSH_ALLOWDROPDESCRIPTIONTEXT = $1;
-
-  SID_IDropTargetHelper = '{4657278B-411B-11D2-839A-00C04FD918D0}';
-  SID_IDragSourceHelper = '{DE5BF786-477A-11D2-839D-00C04FD918D0}';
-  SID_IDragSourceHelper2 = '{83E07D0D-0C5F-4163-BF1A-60B274051E40}';
-  SID_IDropTarget = '{00000122-0000-0000-C000-000000000046}';
-{$ifend}
-
   // Help identifiers for exceptions. Application developers are responsible to link them with actual help topics.
   hcTFEditLinkIsNil      = 2000;
   hcTFWrongMoveError     = 2001;
@@ -264,28 +202,6 @@ type
 
   // Limits the speed interval which can be used for auto scrolling (milliseconds).
   TAutoScrollInterval = 1..1000;
-
-  // Need to declare the correct WMNCPaint record as the VCL (D5-) doesn't.
-  {$if CompilerVersion >= 23}
-  TRealWMNCPaint = TWMNCPaint;
-  {$else}
-  TRealWMNCPaint = packed record
-    Msg: UINT;
-    Rgn: HRGN;
-    lParam: LPARAM;
-    Result: LRESULT;
-  end;
-
-  // The next two message records are not declared in Delphi 6 and lower.
-  TWMPrint = packed record
-    Msg: UINT;
-    DC: HDC;
-    Flags: LPARAM;
-    Result: LRESULT;
-  end;
-
-  TWMPrintClient = TWMPrint;
-  {$ifend}
 
   // Be careful when adding new states as this might change the size of the type which in turn
   // changes the alignment in the node record as well as the stream chunks.
@@ -748,40 +664,6 @@ type
 
   // ----- OLE drag'n drop handling
 
-{$if CompilerVersion<21}
-  {$EXTERNALSYM IDropTargetHelper}
-
-  IDropTargetHelper = interface(IUnknown)
-    [SID_IDropTargetHelper]
-    function DragEnter(hwndTarget: HWND; pDataObject: IDataObject; var ppt: TPoint; dwEffect: Integer): HRESULT; stdcall;
-    function DragLeave: HRESULT; stdcall;
-    function DragOver(var ppt: TPoint; dwEffect: Integer): HRESULT; stdcall;
-    function Drop(pDataObject: IDataObject; var ppt: TPoint; dwEffect: Integer): HRESULT; stdcall;
-    function Show(fShow: Boolean): HRESULT; stdcall;
-  end;
-
-  PSHDragImage = ^TSHDragImage;
-  TSHDragImage = packed record
-    sizeDragImage: TSize;
-    ptOffset: TPoint;
-    hbmpDragImage: HBITMAP;
-    crColorKey: TColorRef;
-  end;
-
-  IDragSourceHelper = interface(IUnknown)
-    [SID_IDragSourceHelper]
-    function InitializeFromBitmap(SHDragImage: PSHDragImage; pDataObject: IDataObject): HRESULT; stdcall;
-    function InitializeFromWindow(Window: HWND; var ppt: TPoint; pDataObject: IDataObject): HRESULT; stdcall;
-  end;
-  {$EXTERNALSYM IDragSourceHelper}
-
-    IDragSourceHelper2 = interface(IDragSourceHelper)
-  [SID_IDragSourceHelper2]
-    function SetFlags(dwFlags: DWORD): HRESULT; stdcall;
-  end;
-  {$EXTERNALSYM IDragSourceHelper2}
-{$ifend}
-
   IVTDragManager = interface(IUnknown)
     ['{C4B25559-14DA-446B-8901-0C879000EB16}']
     procedure ForceDragLeave; stdcall;
@@ -1075,11 +957,7 @@ type
     destructor Destroy; override;
 
     procedure Assign(Source: TPersistent); override;
-{$if CompilerVersion >= 20}
-   function Equals(OtherColumnObj: TObject): Boolean; override;
-{$else}
-   function Equals(OtherColumnObj: TObject): Boolean; virtual; 
-{$ifend}
+    function Equals(OtherColumnObj: TObject): Boolean; override;
     function GetRect: TRect; virtual;
     procedure LoadFromStream(const Stream: TStream; Version: Integer);
     procedure ParentBiDiModeChanged;
@@ -1184,11 +1062,7 @@ type
     procedure Clear; virtual;
     function ColumnFromPosition(P: TPoint; Relative: Boolean = True): TColumnIndex; overload; virtual;
     function ColumnFromPosition(PositionIndex: TColumnPosition): TColumnIndex; overload; virtual;
-{$if CompilerVersion >= 20}
-   function Equals(OtherColumnsObj: TObject): Boolean; override;
-{$else}
-   function Equals(OtherColumnsObj: TObject): Boolean;
-{$ifend}
+    function Equals(OtherColumnsObj: TObject): Boolean; override;
     procedure GetColumnBounds(Column: TColumnIndex; var Left, Right: Integer);
     function GetFirstVisibleColumn(ConsiderAllowFocus: Boolean = False): TColumnIndex;
     function GetLastVisibleColumn(ConsiderAllowFocus: Boolean = False): TColumnIndex;
@@ -1813,11 +1687,7 @@ type
   // ----- Event prototypes:
 
   // node enumeration
-  {$if CompilerVersion >= 20}
   TVTGetNodeProc = reference to procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
-  {$else}
-  TVTGetNodeProc = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; Data: Pointer; var Abort: Boolean) of object;
-  {$ifend}
   // node events
   TVTChangingEvent = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; var Allowed: Boolean) of object;
   TVTCheckChangingEvent = procedure(Sender: TBaseVirtualTree; Node: PVirtualNode; var NewState: TCheckState;
@@ -1987,18 +1857,18 @@ type
 
   PVTVirtualNodeEnumeration = ^TVTVirtualNodeEnumeration;
 
-  TVTVirtualNodeEnumerator = {$if CompilerVersion >= 18}record{$else}class{$ifend}
+  TVTVirtualNodeEnumerator = record
   private
     FNode: PVirtualNode;
     FCanModeNext: Boolean;
     FEnumeration: PVTVirtualNodeEnumeration;
-    function GetCurrent: PVirtualNode; {$if CompilerVersion >= 18}inline;{$ifend}
+    function GetCurrent: PVirtualNode; inline;
   public
-    function MoveNext: Boolean; {$if CompilerVersion >= 18}inline;{$ifend}
+    function MoveNext: Boolean; inline;
     property Current: PVirtualNode read GetCurrent;
   end;
 
-  TVTVirtualNodeEnumeration = {$if CompilerVersion >= 18}record{$else}object{$ifend}
+  TVTVirtualNodeEnumeration = record
   private
     FMode: TVZVirtualNodeEnumerationMode;
     FTree: TBaseVirtualTree;
@@ -2016,7 +1886,6 @@ type
 
 
   // XE2+ VCL Style
-{$if CompilerVersion >= 23 }
   TVclStyleScrollBarsHook = class(TMouseTrackControlStyleHook)
   strict private type
   {$REGION 'TVclStyleScrollBarWindow'}
@@ -2091,8 +1960,6 @@ type
     constructor Create(AControl: TWinControl); override;
     destructor Destroy; override;
   end;
-{$ifend}
-
 
   // ----- TBaseVirtualTree
   TBaseVirtualTree = class(TCustomControl)
@@ -2412,14 +2279,12 @@ type
 
     FVclStyleEnabled: Boolean;
 
-    {$if CompilerVersion >= 23 }
     FSavedBevelKind: TBevelKind;
     FSavedBorderWidth: Integer;
     FSetOrRestoreBevelKindAndBevelWidth: Boolean;
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
     procedure CMBorderChanged(var Message: TMessage); message CM_BORDERCHANGED;
     procedure CMParentDoubleBufferedChange(var Message: TMessage); message CM_PARENTDOUBLEBUFFEREDCHANGED;
-    {$ifend}
 
     procedure AdjustCoordinatesByIndent(var PaintInfo: TVTPaintInfo; Indent: Integer);
     procedure AdjustTotalCount(Node: PVirtualNode; Value: Integer; relative: Boolean = False);
@@ -2574,7 +2439,7 @@ type
     procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
     procedure WMNCDestroy(var Message: TWMNCDestroy); message WM_NCDESTROY;
     procedure WMNCHitTest(var Message: TWMNCHitTest); message WM_NCHITTEST;
-    procedure WMNCPaint(var Message: TRealWMNCPaint); message WM_NCPAINT;
+    procedure WMNCPaint(var Message: TWMNCPaint); message WM_NCPAINT;
     procedure WMPaint(var Message: TWMPaint); message WM_PAINT;
     procedure WMPaste(var Message: TWMPaste); message WM_PASTE;
     procedure WMPrint(var Message: TWMPrint); message WM_PRINT;
@@ -3136,7 +3001,7 @@ type
     function GetNextVisibleNoInit(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = True): PVirtualNode;
     function GetNextVisibleSibling(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function GetNextVisibleSiblingNoInit(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
-    function GetNodeAt(const P: TPoint): PVirtualNode; overload; {$if CompilerVersion >= 18}inline;{$ifend}
+    function GetNodeAt(const P: TPoint): PVirtualNode; overload; inline;
     function GetNodeAt(X, Y: Integer): PVirtualNode; overload;
     function GetNodeAt(X, Y: Integer; Relative: Boolean; var NodeTop: Integer): PVirtualNode; overload;
     function GetNodeData(Node: PVirtualNode): Pointer;
@@ -3322,14 +3187,10 @@ type
 
   TCustomVirtualStringTree = class;
 
-  // Edit support classes.
+  // Edit support Classes.
   TStringEditLink = class;
 
-  {$ifdef TntSupport}
-    TVTEdit = class(TTntEdit)
-  {$else}
-    TVTEdit = class(TCustomEdit)
-  {$endif TntSupport}
+  TVTEdit = class(TCustomEdit)
   private
     procedure CMAutoAdjust(var Message: TMessage); message CM_AUTOADJUST;
     procedure CMExit(var Message: TMessage); message CM_EXIT;
@@ -3759,11 +3620,9 @@ type
     property OnStateChange;
     property OnStructureChange;
     property OnUpdating;
-    {$if CompilerVersion>=22}
     property OnCanResize;
     property OnGesture;
     property Touch;
-    {$ifend}
   end;
 
   TVTDrawNodeEvent = procedure(Sender: TBaseVirtualTree; const PaintInfo: TVTPaintInfo) of object;
@@ -4010,11 +3869,9 @@ type
     property OnStateChange;
     property OnStructureChange;
     property OnUpdating;
-    {$if CompilerVersion>=22}
     property OnCanResize;
     property OnGesture;
     property Touch;
-    {$ifend}
   end;
 
 type
@@ -4054,17 +3911,17 @@ implementation
 {$R VirtualTrees.res}
 
 uses
-  Consts, Math,
-  AxCtrls,                 // TOLEStream
-  MMSystem,                // for animation timer (does not include further resources)
-  TypInfo,                 // for migration stuff
-  ActnList,
-  StdActns,                // for standard action support
-  {$ifdef UNICODE}
-  AnsiStrings,
-  {$endif UNICODE}
-  StrUtils,
-  VTAccessibilityFactory, GraphUtil;  // accessibility helper class
+  Vcl.Consts,
+  System.Math,
+  Vcl.AxCtrls,                 // TOLEStream
+  Winapi.MMSystem,             // for animation timer (does not include further resources)
+  System.TypInfo,              // for migration stuff
+  Vcl.ActnList,
+  Vcl.StdActns,                // for standard action support
+  System.AnsiStrings,
+  System.StrUtils,
+  VTAccessibilityFactory,
+  Vcl.GraphUtil;               // accessibility helper class
 
 resourcestring
   // Localizable strings.
@@ -4109,78 +3966,6 @@ var
     // Acceptable storage formats are IStream and global memory. The first is preferred.
     tymed: TYMED_ISTREAM or TYMED_HGLOBAL;
   );
-
-  {$if CompilerVersion < 23}
-type
-  TElementEdge = (
-    eeRaisedOuter
-  );
-
-  TElementEdges = set of TElementEdge;
-
-  TElementEdgeFlag = (
-    efRect
-  );
-
-  TElementEdgeFlags = set of TElementEdgeFlag;
-
-  // For compatibility with Delphi XE and earlier, prevents deprecated warnings in Delphi XE2 and higher
-  StyleServices = class
-    class function Enabled: Boolean;
-    class function DrawEdge(DC: HDC; Details: TThemedElementDetails; const R: TRect;
-      Edges: TElementEdges; Flags: TElementEdgeFlags; ContentRect: PRect = nil): Boolean;
-    class function DrawElement(DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
-    class function GetElementDetails(Detail: TThemedHeader): TThemedElementDetails; overload;
-    class function GetElementDetails(Detail: TThemedToolTip): TThemedElementDetails; overload;
-    class function GetElementDetails(Detail: TThemedWindow): TThemedElementDetails; overload;
-    class function GetElementDetails(Detail: TThemedButton): TThemedElementDetails; overload;
-    class procedure PaintBorder(Control: TWinControl; EraseLRCorner: Boolean);
-  end;
-
-  class function StyleServices.Enabled: Boolean;
-  begin
-    Result := ThemeServices.ThemesEnabled;
-  end;
-
-  class function StyleServices.DrawEdge(DC: HDC; Details: TThemedElementDetails; const R: TRect;
-    Edges: TElementEdges; Flags: TElementEdgeFlags; ContentRect: PRect = nil): Boolean;
-  begin
-    Assert((Edges = [eeRaisedOuter]) and (Flags = [efRect]));
-    ThemeServices.DrawEdge(DC, Details, R, BDR_RAISEDOUTER, BF_RECT);
-    Result := Enabled;
-  end;
-
-  class function StyleServices.DrawElement(DC: HDC; Details: TThemedElementDetails; const R: TRect; ClipRect: PRect = nil): Boolean;
-  begin
-    ThemeServices.DrawElement(DC, Details, R, ClipRect);
-    Result := Enabled;
-  end;
-
-  class function StyleServices.GetElementDetails(Detail: TThemedHeader): TThemedElementDetails;
-  begin
-    Result := ThemeServices.GetElementDetails(Detail);
-  end;
-
-  class function StyleServices.GetElementDetails(Detail: TThemedToolTip): TThemedElementDetails;
-  begin
-    Result := ThemeServices.GetElementDetails(Detail);
-  end;
-
-  class function StyleServices.GetElementDetails(Detail: TThemedWindow): TThemedElementDetails;
-  begin
-    Result := ThemeServices.GetElementDetails(Detail);
-  end;
-
-  class function StyleServices.GetElementDetails(Detail: TThemedButton): TThemedElementDetails;
-  begin
-    Result := ThemeServices.GetElementDetails(Detail);
-  end;
-
-  class procedure StyleServices.PaintBorder(Control: TWinControl; EraseLRCorner: Boolean);
-  begin
-    ThemeServices.PaintBorder(Control, EraseLRCorner);
-  end;
-  {$ifend}
 
 type
   // protection against TRect record method that cause problems with with-statements
@@ -4245,11 +4030,6 @@ const
                         // this chunk is immediately followed by all child nodes
   CaptionChunk = 3;     // used by the string tree to store a node's caption
   UserChunk = 4;        // used for data supplied by the application
-
-  {$if CompilerVersion < 19}
-    const
-      TVP_HOTGLYPH = 4;
-  {$ifend}
 
   RTLFlag: array[Boolean] of Integer = (0, ETO_RTLREADING);
   AlignmentToDrawFlag: array[TAlignment] of Cardinal = (DT_LEFT, DT_RIGHT, DT_CENTER);
@@ -4342,7 +4122,7 @@ var
 type
   PClipboardFormatListEntry = ^TClipboardFormatListEntry;
   TClipboardFormatListEntry = record
-    Description: string;               // The string used to register the format with Windows.
+    Description: string;               // The string used to register the format with Winapi.Windows.
     TreeClass: TVirtualTreeClass;      // The tree class which supports rendering this format.
     Priority: Cardinal;                // Number which determines the order of formats used in IDataObject.
     FormatEtc: TFormatEtc;             // The definition of the format in the IDataObject.
@@ -4611,10 +4391,8 @@ var
     (ID: CF_UNICODETEXT; Description: 'Unicode text'), // Do not localize
     (ID: CF_ENHMETAFILE; Description: 'Enhanced metafile image'), // Do not localize
     (ID: CF_HDROP; Description: 'File name(s)'), // Do not localize
-    (ID: CF_LOCALE; Description: 'Locale descriptor') // Do not localize
-    {$if CompilerVersion >= 23}
-    ,(ID: CF_DIBV5; Description: 'DIB image V5') // Do not localize
-    {$ifend}
+    (ID: CF_LOCALE; Description: 'Locale descriptor'), // Do not localize
+    (ID: CF_DIBV5; Description: 'DIB image V5') // Do not localize
   );
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5025,7 +4803,7 @@ begin
   Bounds.Right := Bounds.Left + 1;
   Bounds.Bottom := Bounds.Top + 1;
 
-  Windows.DrawTextW(DC, PWideChar(S), Length(S), Bounds, DrawFormat or DT_CALCRECT)
+  Winapi.Windows.DrawTextW(DC, PWideChar(S), Length(S), Bounds, DrawFormat or DT_CALCRECT)
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -6200,9 +5978,7 @@ begin
   // Predefined clipboard formats. Just add them to the internal list.
   RegisterVTClipboardFormat(CF_TEXT, TCustomVirtualStringTree, 100);
   RegisterVTClipboardFormat(CF_UNICODETEXT, TCustomVirtualStringTree, 95);
-  {$if CompilerVersion >= 23}
   TCustomStyleEngine.RegisterStyleHook(TBaseVirtualTree, TVclStyleScrollBarsHook);
-  {$ifend}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -6379,7 +6155,7 @@ var
   lCurrentTree: TBaseVirtualTree;
 
 begin
-  {$if CompilerVersion >= 21} TThread.NameThreadForDebugging('VirtualTrees.TWorkerThread');{$ifend}
+  TThread.NameThreadForDebugging('VirtualTrees.TWorkerThread');
   while not Terminated do
   begin
     WaitForSingleObject(WorkEvent, INFINITE);
@@ -6417,7 +6193,7 @@ begin
           fCurrentTree.ChangeTreeStatesAsync(EnterStates, LeaveStates);
           lCurrentTree := FCurrentTree; // Save reference in a local variable for later use
           fCurrentTree := nil; //Clear variable to prevent deadlock in CancelValidation. See #434
-          {$if CompilerVersion < 20}Synchronize{$else}Queue{$ifend}(lCurrentTree.UpdateEditBounds);
+          Queue(lCurrentTree.UpdateEditBounds);
         end;
       end;
     end;
@@ -7736,12 +7512,10 @@ var
   HintKind: TVTHintKind;
   LClipRect: TRect;
 
-  {$IF CompilerVersion >= 23 }
   LColor: TColor;
   LDetails: TThemedElementDetails;
   LGradientStart: TColor;
   LGradientEnd: TColor;
-  {$IFEND}
 
 begin
   Shadow := 0;
@@ -7779,7 +7553,6 @@ begin
       else
         with Canvas do
         begin
-          {$IF CompilerVersion >= 23 }
           if Tree.VclStyleEnabled  then
           begin
             LDetails := StyleServices.GetElementDetails(thHintNormal);
@@ -7798,8 +7571,7 @@ begin
             GradientFillCanvas(Canvas, LGradientStart, LGradientEnd, R, gdVertical);
           end
           else
-          {$IFEND}
-            begin
+          begin
             // Still force tooltip back and text color.
             Font.Color := clInfoText;
             Pen.Color := clBlack;
@@ -7827,12 +7599,12 @@ begin
           // Determine text position and don't forget the border.
           InflateRect(R, -1, -1);
           DrawFormat := DT_TOP or DT_NOPREFIX;
-          SetBkMode(Handle, Windows.TRANSPARENT);
+          SetBkMode(Handle, Winapi.Windows.TRANSPARENT);
           R.Top := Y;
           R.Left := R.Left + 3; // Make the text more centered
           if Assigned(Node) and (LineBreakStyle = hlbForceMultiLine) then
             DrawFormat := DrawFormat or DT_WORDBREAK;
-          Windows.DrawTextW(Handle, PWideChar(HintText), Length(HintText), R, DrawFormat)
+          Winapi.Windows.DrawTextW(Handle, PWideChar(HintText), Length(HintText), R, DrawFormat)
         end;
     end;
   end;
@@ -8062,7 +7834,7 @@ begin
               // On Windows NT/2K/XP the behavior of the tooltip is slightly different to that on Windows 9x/Me.
               // We don't have Unicode word wrap on the latter so the tooltip gets as wide as the largest line
               // in the caption (limited by carriage return), which results in unoptimal overlay of the tooltip.
-              Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), R, DT_CALCRECT or DT_WORDBREAK);
+              Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), R, DT_CALCRECT or DT_WORDBREAK);
               if BidiMode = bdLeftToRight then
                 Result.Right := R.Right + Tree.FTextMargin
               else
@@ -8103,7 +7875,7 @@ begin
             // Start with the base size of the hint in client coordinates.
             Result := Rect(0, 0, MaxWidth, FTextHeight);
             // Calculate the true size of the text rectangle.
-            Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), Result, DT_CALCRECT or DT_TOP or DT_NOPREFIX or DT_WORDBREAK);
+            Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(HintText), Length(HintText), Result, DT_CALCRECT or DT_TOP or DT_NOPREFIX or DT_WORDBREAK);
             // The height of the text plus 2 pixels vertical margin plus the border determine the hint window height.
             Inc(Result.Bottom, 6);
             // The text is centered horizontally with usual text margin for left and right borders (plus border).
@@ -8710,10 +8482,6 @@ end;
 function TVTVirtualNodeEnumeration.GetEnumerator: TVTVirtualNodeEnumerator;
 
 begin
-  {$if CompilerVersion >= 18}
-  {$else}
-  Result := TVTVirtualNodeEnumerator.Create;
-  {$ifend}
   Result.FNode := nil;
   Result.FCanModeNext := True;
   Result.FEnumeration := @Self;
@@ -9722,7 +9490,7 @@ begin
     vaLString, vaString:
       SetText(Reader.ReadString);
   else
-    SetText(Reader.{$if CompilerVersion >= 23}ReadString{$else}ReadWideString{$ifend});
+    SetText(Reader.ReadString);
   end;
 end;
 
@@ -9735,7 +9503,7 @@ begin
     vaLString, vaString:
       FHint := Reader.ReadString;
   else
-    FHint := Reader.{$if CompilerVersion >= 23}ReadString{$else}ReadWideString{$ifend};
+    FHint := Reader.ReadString;
   end;
 end;
 
@@ -9744,7 +9512,7 @@ end;
 procedure TVirtualTreeColumn.WriteHint(Writer: TWriter);
 
 begin
-  Writer.{$IF CompilerVersion >= 20}WriteString{$else}WriteWideString{$ifend}(FHint);
+  Writer.WriteString(FHint);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -9752,7 +9520,7 @@ end;
 procedure TVirtualTreeColumn.WriteText(Writer: TWriter);
 
 begin
-  Writer.{$IF CompilerVersion >= 20}WriteString{$else}WriteWideString{$ifend}(FText);
+  Writer.WriteString(FText);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -10295,16 +10063,16 @@ begin
     if FHeader.Treeview.VclStyleEnabled then
     begin
       SetTextColor(DC, ColorToRGB(FHeader.Treeview.FColors.HeaderFontColor));
-      Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
+      Winapi.Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
     end
     else
   begin
     OffsetRect(Bounds, 1, 1);
     SetTextColor(DC, ColorToRGB(clBtnHighlight));
-    Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
+    Winapi.Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
     OffsetRect(Bounds, -1, -1);
     SetTextColor(DC, ColorToRGB(clBtnShadow));
-    Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
+    Winapi.Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
   end
   else
   begin
@@ -10312,7 +10080,7 @@ begin
       SetTextColor(DC, ColorToRGB(FHeader.Treeview.FColors.HeaderHotColor))
     else
       SetTextColor(DC, ColorToRGB(FHeader.Treeview.FColors.HeaderFontColor));
-    Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
+    Winapi.Windows.DrawTextW(DC, PWideChar(Caption), Length(Caption), Bounds, DrawFormat);
   end;
 end;
 
@@ -12987,7 +12755,7 @@ begin
           Result := NewCursor <> Screen.Cursors[crDefault];
           if Result then
           begin
-            Windows.SetCursor(NewCursor);
+            Winapi.Windows.SetCursor(NewCursor);
             Message.Result := 1;
           end
         end;
@@ -13271,7 +13039,7 @@ type
   // the FPropPath member, which is otherwise not accessible. The reason why this access is needed is that
   // with nested components this member contains unneeded property path information. These information prevent
   // successful load of the stored properties later.
-  // In Classes.pas you can see that FPropPath is reset several times to '' to prevent this case for certain properies.
+  // In System.Classes.pas you can see that FPropPath is reset several times to '' to prevent this case for certain properies.
   // Unfortunately, there is no clean way for us here to do the same.
   {$hints off}
   TWriterHack = class(TFiler)
@@ -13294,7 +13062,7 @@ begin
   try
     // If VT is a nested component then this path contains the name of the parent component at this time
     // (otherwise it is already empty). This path is then combined with the property name under which the tree
-    // is defined in the parent component. Unfortunately, the load code in Classes.pas does not consider this case
+    // is defined in the parent component. Unfortunately, the load code in System.Classes.pas does not consider this case
     // is then unable to load this property.
     TWriterHack(Writer).FPropPath := '';
     Writer.WriteCollection(Columns);
@@ -13578,11 +13346,7 @@ begin
       SetLength(S, Dummy);
       ReadBuffer(PAnsiChar(S)^, Dummy);
       if VTHeaderStreamVersion >= 4 then
-        {$if CompilerVersion >= 20}
         Name := UTF8ToString(S)
-        {$else}
-        Name := UTF8Decode(S)
-        {$ifend}
       else
         Name := S;
       ReadBuffer(Dummy, SizeOf(Dummy));
@@ -14008,19 +13772,15 @@ end;
 
 function TVTColors.GetBackgroundColor: TColor;
 begin
-// XE2 VCL Style
-{$IF CompilerVersion >= 23 }
   if FOwner.VclStyleEnabled then
     Result := StyleServices.GetStyleColor(scTreeView)
   else
-{$IFEND}
     Result := FOwner.Color;
 end;
 
 function TVTColors.GetColor(const Index: Integer): TColor;
 
 begin
-{$IF CompilerVersion >= 23 }
   if FOwner.VclStyleEnabled then
   begin
     case Index of
@@ -14064,28 +13824,22 @@ begin
     end;
   end
   else
-{$IFEND}
-  Result := FColors[Index];
+    Result := FColors[Index];
 end;
 
 function TVTColors.GetHeaderFontColor: TColor;
 begin
-// XE2+ VCL Style
-{$IF CompilerVersion >= 23 }
   if FOwner.VclStyleEnabled then
     StyleServices.GetElementColor(StyleServices.GetElementDetails(thHeaderItemNormal), ecTextColor, Result)
   else
-{$IFEND}
     Result := FOwner.FHeader.Font.Color;
 end;
 
 function TVTColors.GetNodeFontColor: TColor;
 begin
-{$IF CompilerVersion >= 23 }
   if FOwner.VclStyleEnabled then
     StyleServices.GetElementColor(StyleServices.GetElementDetails(ttItemNormal), ecTextColor, Result)
   else
-{$IFEND}
     Result := FOwner.Font.Color;
 end;
 
@@ -14270,11 +14024,9 @@ begin
 
   FVclStyleEnabled := False;
   // XE2+ VCL Style
-  {$if CompilerVersion >= 23 }
   FSetOrRestoreBevelKindAndBevelWidth := False;
   FSavedBevelKind := bkNone;
   FSavedBorderWidth := 0;
-  {$ifend}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17387,7 +17139,7 @@ procedure TBaseVirtualTree.SetWindowTheme(Theme: Unicodestring);
 
 begin
   FChangingTheme := True;
-  UxTheme.SetWindowTheme(Handle, PWideChar(Theme), nil);
+  Winapi.UxTheme.SetWindowTheme(Handle, PWideChar(Theme), nil);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -17591,7 +17343,6 @@ begin
   FHeader.Invalidate(nil);
 end;
 
- {$if CompilerVersion >= 23 }
 procedure TBaseVirtualTree.CMBorderChanged(var Message: TMessage);
 begin
   inherited;
@@ -17613,8 +17364,6 @@ procedure TBaseVirtualTree.CMParentDoubleBufferedChange(var Message: TMessage);
 begin
   // empty by intention, we do our own buffering
 end;
-
-{$ifend}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -18181,10 +17930,6 @@ var
   ImageIndex: Integer;
   R: TRect;
   Text: UnicodeString;
-  {$ifndef UNICODE}
-    ANSIText: ANSIString;
-  {$endif}
-
 begin
   // We can only return valid data if a nodes reference is given.
   Item := Pointer(Message.LParam);
@@ -18238,15 +17983,8 @@ begin
     begin
       GetTextInfo(Node, -1, Font, R, Text);
 
-      {$ifdef UNICODE}
-        StrLCopy(Item.pszText, PWideChar(Text), Item.cchTextMax - 1);
-        Item.pszText[Length(Text)] := #0;
-      {$else}
-        // Convert the Unicode implicitely to ANSI using the current locale.
-        ANSIText := Text;
-        StrLCopy(Item.pszText, PChar(ANSIText), Item.cchTextMax - 1);
-        Item.pszText[Length(ANSIText)] := #0;
-      {$endif}
+      StrLCopy(Item.pszText, PWideChar(Text), Item.cchTextMax - 1);
+      Item.pszText[Length(Text)] := #0;
     end;
   end;
 end;
@@ -18455,11 +18193,9 @@ begin
     if FAccessibleItem = nil then
       FAccessibleItem := GetAccessibilityFactory.CreateIAccessible(Self);
     if Cardinal(Message.LParam) = OBJID_CLIENT then
-      {$if CompilerVersion >= 18}
       if Assigned(Accessible) then
         Message.Result := LresultFromObject(IID_IAccessible, Message.WParam, FAccessible)
       else
-      {$ifend}
         Message.Result := 0;
   end;
 end;
@@ -19417,7 +19153,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.WMNCPaint(var Message: TRealWMNCPaint);
+procedure TBaseVirtualTree.WMNCPaint(var Message: TWMNCPaint);
 
 var
   DC: HDC;
@@ -19685,7 +19421,7 @@ begin
           end
           else
             NewCursor := Cursor;
-          Windows.SetCursor(Screen.Cursors[NewCursor]);
+          Winapi.Windows.SetCursor(Screen.Cursors[NewCursor]);
           Message.Result := 1;
         end
         else
@@ -20036,7 +19772,7 @@ begin
   begin
     DeleteObject(FPanningCursor);
     FPanningCursor := NewCursor;
-    Windows.SetCursor(FPanningCursor);
+    Winapi.Windows.SetCursor(FPanningCursor);
   end
   else
     DeleteObject(NewCursor);
@@ -22585,7 +22321,7 @@ begin
         begin
           if (suoRepaintHeader in Options) and (hoVisible in FHeader.FOptions) then
             FHeader.Invalidate(nil);
-          if not (tsSizing in FStates) and (FScrollBarOptions.ScrollBars in [{$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssBoth]) then
+          if not (tsSizing in FStates) and (FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth]) then
             UpdateHorizontalScrollBar(suoRepaintScrollbars in Options);
         end;
 
@@ -22593,7 +22329,7 @@ begin
         begin
           UpdateVerticalScrollBar(suoRepaintScrollbars in Options);
           if not (FHeader.UseColumns or IsMouseSelecting) and
-            (FScrollBarOptions.ScrollBars in [{$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssBoth]) then
+            (FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth]) then
             UpdateHorizontalScrollBar(suoRepaintScrollbars in Options);
         end;
       end;
@@ -22921,20 +22657,16 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TBaseVirtualTree.DragAndDrop(AllowedEffects: Dword; DataObject: IDataObject; var DragEffect: LongInt);
-{$IF CompilerVersion >= 22}
 var
   lDragEffect: DWord; // required for type compatibility with SHDoDragDrop
-{$ifend}
 begin
-  {$IF CompilerVersion >= 22}
   if IsWinVistaOrAbove then begin
     lDragEffect := DWord(DragEffect);
     SHDoDragDrop(Self.Handle, DataObject, nil, AllowedEffects, lDragEffect); // supports drag hints on Windows Vista and later
     DragEffect := LongInt(lDragEffect);
   end
   else
-  {$ifend}
-  ActiveX.DoDragDrop(DataObject, DragManager as IDropSource, AllowedEffects, DragEffect);
+    Winapi.ActiveX.DoDragDrop(DataObject, DragManager as IDropSource, AllowedEffects, DragEffect);
  end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23338,7 +23070,7 @@ begin
   begin
     Brush.Color := FColors.BackGroundColor;
     R := Rect(Min(Left, Right), Top, Max(Left, Right) + 1, Top + 1);
-    Windows.FillRect(Handle, R, FDottedBrush);
+    Winapi.Windows.FillRect(Handle, R, FDottedBrush);
   end;
 end;
 
@@ -23363,7 +23095,7 @@ begin
     else
     Brush.Color := FColors.BackGroundColor;
     R := Rect(Left, Min(Top, Bottom), Left + 1, Max(Top, Bottom) + 1);
-    Windows.FillRect(Handle, R, FDottedBrush);
+    Winapi.Windows.FillRect(Handle, R, FDottedBrush);
   end;
 end;
 
@@ -23634,7 +23366,7 @@ end;
 
 function TBaseVirtualTree.GetHintWindowClass: THintWindowClass;
 
-// Returns the default hint window class used for the tree. Descendants can override it to use their own classes.
+// Returns the default hint window class used for the tree. Descendants can override it to use their own System.Classes.
 
 begin
   Result := TVirtualTreeHintWindow;
@@ -24006,12 +23738,7 @@ var
   // Converts the given character into its corresponding Unicode character
   // depending on the active keyboard layout.
   begin
-    {$ifdef UNICODE}
     Result := C;      //!!!!!!
-    {$ELSE}
-    MultiByteToWideChar(CodePageFromLocale(GetKeyboardLayout(0) and $FFFF),
-      MB_USEGLYPHCHARS, @C, 1, @Result, 1);
-    {$endif}
   end;
 
   //--------------- end local functions ---------------------------------------
@@ -24267,10 +23994,10 @@ begin
   if (tsEditing in FStates) then
     DoEndEdit;
 
-  // Focus change. Don't use the SetFocus method as this does not work for MDI windows.
+  // Focus change. Don't use the SetFocus method as this does not work for MDI Winapi.Windows.
   if not Focused and CanFocus then
   begin
-    Windows.SetFocus(Handle);
+    Winapi.Windows.SetFocus(Handle);
     // Repeat the hit test as an OnExit event might got triggered that could modify the tree.
     GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
   end;
@@ -25289,10 +25016,8 @@ begin
     if HandleAllocated then
       RegisterDragDrop(Handle, DragManager as IDropTarget);
 
-  {$IF CompilerVersion >= 23}
-    FSavedBorderWidth := BorderWidth;
-    FSavedBevelKind := BevelKind;
-  {$IFEND}
+  FSavedBorderWidth := BorderWidth;
+  FSavedBevelKind := BevelKind;
   VclStyleChanged;
   // If a root node count has been set during load of the tree then update its child structure now
   // as this hasn't been done yet in this case.
@@ -25568,7 +25293,7 @@ begin
 
     // Erase parts not drawn.
     Brush.Color := FColors.BorderColor;
-    Windows.FillRect(DC, RW, Brush.Handle);
+    Winapi.Windows.FillRect(DC, RW, Brush.Handle);
   end;
 end;
 
@@ -25712,7 +25437,6 @@ type
 procedure DrawImage(ImageList: TCustomImageList; Index: Integer; Canvas: TCanvas; X, Y: Integer; Style: Cardinal; Enabled: Boolean);
 
   procedure DrawDisabledImage(ImageList: TCustomImageList; Canvas: TCanvas; X, Y, Index: Integer);
-  {$if CompilerVersion >= 21}
   var
     Params: TImageListDrawParams;
   begin
@@ -25725,10 +25449,6 @@ procedure DrawImage(ImageList: TCustomImageList; Index: Integer; Canvas: TCanvas
     Params.y := Y;
     Params.fState := ILS_SATURATE;
     ImageList_DrawIndirect(@Params);
-  {$else}
-  begin
-    TCustomImageListCast(ImageList).DoDraw(Index, Canvas, X, Y, Style, False);
-  {$ifend}
   end;
 
 begin
@@ -26026,10 +25746,8 @@ var
   InnerRect: TRect;
   RowRect: TRect;
   Theme: HTHEME;
-{$if CompilerVersion < 19}
 const
   TREIS_HOTSELECTED = 6;
-{$ifend}
 
   //--------------- local functions -------------------------------------------
 
@@ -26069,7 +25787,7 @@ const
   var
     Theme: HTHEME;
   begin
-    Theme := OpenThemeData(Application.{$if CompilerVersion >= 20}ActiveFormHandle{$else}Handle{$ifend}, 'Explorer::ItemsView');
+    Theme := OpenThemeData(Application.ActiveFormHandle, 'Explorer::ItemsView');
     if not (toFullRowSelect in FOptions.FSelectionOptions) or (toGridExtensions in FOptions.FMiscOptions) then
       DrawThemeBackground(Theme, PaintInfo.Canvas.Handle, LVP_LISTDETAIL, State, InnerRect, nil)
     else
@@ -26082,7 +25800,7 @@ const
 begin
   if tsUseExplorerTheme in FStates then
   begin
-    Theme := OpenThemeData(Application.{$if CompilerVersion >= 20}ActiveFormHandle{$else}Handle{$ifend}, 'Explorer::TreeView');
+    Theme := OpenThemeData(Application.ActiveFormHandle, 'Explorer::TreeView');
     RowRect := Rect(0, PaintInfo.CellRect.Top, FRangeX, PaintInfo.CellRect.Bottom);
     if (Header.Columns.Count = 0) and (toFullRowSelect in TreeOptions.SelectionOptions) then
       RowRect.Right := Max(ClientWidth, RowRect.Right);
@@ -26234,7 +25952,7 @@ begin
             DrawBackground(TREIS_HOTSELECTED);
         end
         else
-          Windows.DrawFocusRect(Handle, FocusRect);
+          Winapi.Windows.DrawFocusRect(Handle, FocusRect);
         SetTextColor(Handle, TextColorBackup);
         SetBkColor(Handle, BackColorBackup);
       end;
@@ -26756,8 +26474,8 @@ begin
   if not ClassRegistered or (TempClass.lpfnWndProc <> @DefWindowProc) then
   begin
     if ClassRegistered then
-      Windows.UnregisterClass(PanningWindowClass.lpszClassName, HInstance);
-    Windows.RegisterClass(PanningWindowClass);
+      Winapi.Windows.UnregisterClass(PanningWindowClass.lpszClassName, HInstance);
+    Winapi.Windows.RegisterClass(PanningWindowClass);
   end;
   // Create the helper window and show it at the given position without activating it.
   Pt := ClientToScreen(Position);
@@ -26778,9 +26496,9 @@ begin
   SetWindowRgn(FPanningWindow, CreateClipRegion, False);
 
   {$ifdef CPUX64}
-  SetWindowLongPtr(FPanningWindow, GWLP_WNDPROC, LONG_PTR(Classes.MakeObjectInstance(PanningWindowProc)));
+  SetWindowLongPtr(FPanningWindow, GWLP_WNDPROC, LONG_PTR(System.Classes.MakeObjectInstance(PanningWindowProc)));
   {$else}
-  SetWindowLong(FPanningWindow, GWL_WNDPROC, Longint(Classes.MakeObjectInstance(PanningWindowProc)));
+  SetWindowLong(FPanningWindow, GWL_WNDPROC, Longint(System.Classes.MakeObjectInstance(PanningWindowProc)));
   {$endif CPUX64}
   ShowWindow(FPanningWindow, SW_SHOWNOACTIVATE);
 
@@ -26815,13 +26533,13 @@ begin
     {$endif CPUX64}
     DestroyWindow(FPanningWindow);
     if Instance <> @DefWindowProc then
-      Classes.FreeObjectInstance(Instance);
+      System.Classes.FreeObjectInstance(Instance);
     FPanningWindow := 0;
     FPanningImage.Free;
     FPanningImage := nil;
     DeleteObject(FPanningCursor);
     FPanningCursor := 0;
-    Windows.SetCursor(Screen.Cursors[Cursor]);
+    Winapi.Windows.SetCursor(Screen.Cursors[Cursor]);
   end;
 end;
 
@@ -27287,7 +27005,6 @@ end;
 
 procedure TBaseVirtualTree.VclStyleChanged;
 begin
-  {$if CompilerVersion >= 23 }
   FSetOrRestoreBevelKindAndBevelWidth := True;
   FVclStyleEnabled := StyleServices.Enabled and not StyleServices.IsSystemStyle;
   if not VclStyleEnabled then
@@ -27305,9 +27022,6 @@ begin
       BorderWidth := 0;
   end;
   FSetOrRestoreBevelKindAndBevelWidth := False;
-  {$else}
-  FVclStyleEnabled := False;
-  {$ifend}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -28796,7 +28510,7 @@ begin
 
       // Increase cell height (up to MaxUnclippedHeight determined above) if text does not fit.
       GetTextMetrics(Self.Canvas.Handle, TM);
-      ExtraVerticalMargin := Math.Min(TM.tmHeight, MaxUnclippedHeight) - (Result.Bottom - Result.Top);
+      ExtraVerticalMargin := System.Math.Min(TM.tmHeight, MaxUnclippedHeight) - (Result.Bottom - Result.Top);
       if ExtraVerticalMargin > 0 then
         InflateRect(Result, 0, (ExtraVerticalMargin + 1) div 2);
 
@@ -31768,12 +31482,12 @@ var
   NewNodeHeight: Integer;
 
 begin
-  if not (vsHeightMeasured in Node.States) {$if CompilerVersion < 20}and (MainThreadId = GetCurrentThreadId){$ifend} then
+  if not (vsHeightMeasured in Node.States) then
   begin
     Include(Node.States, vsHeightMeasured);
     if (toVariableNodeHeight in FOptions.FMiscOptions) then begin
       NewNodeHeight := Node.NodeHeight;
-      {$if CompilerVersion > 20} // Anonymous methods help to make this thread safe easily. In Delphi 2007 and lower developers must take care themselves about thread synchronization when consuming the OnMeasureItemHeight event
+      // Anonymous methods help to make this thread safe easily. In Delphi 2007 and lower developers must take care themselves about thread synchronization when consuming the OnMeasureItemHeight event
       if (MainThreadId <> GetCurrentThreadId) then
         TThread.Synchronize(nil,
           procedure begin
@@ -31782,9 +31496,10 @@ begin
           end
         )
       else
-      {$ifend}
-      DoMeasureItem(Canvas, Node, NewNodeHeight); //
-      SetNodeHeight(Node, NewNodeHeight);
+      begin
+        DoMeasureItem(Canvas, Node, NewNodeHeight); //
+        SetNodeHeight(Node, NewNodeHeight);
+      end;
     end;
   end;
 end;
@@ -32609,11 +32324,7 @@ begin
         R.Right := R.Left + Width - 2;
         R.Bottom := Height -2;
         TargetCanvas.Font.Color := clGrayText;
-        {$if CompilerVersion >= 20}
         TargetCanvas.TextRect(R, FEmptyListMessage, [tfNoClip, tfLeft, tfWordBreak]);
-        {$else}
-        TextOutW(TargetCanvas.Handle, 2 - Window.Left, 2 - Window.Top, PWideChar(FEmptyListMessage), Length(FEmptyListMessage));
-        {$ifend}
       end;
 
       DoAfterPaint(TargetCanvas);
@@ -33328,7 +33039,7 @@ begin
     else
       if (R.Bottom > ClientHeight) or Center then
       begin
-        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [{$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssBoth, {$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal]) and
+        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssBoth, System.UITypes.TScrollStyle.ssHorizontal]) and
           (ScrollBarOptions.AlwaysVisible or (Integer(FRangeX) > ClientWidth));
         if Center then
           SetOffsetY(FOffsetY - R.Bottom + ClientHeight div 2)
@@ -34211,7 +33922,7 @@ begin
   else
     FEffectiveOffsetX := -FOffsetX;
 
-  if FScrollBarOptions.ScrollBars in [{$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssHorizontal, {$if CompilerVersion >=24}System.UITypes.TScrollStyle.{$ifend}ssBoth] then
+  if FScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssHorizontal, System.UITypes.TScrollStyle.ssBoth] then
   begin
     ZeroMemory (@ScrollInfo, SizeOf(ScrollInfo));
     ScrollInfo.cbSize := SizeOf(ScrollInfo);
@@ -34648,11 +34359,7 @@ begin
     LastFont := SelectObject(DC, Font.Handle);
     try
       // Read needed space for the current text.
-      {$ifdef TntSupport}
-        GetTextExtentPoint32W(DC, PWideChar(Text), Length(Text), Size);
-      {$else}
-        GetTextExtentPoint32(DC, PChar(Text+'yG'), Length(Text)+2, Size);
-      {$endif TntSupport}
+      GetTextExtentPoint32(DC, PChar(Text+'yG'), Length(Text)+2, Size);
       Inc(Size.cx, 2 * FLink.FTree.FTextMargin);
       Inc(Size.cy, 2 * FLink.FTree.FTextMargin);
       Height := Max(Size.cy, Height); // Ensure a minimum height so that the edit field's content and cursor are displayed correctly. See #159
@@ -35240,7 +34947,7 @@ begin
       SetBkMode(Canvas.Handle, TRANSPARENT)
     else
       SetBkMode(Canvas.Handle, OPAQUE);
-    Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat);
+    Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat);
   end;
 end;
 
@@ -35253,7 +34960,7 @@ begin
     vaLString, vaString:
       SetDefaultText(Reader.ReadString);
   else
-    SetDefaultText(Reader.{$if CompilerVersion >= 23}ReadString{$else}ReadWideString{$ifend});
+    SetDefaultText(Reader.ReadString);
   end;
 end;
 
@@ -35312,7 +35019,7 @@ end;
 procedure TCustomVirtualStringTree.WriteText(Writer: TWriter);
 
 begin
-  Writer.{$IF CompilerVersion >= 20}WriteString{$else}WriteWideString{$ifend}(FDefaultText);
+  Writer.WriteString(FDefaultText);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -35680,7 +35387,7 @@ begin
   if Assigned(FOnDrawText) then
     FOnDrawText(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, Text, CellRect, DefaultDraw);
   if DefaultDraw then
-    Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(Text), Length(Text), CellRect, DrawFormat);
+    Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(Text), Length(Text), CellRect, DrawFormat);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -35701,7 +35408,7 @@ begin
       DrawFormat := DrawFormat or DT_RTLREADING;
 
     R := Rect(0, 0, Result.cx, MaxInt);
-    Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat);
+    Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(Text), Length(Text), R, DrawFormat);
     Result.cx := R.Right - R.Left;
   end;
   if Assigned(FOnMeasureTextWidth) then
@@ -35948,7 +35655,7 @@ begin
     DrawFormat := DrawFormat or DT_RIGHT or DT_RTLREADING
   else
     DrawFormat := DrawFormat or DT_LEFT;
-  Windows.DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat);
+  Winapi.Windows.DrawTextW(Canvas.Handle, PWideChar(S), Length(S), PaintInfo.CellRect, DrawFormat);
   Result := PaintInfo.CellRect.Bottom - PaintInfo.CellRect.Top;
 end;
 
@@ -36008,10 +35715,10 @@ function TCustomVirtualStringTree.ContentToClipboard(Format: Word; Source: TVSTT
     EndHTMLIndex := EndFragmentIndex + Length(HTMLExtro);
 
     Description := Version +
-    SysUtils.Format('%s%.8d', [StartHTML, StartHTMLIndex]) + #13#10 +
-    SysUtils.Format('%s%.8d', [EndHTML, EndHTMLIndex]) + #13#10 +
-    SysUtils.Format('%s%.8d', [StartFragment, StartFragmentIndex]) + #13#10 +
-    SysUtils.Format('%s%.8d', [EndFragment, EndFragmentIndex]) + #13#10;
+    System.SysUtils.Format('%s%.8d', [StartHTML, StartHTMLIndex]) + #13#10 +
+    System.SysUtils.Format('%s%.8d', [EndHTML, EndHTMLIndex]) + #13#10 +
+    System.SysUtils.Format('%s%.8d', [StartFragment, StartFragmentIndex]) + #13#10 +
+    System.SysUtils.Format('%s%.8d', [EndFragment, EndFragmentIndex]) + #13#10;
     HTML := Description + DocType + HTMLIntro + HTML + HTMLExtro;
   end;
 
@@ -36041,7 +35748,7 @@ begin
       end;
   else
     if Format = CF_CSV then
-      S := ContentToText(Source, AnsiChar ({$if CompilerVersion>=22}FormatSettings.{$ifend}ListSeparator)) + #0
+      S := ContentToText(Source, AnsiChar (FormatSettings.ListSeparator)) + #0
     else
       if (Format = CF_VRTF) or (Format = CF_VRTFNOOBJS) then
         S := ContentToRTF(Source) + #0
@@ -37526,8 +37233,6 @@ end;
 
 
 // XE2+ VCL Style
- {$if CompilerVersion >= 23 }
-
 { TVclStyleScrollBarsHook }
 
 procedure TVclStyleScrollBarsHook.CalcScrollBarsRect;
@@ -38470,7 +38175,6 @@ begin
     EndPaint(Handle, PS);
   end;
 end;
-{$ifend}
 
 initialization
   // Necessary for dynamic package loading.
