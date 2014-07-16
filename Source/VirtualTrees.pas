@@ -74,7 +74,7 @@ uses
   Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.ImgList, Winapi.ActiveX, Vcl.StdCtrls, System.Classes,
   Vcl.Menus, Vcl.Printers, System.Types, Winapi.CommCtrl, Vcl.Themes, Winapi.UxTheme,
-  Winapi.ShlObj, System.UITypes;
+  Winapi.ShlObj, System.UITypes, System.Generics.Collections;
 
 const
   VTVersion = '5.3.2';
@@ -1042,7 +1042,7 @@ type
     procedure HandleClick(P: TPoint; Button: TMouseButton; Force, DblClick: Boolean); virtual;
     procedure IndexChanged(OldIndex, NewIndex: Integer);
     procedure InitializePositionArray;
-    procedure Notify(Item: TCollectionItem; Action: TCollectionNotification); override;
+    procedure Notify(Item: TCollectionItem; Action: System.Classes.TCollectionNotification); override;
     procedure ReorderColumns(RTL: Boolean);
     procedure Update(Item: TCollectionItem); override;
     procedure UpdatePositions(Force: Boolean = False);
@@ -10316,7 +10316,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TVirtualTreeColumns.Notify(Item: TCollectionItem; Action: TCollectionNotification);
+procedure TVirtualTreeColumns.Notify(Item: TCollectionItem; Action: System.Classes.TCollectionNotification);
 
 begin
   if Action in [cnExtracting, cnDeleting] then
@@ -36335,7 +36335,7 @@ function TCustomVirtualStringTree.ContentToRTF(Source: TVSTTextSourceType): RawB
 
 var
   Fonts: TStringList;
-  Colors: TList;
+  Colors: TList<TColor>;
   CurrentFontIndex,
   CurrentFontColor,
   CurrentFontSize: Integer;
@@ -36377,7 +36377,7 @@ var
     I: Integer;
 
   begin
-    I := Colors.IndexOf(Pointer(Color));
+    I := Colors.IndexOf(Color);
     if I > -1 then
     begin
       // Color has already been used
@@ -36390,7 +36390,7 @@ var
     end
     else
     begin
-      I := Colors.Add(Pointer(Color));
+      I := Colors.Add(Color);
       Buffer.Add('\cf');
       Buffer.Add(IntToStr(I + 1));
       CurrentFontColor := I;
