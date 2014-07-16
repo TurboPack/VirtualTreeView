@@ -36477,7 +36477,7 @@ begin
     RedirectFontChangeEvent(Canvas);
 
     Fonts := TStringList.Create;
-    Colors := TList.Create;
+    Colors := TList<TColor>.Create;
     CurrentFontIndex := -1;
     CurrentFontColor := -1;
     CurrentFontSize := -1;
