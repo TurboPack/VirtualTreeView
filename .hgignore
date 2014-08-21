@@ -7,3 +7,5 @@ syntax: glob
 __history
 Win32
 Win64
+Debug
+Release
