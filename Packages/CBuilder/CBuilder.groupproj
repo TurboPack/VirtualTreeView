@@ -3,10 +3,10 @@
         <ProjectGuid>{90943296-FDFA-4C80-A99D-237F570C4F54}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="VirtualTreesR.cbproj">
+        <Projects Include="VirtualTreesCR.cbproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="VirtualTreesD.cbproj">
+        <Projects Include="VirtualTreesCD.cbproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -17,32 +17,32 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="VirtualTreesR">
-        <MSBuild Projects="VirtualTreesR.cbproj"/>
+    <Target Name="VirtualTreesCR">
+        <MSBuild Projects="VirtualTreesCR.cbproj"/>
     </Target>
-    <Target Name="VirtualTreesR:Clean">
-        <MSBuild Projects="VirtualTreesR.cbproj" Targets="Clean"/>
+    <Target Name="VirtualTreesCR:Clean">
+        <MSBuild Projects="VirtualTreesCR.cbproj" Targets="Clean"/>
     </Target>
-    <Target Name="VirtualTreesR:Make">
-        <MSBuild Projects="VirtualTreesR.cbproj" Targets="Make"/>
+    <Target Name="VirtualTreesCR:Make">
+        <MSBuild Projects="VirtualTreesCR.cbproj" Targets="Make"/>
     </Target>
-    <Target Name="VirtualTreesD">
-        <MSBuild Projects="VirtualTreesD.cbproj"/>
+    <Target Name="VirtualTreesCD">
+        <MSBuild Projects="VirtualTreesCD.cbproj"/>
     </Target>
-    <Target Name="VirtualTreesD:Clean">
-        <MSBuild Projects="VirtualTreesD.cbproj" Targets="Clean"/>
+    <Target Name="VirtualTreesCD:Clean">
+        <MSBuild Projects="VirtualTreesCD.cbproj" Targets="Clean"/>
     </Target>
-    <Target Name="VirtualTreesD:Make">
-        <MSBuild Projects="VirtualTreesD.cbproj" Targets="Make"/>
+    <Target Name="VirtualTreesCD:Make">
+        <MSBuild Projects="VirtualTreesCD.cbproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="VirtualTreesR;VirtualTreesD"/>
+        <CallTarget Targets="VirtualTreesCR;VirtualTreesCD"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VirtualTreesR:Clean;VirtualTreesD:Clean"/>
+        <CallTarget Targets="VirtualTreesCR:Clean;VirtualTreesCD:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VirtualTreesR:Make;VirtualTreesD:Make"/>
+        <CallTarget Targets="VirtualTreesCR:Make;VirtualTreesCD:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

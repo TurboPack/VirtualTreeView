@@ -3,11 +3,11 @@
         <ProjectGuid>{CC6A9541-DD5C-4BCD-8914-016D8D2EAB3B}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
-        <Projects Include="VirtualTreesR.dproj">
+        <Projects Include="VirtualTreesDR.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="VirtualTreesD.dproj">
-            <Dependencies>VirtualTreesR.dproj</Dependencies>
+        <Projects Include="VirtualTreesDD.dproj">
+            <Dependencies>VirtualTreesDR.dproj</Dependencies>
         </Projects>
     </ItemGroup>
     <ProjectExtensions>
@@ -17,32 +17,32 @@
             <Default.Personality/>
         </BorlandProject>
     </ProjectExtensions>
-    <Target Name="VirtualTreesR">
-        <MSBuild Projects="VirtualTreesR.dproj"/>
+    <Target Name="VirtualTreesDR">
+        <MSBuild Projects="VirtualTreesDR.dproj"/>
     </Target>
-    <Target Name="VirtualTreesR:Clean">
-        <MSBuild Projects="VirtualTreesR.dproj" Targets="Clean"/>
+    <Target Name="VirtualTreesDR:Clean">
+        <MSBuild Projects="VirtualTreesDR.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="VirtualTreesR:Make">
-        <MSBuild Projects="VirtualTreesR.dproj" Targets="Make"/>
+    <Target Name="VirtualTreesDR:Make">
+        <MSBuild Projects="VirtualTreesDR.dproj" Targets="Make"/>
     </Target>
-    <Target Name="VirtualTreesD" DependsOnTargets="VirtualTreesR">
-        <MSBuild Projects="VirtualTreesD.dproj"/>
+    <Target Name="VirtualTreesDD" DependsOnTargets="VirtualTreesDR">
+        <MSBuild Projects="VirtualTreesDD.dproj"/>
     </Target>
-    <Target Name="VirtualTreesD:Clean" DependsOnTargets="VirtualTreesR:Clean">
-        <MSBuild Projects="VirtualTreesD.dproj" Targets="Clean"/>
+    <Target Name="VirtualTreesDD:Clean" DependsOnTargets="VirtualTreesDR:Clean">
+        <MSBuild Projects="VirtualTreesDD.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="VirtualTreesD:Make" DependsOnTargets="VirtualTreesR:Make">
-        <MSBuild Projects="VirtualTreesD.dproj" Targets="Make"/>
+    <Target Name="VirtualTreesDD:Make" DependsOnTargets="VirtualTreesDR:Make">
+        <MSBuild Projects="VirtualTreesDD.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="VirtualTreesR;VirtualTreesD"/>
+        <CallTarget Targets="VirtualTreesDR;VirtualTreesDD"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="VirtualTreesR:Clean;VirtualTreesD:Clean"/>
+        <CallTarget Targets="VirtualTreesDR:Clean;VirtualTreesDD:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="VirtualTreesR:Make;VirtualTreesD:Make"/>
+        <CallTarget Targets="VirtualTreesDR:Make;VirtualTreesDD:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
