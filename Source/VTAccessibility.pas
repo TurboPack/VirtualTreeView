@@ -734,24 +734,24 @@ initialization
   if DefaultAccessibleProvider = nil then
   begin
     DefaultAccessibleProvider := TVTDefaultAccessibleProvider.Create;
-    GetAccessibilityFactory.RegisterAccessibleProvider(DefaultAccessibleProvider);
+    TVTAccessibilityFactory.GetAccessibilityFactory.RegisterAccessibleProvider(DefaultAccessibleProvider);
   end;
   if DefaultAccessibleItemProvider = nil then
   begin
     DefaultAccessibleItemProvider := TVTDefaultAccessibleItemProvider.Create;
-    GetAccessibilityFactory.RegisterAccessibleProvider(DefaultAccessibleItemProvider);
+    TVTAccessibilityFactory.GetAccessibilityFactory.RegisterAccessibleProvider(DefaultAccessibleItemProvider);
   end;
   if MultiColumnAccessibleProvider = nil then
   begin
     MultiColumnAccessibleProvider := TVTMultiColumnAccessibleItemProvider.Create;
-    GetAccessibilityFactory.RegisterAccessibleProvider(MultiColumnAccessibleProvider);
+    TVTAccessibilityFactory.GetAccessibilityFactory.RegisterAccessibleProvider(MultiColumnAccessibleProvider);
   end;
 finalization
-  GetAccessibilityFactory.UnRegisterAccessibleProvider(MultiColumnAccessibleProvider);
+  TVTAccessibilityFactory.GetAccessibilityFactory.UnRegisterAccessibleProvider(MultiColumnAccessibleProvider);
   MultiColumnAccessibleProvider := nil;
-  GetAccessibilityFactory.UnRegisterAccessibleProvider(DefaultAccessibleItemProvider);
+  TVTAccessibilityFactory.GetAccessibilityFactory.UnRegisterAccessibleProvider(DefaultAccessibleItemProvider);
   DefaultAccessibleItemProvider := nil;
-  GetAccessibilityFactory.UnRegisterAccessibleProvider(DefaultAccessibleProvider);
+  TVTAccessibilityFactory.GetAccessibilityFactory.UnRegisterAccessibleProvider(DefaultAccessibleProvider);
   DefaultAccessibleProvider := nil;
 
 end.
