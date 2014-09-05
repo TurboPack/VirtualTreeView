@@ -39,12 +39,18 @@ class PASCALIMPLEMENTATION TVTAccessibilityFactory : public System::TObject
 	typedef System::TObject inherited;
 	
 private:
+	static bool FAccessibilityAvailable;
+	static TVTAccessibilityFactory* FVTAccessibleFactory;
 	System::Classes::TInterfaceList* FAccessibleProviders;
+	
+private:
+	__classmethod void __fastcall FreeFactory();
 	
 public:
 	__fastcall TVTAccessibilityFactory(void);
 	__fastcall virtual ~TVTAccessibilityFactory(void);
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
+	static TVTAccessibilityFactory* __fastcall GetAccessibilityFactory();
 	void __fastcall RegisterAccessibleProvider(_di_IVTAccessibleProvider AProvider);
 	void __fastcall UnRegisterAccessibleProvider(_di_IVTAccessibleProvider AProvider);
 };
@@ -52,7 +58,6 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE TVTAccessibilityFactory* __fastcall GetAccessibilityFactory(void);
 }	/* namespace Vtaccessibilityfactory */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_VTACCESSIBILITYFACTORY)
 using namespace Vtaccessibilityfactory;

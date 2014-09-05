@@ -18191,13 +18191,13 @@ end;
 procedure TBaseVirtualTree.WMGetObject(var Message: TMessage);
 
 begin
-  if GetAccessibilityFactory <> nil then
+  if TVTAccessibilityFactory.GetAccessibilityFactory <> nil then
   begin
     // Create the IAccessibles for the tree view and tree view items, if necessary.
     if FAccessible = nil then
-      FAccessible := GetAccessibilityFactory.CreateIAccessible(Self);
+      FAccessible := TVTAccessibilityFactory.GetAccessibilityFactory.CreateIAccessible(Self);
     if FAccessibleItem = nil then
-      FAccessibleItem := GetAccessibilityFactory.CreateIAccessible(Self);
+      FAccessibleItem := TVTAccessibilityFactory.GetAccessibilityFactory.CreateIAccessible(Self);
     if Cardinal(Message.LParam) = OBJID_CLIENT then
       if Assigned(Accessible) then
         Message.Result := LresultFromObject(IID_IAccessible, Message.WParam, FAccessible)
