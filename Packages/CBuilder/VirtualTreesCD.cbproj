@@ -51,6 +51,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <ILINK_Description>VirtualTree CBuilder designtime package</ILINK_Description>
         <DCC_HppOutput>..\..\source\hpp</DCC_HppOutput>
         <SanitizedProjectName>VirtualTreesCD</SanitizedProjectName>
         <DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>

@@ -57,6 +57,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <ILINK_Description>VirtualTree CBuilder runtime package</ILINK_Description>
         <DCC_HppOutput>..\..\source\hpp</DCC_HppOutput>
         <SanitizedProjectName>VirtualTreesCR</SanitizedProjectName>
         <ILINK_DelayLoadDll>Shell32.dll;$(ILINK_DelayLoadDll)</ILINK_DelayLoadDll>

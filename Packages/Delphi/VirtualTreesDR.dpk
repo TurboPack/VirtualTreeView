@@ -25,6 +25,7 @@ package VirtualTreesDR;
 {$IMAGEBASE $400000}
 {$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'VirtualTree Delphi runtime package'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
