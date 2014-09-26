@@ -33,6 +33,7 @@ public:
 };
 
 class DELPHICLASS TVTAccessibilityFactory;
+#pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTAccessibilityFactory : public System::TObject
 {
 	typedef System::TObject inherited;
@@ -54,6 +55,7 @@ public:
 	void __fastcall UnRegisterAccessibleProvider(_di_IVTAccessibleProvider AProvider);
 };
 
+#pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
 }	/* namespace Vtaccessibilityfactory */
