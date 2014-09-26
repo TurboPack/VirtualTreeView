@@ -79,44 +79,6 @@ uses
 const
   VTVersion = '5.5.0';
 
-{$if CompilerVersion < 20}
-type
-  UnicodeString = WideString;
-  RawByteString = AnsiString;
-  PByte = PAnsiChar;
-{$ifend}
-
-{$if CompilerVersion < 18}
-  //MSAA interfaces not included in Delphi 7
-  {$WARN BOUNDS_ERROR OFF}
-  IAccessible = interface(IDispatch)
-    ['{618736E0-3C3D-11CF-810C-00AA00389B71}']
-    function Get_accParent(out ppdispParent: IDispatch): HResult; stdcall;
-    function Get_accChildCount(out pcountChildren: Integer): HResult; stdcall;
-    function Get_accChild(varChild: OleVariant; out ppdispChild: IDispatch): HResult; stdcall;
-    function Get_accName(varChild: OleVariant; out pszName: WideString): HResult; stdcall;
-    function Get_accValue(varChild: OleVariant; out pszValue: WideString): HResult; stdcall;
-    function Get_accDescription(varChild: OleVariant; out pszDescription: WideString): HResult; stdcall;
-    function Get_accRole(varChild: OleVariant; out pvarRole: OleVariant): HResult; stdcall;
-    function Get_accState(varChild: OleVariant; out pvarState: OleVariant): HResult; stdcall;
-    function Get_accHelp(varChild: OleVariant; out pszHelp: WideString): HResult; stdcall;
-    function Get_accHelpTopic(out pszHelpFile: WideString; varChild: OleVariant;
-                              out pidTopic: Integer): HResult; stdcall;
-    function Get_accKeyboardShortcut(varChild: OleVariant; out pszKeyboardShortcut: WideString): HResult; stdcall;
-    function Get_accFocus(out pvarChild: OleVariant): HResult; stdcall;
-    function Get_accSelection(out pvarChildren: OleVariant): HResult; stdcall;
-    function Get_accDefaultAction(varChild: OleVariant; out pszDefaultAction: WideString): HResult; stdcall;
-    function accSelect(flagsSelect: Integer; varChild: OleVariant): HResult; stdcall;
-    function accLocation(out pxLeft: Integer; out pyTop: Integer; out pcxWidth: Integer;
-                         out pcyHeight: Integer; varChild: OleVariant): HResult; stdcall;
-    function accNavigate(navDir: Integer; varStart: OleVariant; out pvarEndUpAt: OleVariant): HResult; stdcall;
-    function accHitTest(xLeft: Integer; yTop: Integer; out pvarChild: OleVariant): HResult; stdcall;
-    function accDoDefaultAction(varChild: OleVariant): HResult; stdcall;
-    function Set_accName(varChild: OleVariant; const pszName: WideString): HResult; stdcall;
-    function Set_accValue(varChild: OleVariant; const pszValue: WideString): HResult; stdcall;
-  end;
-{$ifend}
-
 const
   VTTreeStreamVersion = 2;
   VTHeaderStreamVersion = 6;    // The header needs an own stream version to indicate changes only relevant to the header.
@@ -13867,11 +13829,9 @@ end;
 
 function TVTColors.GetNodeFontColor: TColor;
 begin
-{$IF CompilerVersion >= 23 }
   if FOwner.VclStyleEnabled and  FOwner.FBackground.Bitmap.Empty then
     StyleServices.GetElementColor(StyleServices.GetElementDetails(ttItemNormal), ecTextColor, Result)
   else
-{$IFEND}
     Result := FOwner.Font.Color;
 end;
 
@@ -31540,7 +31500,7 @@ begin
     Include(Node.States, vsHeightMeasured);
     if (toVariableNodeHeight in FOptions.FMiscOptions) then begin
       NewNodeHeight := Node.NodeHeight;
-      {$if CompilerVersion >= 20} // Anonymous methods help to make this thread safe easily. In Delphi 2007 and lower developers must take care themselves about thread synchronization when consuming the OnMeasureItemHeight event
+      // Anonymous methods help to make this thread safe easily. In Delphi 2007 and lower developers must take care themselves about thread synchronization when consuming the OnMeasureItemHeight event
       if (MainThreadId <> GetCurrentThreadId) then
         TThread.Synchronize(nil,
           procedure begin
@@ -31549,7 +31509,6 @@ begin
           end
         )
       else
-      {$ifend}
       begin
         DoMeasureItem(Canvas, Node, NewNodeHeight);
         SetNodeHeight(Node, NewNodeHeight);
