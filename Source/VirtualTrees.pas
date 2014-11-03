@@ -2285,11 +2285,7 @@ type
 
     FVclStyleEnabled: Boolean;
 
-    FSavedBevelKind: TBevelKind;
-    FSavedBorderWidth: Integer;
-    FSetOrRestoreBevelKindAndBevelWidth: Boolean;
     procedure CMStyleChanged(var Message: TMessage); message CM_STYLECHANGED;
-    procedure CMBorderChanged(var Message: TMessage); message CM_BORDERCHANGED;
     procedure CMParentDoubleBufferedChange(var Message: TMessage); message CM_PARENTDOUBLEBUFFEREDCHANGED;
 
     procedure AdjustCoordinatesByIndent(var PaintInfo: TVTPaintInfo; Indent: Integer);
@@ -2716,7 +2712,7 @@ type
     procedure UpdateDesigner; virtual;
     procedure UpdateEditBounds; virtual;
     procedure UpdateHeaderRect; virtual;
-    procedure UpdateStyleElements; {$if CompilerVersion >= 23}override;{$ifend}
+    procedure UpdateStyleElements; override;
     procedure UpdateWindowAndDragImage(const Tree: TBaseVirtualTree; TreeRect: TRect; UpdateNCArea,
       ReshowDragImage: Boolean); virtual;
     procedure ValidateCache; virtual;
@@ -3328,8 +3324,8 @@ type
   protected
     FPreviouslySelected: TStringList;
     procedure InitializeTextProperties(var PaintInfo: TVTPaintInfo); // [IPK] - private to protected
-    procedure PaintNormalText(var PaintInfo: TVTPaintInfo; TextOutFlags: Integer; Text: UnicodeString); virtual; // [IPK] - private to protected
-    procedure PaintStaticText(const PaintInfo: TVTPaintInfo; TextOutFlags: Integer; const Text: UnicodeString); virtual; // [IPK] - private to protected
+    procedure PaintNormalText(var PaintInfo: TVTPaintInfo; TextOutFlags: Integer; Text: string); virtual; // [IPK] - private to protected
+    procedure PaintStaticText(const PaintInfo: TVTPaintInfo; TextOutFlags: Integer; const Text: string); virtual; // [IPK] - private to protected
     procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
     function CanExportNode(Node: PVirtualNode): Boolean;
     function CalculateStaticTextWidth(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; Text: string): Integer; virtual;
@@ -3407,9 +3403,7 @@ type
    
   protected
     function GetOptionsClass: TTreeOptionsClass; override;
-    {$if CompilerVersion >= 23}
     class constructor Create();
-    {$ifend}
   public
 
     property Canvas;
@@ -3491,9 +3485,7 @@ type
     property SelectionCurveRadius;
     property ShowHint;
     property StateImages;
-    {$if CompilerVersion >= 24}
     property StyleElements;
-    {$ifend}
     property TabOrder;
     property TabStop default True;
     property TextMargin;
@@ -3677,9 +3669,7 @@ type
     procedure SetOptions(const Value: TVirtualTreeOptions);
   protected
     function GetOptionsClass: TTreeOptionsClass; override;
-    {$if CompilerVersion >= 23}
     class constructor Create();
-    {$ifend}
   public
     property Canvas;
     property LastDragEffect;
@@ -3921,14 +3911,14 @@ function RegisterVTClipboardFormat(Description: string; TreeClass: TVirtualTreeC
 // utility routines
 procedure AlphaBlend(Source, Destination: HDC; R: TRect; Target: TPoint; Mode: TBlendMode; ConstantAlpha, Bias: Integer);
 procedure PrtStretchDrawDIB(Canvas: TCanvas; DestRect: TRect; ABitmap: TBitmap);
-function ShortenString(DC: HDC; const S: UnicodeString; Width: Integer; EllipsisWidth: Integer = 0): UnicodeString;
+function ShortenString(DC: HDC; const S: string; Width: Integer; EllipsisWidth: Integer = 0): string;
 function TreeFromNode(Node: PVirtualNode): TBaseVirtualTree;
-procedure GetStringDrawRect(DC: HDC; const S: UnicodeString; var Bounds: TRect; DrawFormat: Cardinal);
-function WrapString(DC: HDC; const S: UnicodeString; const Bounds: TRect; RTL: Boolean;
-  DrawFormat: Cardinal): UnicodeString;
+procedure GetStringDrawRect(DC: HDC; const S: string; var Bounds: TRect; DrawFormat: Cardinal);
+function WrapString(DC: HDC; const S: string; const Bounds: TRect; RTL: Boolean;
+  DrawFormat: Cardinal): string;
 
 function GetUtilityImages: TCustomImageList;
-procedure ShowError(Msg: UnicodeString; HelpContext: Integer);  // [IPK] Surface this to interface
+procedure ShowError(Msg: string; HelpContext: Integer);  // [IPK] Surface this to interface
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -11095,7 +11085,7 @@ var
       end  
       else
       begin
-        if ((tsUseThemes in FHeader.Treeview.FStates) and (FHeader.Treeview.VclStyleEnabled {$if CompilerVersion >= 24} and (seClient in FHeader.FOwner.StyleElements){$IFEND})) then
+        if ((tsUseThemes in FHeader.Treeview.FStates) and (FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
         begin
           Details := StyleServices.GetElementDetails(thHeaderItemRightNormal);
           StyleServices.DrawElement(Handle, Details, BackgroundRect, @BackgroundRect);
@@ -11175,7 +11165,7 @@ var
           FHeader.Treeview.DoAdvancedHeaderDraw(PaintInfo, [hpeBackground])
         else
         begin
-          if ((tsUseThemes in FHeader.Treeview.FStates)   and (FHeader.Treeview.VclStyleEnabled {$if CompilerVersion >= 24} and (seClient in FHeader.FOwner.StyleElements){$IFEND})) then
+          if ((tsUseThemes in FHeader.Treeview.FStates)   and (FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
           begin
             if IsDownIndex then
               Details := StyleServices.GetElementDetails(thHeaderItemPressed)
@@ -13827,6 +13817,7 @@ begin
         if not (seBorder in FOwner.StyleElements) then
           Result := FColors[Index]
         else
+         Result := StyleServices.GetSystemColor(clBtnFace); // BorderColor
       8:
         if not StyleServices.GetElementColor(StyleServices.GetElementDetails(ttItemHot), ecTextColor, Result) or
           (Result <> clWindowText) then
@@ -13853,8 +13844,9 @@ end;
 function TVTColors.GetHeaderFontColor: TColor;
 begin
 // XE2+ VCL Style
-  if FOwner.VclStyleEnabled {$IF CompilerVersion >= 24}and (seFont in FOwner.StyleElements) then
+  if FOwner.VclStyleEnabled and (seFont in FOwner.StyleElements) then
     StyleServices.GetElementColor(StyleServices.GetElementDetails(thHeaderItemNormal), ecTextColor, Result)
+  else
     Result := FOwner.FHeader.Font.Color;
 end;
 
@@ -17383,13 +17375,10 @@ end;
 procedure TBaseVirtualTree.CMBorderChanged(var Message: TMessage);
 begin
   inherited;
-  {$if CompilerVersion >= 24}
   if VclStyleEnabled and (seBorder in StyleElements) then
     RecreateWnd;
-  {$IFEND}
 end;
 
-{$if CompilerVersion >= 24}
 procedure TBaseVirtualTree.CMParentDoubleBufferedChange(var Message: TMessage);
 begin
   // empty by intention, we do our own buffering
@@ -19194,7 +19183,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 
-procedure TBaseVirtualTree.WMNCPaint(var Message: TRealWMNCPaint);
+procedure TBaseVirtualTree.WMNCPaint(var Message: TWMNCPaint);
 
 var
   DC: HDC;
@@ -19249,13 +19238,11 @@ begin
     OriginalWMNCPaint(DC);
     ReleaseDC(Handle, DC);
   end;
-    if (((tsUseThemes in FStates) and not VclStyleEnabled) or (VclStyleEnabled {$IF CompilerVersion >= 24} and (seBorder in StyleElements) {$IFEND})) then
+    if (((tsUseThemes in FStates) and not VclStyleEnabled) or (VclStyleEnabled and (seBorder in StyleElements))) then
       StyleServices.PaintBorder(Self, False)
-    {$IF CompilerVersion >= 24}
     else
       if (VclStyleEnabled and not (seBorder in StyleElements)) then
         TStyleManager.SystemStyle.PaintBorder(Self, False)
-    {$IFEND};
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -22732,7 +22719,7 @@ begin
     DragEffect := LongInt(lDragEffect);
   end
   else
-  ActiveX.DoDragDrop(DataObject, DragManager as IDropSource, AllowedEffects, DragEffect);
+  Winapi.ActiveX.DoDragDrop(DataObject, DragManager as IDropSource, AllowedEffects, DragEffect);
  end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23468,11 +23455,7 @@ end;
 
 function TBaseVirtualTree.GetIsSeBorderInStyleElement: Boolean;
 begin
-  {$if CompilerVersion >= 24}
   Result := (seBorder in StyleElements);
-  {$else}
-  Result := True;
-  {$IFEND}
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -27484,9 +27467,7 @@ begin
       Self.ScrollBarOptions := ScrollBarOptions;
       Self.ShowHint := ShowHint;
       Self.StateImages := StateImages;
-      {$if CompilerVersion >= 24}
       Self.StyleElements := StyleElements;
-      {$ifend}
       Self.TabOrder := TabOrder;
       Self.TabStop := TabStop;
       Self.Visible := Visible;
@@ -33168,7 +33149,7 @@ begin
     else
       if (R.Bottom > ClientHeight) or Center then
       begin
-        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.{$ifend}ssBoth, System.UITypes.TScrollStyle.ssHorizontal]) and
+        HScrollBarVisible := (ScrollBarOptions.ScrollBars in [System.UITypes.TScrollStyle.ssBoth, System.UITypes.TScrollStyle.ssHorizontal]) and
           (ScrollBarOptions.AlwaysVisible or (Integer(FRangeX) > ClientWidth));
         if Center then
           SetOffsetY(FOffsetY - R.Bottom + ClientHeight div 2)
@@ -35135,7 +35116,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TCustomVirtualStringTree.SetDefaultText(const Value: UnicodeString);
+procedure TCustomVirtualStringTree.SetDefaultText(const Value: string);
 
 begin
   if FDefaultText <> Value then
@@ -37336,12 +37317,10 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-{$if CompilerVersion >= 23}
 class constructor TVirtualStringTree.Create();
 begin
   TCustomStyleEngine.RegisterStyleHook(TVirtualStringTree, TVclStyleScrollBarsHook);
 end;
-{$ifend}
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -37411,12 +37390,10 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-{$if CompilerVersion >= 23}
 class constructor TVirtualDrawTree.Create();
 begin
   TCustomStyleEngine.RegisterStyleHook(TVirtualDrawTree, TVclStyleScrollBarsHook);
 end;
-{$ifend}
 
 //----------------------------------------------------------------------------------------------------------------------
 

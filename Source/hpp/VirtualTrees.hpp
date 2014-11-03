@@ -140,7 +140,7 @@ enum DECLSPEC_DENUM TVTMiscOption : unsigned char { toAcceptOLEDrop, toCheckSupp
 
 typedef System::Set<TVTMiscOption, TVTMiscOption::toAcceptOLEDrop, TVTMiscOption::toReverseFullExpandHotKey> TVTMiscOptions;
 
-enum DECLSPEC_DENUM TVTExportMode : unsigned char { emAll, emChecked, emUnchecked };
+enum DECLSPEC_DENUM TVTExportMode : unsigned char { emAll, emChecked, emUnchecked, emVisibleDueToExpansion, emSelected };
 
 enum DECLSPEC_DENUM TVTOperationKind : unsigned char { okAutoFitColumns, okGetMaxColumnWidth, okSortNode, okSortTree };
 
@@ -663,7 +663,7 @@ private:
 	TCheckState FCheckState;
 	System::Types::TRect FImageRect;
 	bool FHasImage;
-	TSortDirection fDefaultSortDirection;
+	TSortDirection FDefaultSortDirection;
 	System::Classes::TAlignment __fastcall GetCaptionAlignment(void);
 	int __fastcall GetLeft(void);
 	bool __fastcall IsBiDiModeStored(void);
@@ -726,7 +726,7 @@ __published:
 	__property TCheckState CheckState = {read=FCheckState, write=SetCheckState, default=0};
 	__property bool CheckBox = {read=FCheckBox, write=SetCheckBox, default=0};
 	__property System::Uitypes::TColor Color = {read=FColor, write=SetColor, stored=IsColorStored, nodefault};
-	__property TSortDirection DefaultSortDirection = {read=fDefaultSortDirection, write=fDefaultSortDirection, default=0};
+	__property TSortDirection DefaultSortDirection = {read=FDefaultSortDirection, write=FDefaultSortDirection, default=0};
 	__property System::UnicodeString Hint = {read=FHint, write=FHint, stored=false};
 	__property System::Uitypes::TImageIndex ImageIndex = {read=FImageIndex, write=SetImageIndex, default=-1};
 	__property TVTHeaderColumnLayout Layout = {read=FLayout, write=SetLayout, default=0};
@@ -1196,7 +1196,7 @@ public:
 
 enum DECLSPEC_DENUM TVTImageInfoIndex : unsigned char { iiNormal, iiState, iiCheck, iiOverlay };
 
-enum DECLSPEC_DENUM Virtualtrees__02 : unsigned char { suoRepaintHeader, suoRepaintScrollbars, suoScrollClientArea, suoUpdateNCArea };
+enum DECLSPEC_DENUM Virtualtrees__02 : unsigned char { suoRepaintHeader, suoRepaintScrollBars, suoScrollClientArea, suoUpdateNCArea };
 
 typedef System::Set<Virtualtrees__02, Virtualtrees__02::suoRepaintHeader, Virtualtrees__02::suoUpdateNCArea> TScrollUpdateOptions;
 
@@ -1369,7 +1369,7 @@ typedef void __fastcall (__closure *TVTAfterGetMaxColumnWidthEvent)(TVTHeader* S
 
 typedef void __fastcall (__closure *TVTCanSplitterResizeColumnEvent)(TVTHeader* Sender, const System::Types::TPoint &P, TColumnIndex Column, bool &Allowed);
 
-typedef void __fastcall (__closure *TVTCanSplitterResizeHeaderEvent)(TVTHeader* SendeR, const System::Types::TPoint &P, bool &Allowed);
+typedef void __fastcall (__closure *TVTCanSplitterResizeHeaderEvent)(TVTHeader* Sender, const System::Types::TPoint &P, bool &Allowed);
 
 typedef void __fastcall (__closure *TVTNodeMovedEvent)(TBaseVirtualTree* Sender, PVirtualNode Node);
 
@@ -1429,7 +1429,7 @@ typedef void __fastcall (__closure *TVTOperationEvent)(TBaseVirtualTree* Sender,
 
 enum DECLSPEC_DENUM TVTHintKind : unsigned char { vhkText, vhkOwnerDraw };
 
-typedef void __fastcall (__closure *TVTHintKindEvent)(TBaseVirtualTree* sender, PVirtualNode Node, TColumnIndex Column, TVTHintKind &Kind);
+typedef void __fastcall (__closure *TVTHintKindEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TColumnIndex Column, TVTHintKind &Kind);
 
 typedef void __fastcall (__closure *TVTDrawHintEvent)(TBaseVirtualTree* Sender, Vcl::Graphics::TCanvas* HintCanvas, PVirtualNode Node, const System::Types::TRect &R, TColumnIndex Column);
 
@@ -1451,7 +1451,7 @@ typedef void __fastcall (__closure *TVTStateChangeEvent)(TBaseVirtualTree* Sende
 
 typedef void __fastcall (__closure *TVTGetCellIsEmptyEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TColumnIndex Column, bool &IsEmpty);
 
-typedef void __fastcall (__closure *TVTScrollbarShowEvent)(TBaseVirtualTree* Sender, int Bar, bool Show);
+typedef void __fastcall (__closure *TVTScrollBarShowEvent)(TBaseVirtualTree* Sender, int Bar, bool Show);
 
 typedef PVirtualNode __fastcall (__closure *TGetFirstNodeProc)(void);
 
@@ -1721,7 +1721,7 @@ private:
 	unsigned FOperationCount;
 	bool FOperationCanceled;
 	bool FChangingTheme;
-	TVirtualNode *fNextNodeToSelect;
+	TVirtualNode *FNextNodeToSelect;
 	_di_IAccessible FAccessible;
 	_di_IAccessible FAccessibleItem;
 	System::UnicodeString FAccessibleName;
@@ -1831,22 +1831,18 @@ private:
 	TVTGetCursorEvent FOnGetCursor;
 	TVTStateChangeEvent FOnStateChange;
 	TVTGetCellIsEmptyEvent FOnGetCellIsEmpty;
-	TVTScrollbarShowEvent FOnShowScrollbar;
+	TVTScrollBarShowEvent FOnShowScrollBar;
 	TVTCompareEvent FOnCompareNodes;
 	TVTDrawHintEvent FOnDrawHint;
 	TVTGetHintSizeEvent FOnGetHintSize;
-	TVTHintKindEvent fOnGetHintKind;
+	TVTHintKindEvent FOnGetHintKind;
 	TVTIncrementalSearchEvent FOnIncrementalSearch;
 	System::Classes::TNotifyEvent FOnMouseEnter;
 	System::Classes::TNotifyEvent FOnMouseLeave;
 	TVTOperationEvent FOnStartOperation;
 	TVTOperationEvent FOnEndOperation;
 	bool FVclStyleEnabled;
-	Vcl::Controls::TBevelKind FSavedBevelKind;
-	int FSavedBorderWidth;
-	bool FSetOrRestoreBevelKindAndBevelWidth;
 	MESSAGE void __fastcall CMStyleChanged(Winapi::Messages::TMessage &Message);
-	HIDESBASE MESSAGE void __fastcall CMBorderChanged(Winapi::Messages::TMessage &Message);
 	MESSAGE void __fastcall CMParentDoubleBufferedChange(Winapi::Messages::TMessage &Message);
 	void __fastcall AdjustCoordinatesByIndent(TVTPaintInfo &PaintInfo, int Indent);
 	void __fastcall AdjustTotalCount(PVirtualNode Node, int Value, bool relative = false);
@@ -1961,6 +1957,7 @@ private:
 	MESSAGE void __fastcall CMColorChange(Winapi::Messages::TMessage &Message);
 	HIDESBASE MESSAGE void __fastcall CMCtl3DChanged(Winapi::Messages::TMessage &Message);
 	HIDESBASE MESSAGE void __fastcall CMBiDiModeChanged(Winapi::Messages::TMessage &Message);
+	HIDESBASE MESSAGE void __fastcall CMBorderChanged(Winapi::Messages::TMessage &Message);
 	MESSAGE void __fastcall CMDenySubclassing(Winapi::Messages::TMessage &Message);
 	HIDESBASE MESSAGE void __fastcall CMDrag(Vcl::Controls::TCMDrag &Message);
 	HIDESBASE MESSAGE void __fastcall CMEnabledChanged(Winapi::Messages::TMessage &Message);
@@ -2015,6 +2012,7 @@ private:
 	bool __fastcall GetDoubleBuffered(void);
 	HIDESBASE void __fastcall SetDoubleBuffered(const bool Value);
 	void __fastcall ChangeTreeStatesAsync(TChangeStates EnterStates, TChangeStates LeaveStates);
+	bool __fastcall GetIsSeBorderInStyleElement(void);
 	
 protected:
 	bool FFontChanged;
@@ -2036,7 +2034,7 @@ protected:
 	virtual bool __fastcall CheckParentCheckState(PVirtualNode Node, TCheckState NewCheckState);
 	virtual void __fastcall ClearTempCache(void);
 	virtual bool __fastcall ColumnIsEmpty(PVirtualNode Node, TColumnIndex Column);
-	virtual int __fastcall ComputeRTLOffset(bool ExcludeScrollbar = false);
+	virtual int __fastcall ComputeRTLOffset(bool ExcludeScrollBar = false);
 	virtual int __fastcall CountLevelDifference(PVirtualNode Node1, PVirtualNode Node2);
 	virtual unsigned __fastcall CountVisibleChildren(PVirtualNode Node);
 	virtual void __fastcall CreateParams(Vcl::Controls::TCreateParams &Params);
@@ -2146,7 +2144,7 @@ protected:
 	virtual void __fastcall DoSaveUserData(PVirtualNode Node, System::Classes::TStream* Stream);
 	virtual void __fastcall DoScroll(int DeltaX, int DeltaY);
 	virtual bool __fastcall DoSetOffsetXY(const System::Types::TPoint &Value, TScrollUpdateOptions Options, System::Types::PRect ClipRect = (System::Types::PRect)(0x0));
-	virtual void __fastcall DoShowScrollbar(int Bar, bool Show);
+	virtual void __fastcall DoShowScrollBar(int Bar, bool Show);
 	DYNAMIC void __fastcall DoStartDrag(Vcl::Controls::TDragObject* &DragObject);
 	virtual void __fastcall DoStartOperation(TVTOperationKind OperationKind);
 	virtual void __fastcall DoStateChange(const TVirtualTreeStates &Enter, const TVirtualTreeStates &Leave = TVirtualTreeStates() );
@@ -2237,6 +2235,7 @@ protected:
 	virtual void __fastcall UpdateDesigner(void);
 	virtual void __fastcall UpdateEditBounds(void);
 	virtual void __fastcall UpdateHeaderRect(void);
+	virtual void __fastcall UpdateStyleElements(void);
 	virtual void __fastcall UpdateWindowAndDragImage(TBaseVirtualTree* const Tree, const System::Types::TRect &TreeRect, bool UpdateNCArea, bool ReshowDragImage);
 	virtual void __fastcall ValidateCache(void);
 	virtual void __fastcall ValidateNodeDataSize(int &Size);
@@ -2288,13 +2287,14 @@ protected:
 	__property TVTSearchStart IncrementalSearchStart = {read=FSearchStart, write=FSearchStart, default=2};
 	__property unsigned IncrementalSearchTimeout = {read=FSearchTimeout, write=FSearchTimeout, default=1000};
 	__property unsigned Indent = {read=FIndent, write=SetIndent, default=18};
+	__property bool IsSeBorderInStyleElement = {read=GetIsSeBorderInStyleElement, nodefault};
 	__property System::Types::TPoint LastClickPos = {read=FLastClickPos, write=FLastClickPos};
 	__property TDropMode LastDropMode = {read=FLastDropMode, write=FLastDropMode, nodefault};
 	__property System::Types::TRect LastHintRect = {read=FLastHintRect, write=FLastHintRect};
 	__property TVTLineMode LineMode = {read=FLineMode, write=SetLineMode, default=0};
 	__property TVTLineStyle LineStyle = {read=FLineStyle, write=SetLineStyle, default=1};
 	__property int Margin = {read=FMargin, write=SetMargin, default=4};
-	__property PVirtualNode NextNodeToSelect = {read=fNextNodeToSelect};
+	__property PVirtualNode NextNodeToSelect = {read=FNextNodeToSelect};
 	__property TVTNodeAlignment NodeAlignment = {read=FNodeAlignment, write=SetNodeAlignment, default=2};
 	__property int NodeDataSize = {read=FNodeDataSize, write=SetNodeDataSize, default=-1};
 	__property bool OperationCanceled = {read=GetOperationCanceled, nodefault};
@@ -2378,7 +2378,7 @@ protected:
 	__property TVTGetHeaderCursorEvent OnGetHeaderCursor = {read=FOnGetHeaderCursor, write=FOnGetHeaderCursor};
 	__property TVTHelpContextEvent OnGetHelpContext = {read=FOnGetHelpContext, write=FOnGetHelpContext};
 	__property TVTGetHintSizeEvent OnGetHintSize = {read=FOnGetHintSize, write=FOnGetHintSize};
-	__property TVTHintKindEvent OnGetHintKind = {read=fOnGetHintKind, write=fOnGetHintKind};
+	__property TVTHintKindEvent OnGetHintKind = {read=FOnGetHintKind, write=FOnGetHintKind};
 	__property TVTGetImageEvent OnGetImageIndex = {read=FOnGetImage, write=FOnGetImage};
 	__property TVTGetImageExEvent OnGetImageIndexEx = {read=FOnGetImageEx, write=FOnGetImageEx};
 	__property TVTGetImageTextEvent OnGetImageText = {read=FOnGetImageText, write=FOnGetImageText};
@@ -2424,7 +2424,7 @@ protected:
 	__property TVTSaveNodeEvent OnSaveNode = {read=FOnSaveNode, write=FOnSaveNode};
 	__property TVTSaveTreeEvent OnSaveTree = {read=FOnSaveTree, write=FOnSaveTree};
 	__property TVTScrollEvent OnScroll = {read=FOnScroll, write=FOnScroll};
-	__property TVTScrollbarShowEvent OnShowScrollbar = {read=FOnShowScrollbar, write=FOnShowScrollbar};
+	__property TVTScrollBarShowEvent OnShowScrollBar = {read=FOnShowScrollBar, write=FOnShowScrollBar};
 	__property TVTOperationEvent OnStartOperation = {read=FOnStartOperation, write=FOnStartOperation};
 	__property TVTStateChangeEvent OnStateChange = {read=FOnStateChange, write=FOnStateChange};
 	__property TVTStructureChangeEvent OnStructureChange = {read=FOnStructureChange, write=FOnStructureChange};
@@ -2451,8 +2451,8 @@ public:
 	void __fastcall ClearSelection(void);
 	PVirtualNode __fastcall CopyTo(PVirtualNode Source, TBaseVirtualTree* Tree, TVTNodeAttachMode Mode, bool ChildrenOnly)/* overload */;
 	PVirtualNode __fastcall CopyTo(PVirtualNode Source, PVirtualNode Target, TVTNodeAttachMode Mode, bool ChildrenOnly)/* overload */;
-	virtual void __fastcall CopyToClipBoard(void);
-	virtual void __fastcall CutToClipBoard(void);
+	virtual void __fastcall CopyToClipboard(void);
+	virtual void __fastcall CutToClipboard(void);
 	void __fastcall DeleteChildren(PVirtualNode Node, bool ResetHasChildren = false);
 	void __fastcall DeleteNode(PVirtualNode Node, bool Reindex = true);
 	virtual void __fastcall DeleteSelectedNodes(void);
@@ -2837,7 +2837,7 @@ private:
 	void __fastcall GetDataFromGrid(System::Classes::TStringList* const AStrings, const bool IncludeHeading = true);
 	
 protected:
-	System::Classes::TStringList* fPreviouslySelected;
+	System::Classes::TStringList* FPreviouslySelected;
 	void __fastcall InitializeTextProperties(TVTPaintInfo &PaintInfo);
 	virtual void __fastcall PaintNormalText(TVTPaintInfo &PaintInfo, int TextOutFlags, System::UnicodeString Text);
 	virtual void __fastcall PaintStaticText(const TVTPaintInfo &PaintInfo, int TextOutFlags, const System::UnicodeString Text);
@@ -2925,6 +2925,9 @@ private:
 protected:
 	virtual TTreeOptionsClass __fastcall GetOptionsClass(void);
 	
+private:
+	// __classmethod void __fastcall Create@();
+	
 public:
 	__property Canvas;
 	__property RangeX;
@@ -3006,6 +3009,7 @@ __published:
 	__property SelectionCurveRadius = {default=0};
 	__property ShowHint;
 	__property StateImages;
+	__property StyleElements = {default=7};
 	__property TabOrder = {default=-1};
 	__property TabStop = {default=1};
 	__property TextMargin = {default=4};
@@ -3146,7 +3150,7 @@ __published:
 	__property OnSaveTree;
 	__property OnScroll;
 	__property OnShortenString;
-	__property OnShowScrollbar;
+	__property OnShowScrollBar;
 	__property OnStartDock;
 	__property OnStartDrag;
 	__property OnStartOperation;
@@ -3156,6 +3160,9 @@ __published:
 	__property OnCanResize;
 	__property OnGesture;
 	__property Touch;
+	
+private:
+	// __classmethod void __fastcall Destroy@();
 public:
 	/* TCustomVirtualStringTree.Create */ inline __fastcall virtual TVirtualStringTree(System::Classes::TComponent* AOwner) : TCustomVirtualStringTree(AOwner) { }
 	/* TCustomVirtualStringTree.Destroy */ inline __fastcall virtual ~TVirtualStringTree(void) { }
@@ -3211,6 +3218,9 @@ private:
 	
 protected:
 	virtual TTreeOptionsClass __fastcall GetOptionsClass(void);
+	
+private:
+	// __classmethod void __fastcall Create@();
 	
 public:
 	__property Canvas;
@@ -3419,7 +3429,7 @@ __published:
 	__property OnSaveNode;
 	__property OnSaveTree;
 	__property OnScroll;
-	__property OnShowScrollbar;
+	__property OnShowScrollBar;
 	__property OnStartDock;
 	__property OnStartDrag;
 	__property OnStartOperation;
@@ -3429,6 +3439,10 @@ __published:
 	__property OnCanResize;
 	__property OnGesture;
 	__property Touch;
+	__property StyleElements = {default=7};
+	
+private:
+	// __classmethod void __fastcall Destroy@();
 public:
 	/* TBaseVirtualTree.Create */ inline __fastcall virtual TVirtualDrawTree(System::Classes::TComponent* AOwner) : TCustomVirtualDrawTree(AOwner) { }
 	/* TBaseVirtualTree.Destroy */ inline __fastcall virtual ~TVirtualDrawTree(void) { }
