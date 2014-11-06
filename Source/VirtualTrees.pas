@@ -49,10 +49,9 @@ unit VirtualTrees;
 
 interface
 
+{$if CompilerVersion < 24}{$MESSAGE FATAL 'This version supports only RAD Studio XE3 and higher. Please use V5 or:  https://virtual-treeview.googlecode.com/svn/branches/V5_stable'}{$ifend}
+
 {$booleval off} // Use fastest possible boolean evaluation
- 
-{.$define TntSupport} // Added by Igor Afanasyev to support unicode-aware inplace editors. This implementation uses
-                      // Troy Wolbrink's TNT controls, meanwhile available as TMS Unicode components
 
 // For some things to work we need code, which is classified as being unsafe for .NET.
 {$WARN UNSAFE_TYPE OFF}
@@ -77,7 +76,7 @@ uses
   Winapi.ShlObj, System.UITypes, System.Generics.Collections;
 
 const
-  VTVersion = '5.5.0';
+  VTVersion = '6.0.0';
 
 const
   VTTreeStreamVersion = 2;
