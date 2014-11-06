@@ -3456,7 +3456,7 @@ public:
 enum DECLSPEC_DENUM TBlendMode : unsigned char { bmConstantAlpha, bmPerPixelAlpha, bmMasterAlpha, bmConstantAlphaAndColor };
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"5.5.0"
+#define VTVersion L"6.0.0"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);
