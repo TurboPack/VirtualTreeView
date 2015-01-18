@@ -62,6 +62,7 @@ interface
 
 {$WARN IMPLICIT_STRING_CAST       OFF}
 {$WARN IMPLICIT_STRING_CAST_LOSS  OFF}
+{$WARN UNSUPPORTED_CONSTRUCT      OFF}
 
 {$HPPEMIT '#include <objidl.h>'}
 {$HPPEMIT '#include <oleidl.h>'}
@@ -3013,7 +3014,10 @@ type
     function GetNodeAt(const P: TPoint): PVirtualNode; overload; inline;
     function GetNodeAt(X, Y: Integer): PVirtualNode; overload;
     function GetNodeAt(X, Y: Integer; Relative: Boolean; var NodeTop: Integer): PVirtualNode; overload;
-    function GetNodeData(Node: PVirtualNode): Pointer;
+    function GetNodeData(Node: PVirtualNode): Pointer; overload;
+    function GetNodeData<T>(pNode: PVirtualNode): T; overload; inline;
+    function GetNodeDataAt<T:class>(pXCoord: Integer; pYCoord: Integer): T;
+    function GetFirstSelectedNodeData<T>(): T;
     function GetNodeLevel(Node: PVirtualNode): Cardinal;
     function GetPrevious(Node: PVirtualNode; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetPreviousChecked(Node: PVirtualNode; State: TCheckState = csCheckedNormal;
@@ -3328,7 +3332,7 @@ type
     procedure AdjustPaintCellRect(var PaintInfo: TVTPaintInfo; var NextNonEmpty: TColumnIndex); override;
     function CanExportNode(Node: PVirtualNode): Boolean;
     function CalculateStaticTextWidth(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; Text: string): Integer; virtual;
-    function CalculateTextWidth(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; Text: string): Integer; virtual;
+    function CalculateTextWidth(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string): Integer; virtual;
     function ColumnIsEmpty(Node: PVirtualNode; Column: TColumnIndex): Boolean; override;
     procedure DefineProperties(Filer: TFiler); override;
     function DoCreateEditor(Node: PVirtualNode; Column: TColumnIndex): IVTEditLink; override;
@@ -3345,8 +3349,8 @@ type
       TextType: TVSTTextType); virtual;
     function DoShortenString(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const S: string; Width: Integer;
       EllipsisWidth: Integer = 0): string; virtual;
-    procedure DoTextDrawing(var PaintInfo: TVTPaintInfo; Text: string; CellRect: TRect; DrawFormat: Cardinal); virtual;
-    function DoTextMeasuring(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; Text: string): TSize; virtual;
+    procedure DoTextDrawing(var PaintInfo: TVTPaintInfo; const Text: string; CellRect: TRect; DrawFormat: Cardinal); virtual;
+    function DoTextMeasuring(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string): TSize; virtual;
     function GetOptionsClass: TTreeOptionsClass; override;
     function InternalData(Node: PVirtualNode): Pointer;
     procedure MainColumnChanged; override;
@@ -3399,10 +3403,10 @@ type
    
     function GetOptions: TStringTreeOptions;
     procedure SetOptions(const Value: TStringTreeOptions);
-   
+    class constructor Create();
+
   protected
     function GetOptionsClass: TTreeOptionsClass; override;
-    class constructor Create();
   public
 
     property Canvas;
@@ -3666,9 +3670,9 @@ type
   private
     function GetOptions: TVirtualTreeOptions;
     procedure SetOptions(const Value: TVirtualTreeOptions);
+    class constructor Create();
   protected
     function GetOptionsClass: TTreeOptionsClass; override;
-    class constructor Create();
   public
     property Canvas;
     property LastDragEffect;
@@ -6205,7 +6209,7 @@ begin
           FCurrentTree.ChangeTreeStatesAsync(EnterStates, LeaveStates);
           lCurrentTree := FCurrentTree; // Save reference in a local variable for later use
           FCurrentTree := nil; //Clear variable to prevent deadlock in CancelValidation. See #434
-          Synchronize(lCurrentTree.UpdateEditBounds);
+          Queue(lCurrentTree.UpdateEditBounds);
         end;
       end;
     end;
@@ -7238,9 +7242,12 @@ begin
   // and cannot be updated during a drag operation. With the following call painting is again enabled.
   if not FFullDragging then
     LockWindowUpdate(0);
-  if Assigned(FDropTargetHelper) and FFullDragging then
-    FDropTargetHelper.DragEnter(FOwner.Handle, DataObject, Pt, Effect);
-
+  if Assigned(FDropTargetHelper) and FFullDragging then begin
+    if toAutoScroll in Self.FOwner.TreeOptions.AutoOptions then
+      FDropTargetHelper.DragEnter(FOwner.Handle, DataObject, Pt, Effect)
+    else
+      FDropTargetHelper.DragEnter(0, DataObject, Pt, Effect);// Do not pass handle, otherwise the IDropTargetHelper will perform autoscroll. Issue #486
+  end;
   FDragSource := FOwner.GetTreeFromDataObject(DataObject);
   Result := FOwner.DragEnter(KeyState, Pt, Effect);
 end;
@@ -10162,6 +10169,8 @@ var
   NewClickIndex: Integer;
 
 begin
+  if (csDesigning in Header.Treeview.ComponentState) then
+    exit;
   // Convert vertical position to local coordinates.
   Inc(P.Y, FHeader.FHeight);
   NewClickIndex := ColumnFromPosition(P);
@@ -10408,7 +10417,7 @@ var
   I, RunningPos: Integer;
 
 begin
-  if not FNeedPositionsFix and (Force or (UpdateCount = 0)) then
+  if not (csDestroying in FHeader.Treeview.ComponentState) and not FNeedPositionsFix and (Force or (UpdateCount = 0)) then
   begin
     RunningPos := 0;
     for I := 0 to High(FPositionToIndex) do
@@ -11084,7 +11093,7 @@ var
       end  
       else
       begin
-        if ((tsUseThemes in FHeader.Treeview.FStates) and (FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
+        if ((tsUseThemes in FHeader.Treeview.FStates) or (FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
         begin
           Details := StyleServices.GetElementDetails(thHeaderItemRightNormal);
           StyleServices.DrawElement(Handle, Details, BackgroundRect, @BackgroundRect);
@@ -11164,7 +11173,7 @@ var
           FHeader.Treeview.DoAdvancedHeaderDraw(PaintInfo, [hpeBackground])
         else
         begin
-          if ((tsUseThemes in FHeader.Treeview.FStates)   and (FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
+          if (tsUseThemes in FHeader.Treeview.FStates) or ((FHeader.Treeview.VclStyleEnabled and (seClient in FHeader.FOwner.StyleElements))) then
           begin
             if IsDownIndex then
               Details := StyleServices.GetElementDetails(thHeaderItemPressed)
@@ -14082,9 +14091,9 @@ begin
     DeleteObject(FDottedBrush);
   FDottedBrush := 0;
 
-  FOptions.Free; // WM_NCDESTROY accesses FOptions
   FHeader.Free;
-  FHeader := nil;
+  FHeader := nil; // Do not use FreeAndNil() before checking issue #497
+  FreeAndNil(FOptions); // WM_NCDESTROY accesses FOptions
 
   FreeMem(FRoot);
 
@@ -16299,6 +16308,7 @@ begin
               lNodeHeight := Child.NodeHeight;
               DoMeasureItem(Canvas, Child, lNodeHeight);
               Child.NodeHeight := lNodeHeight;
+              Child.TotalHeight := lNodeHeight;
             end;
             Inc(NewHeight, Child.NodeHeight);
           end;
@@ -22048,6 +22058,8 @@ end;
 procedure TBaseVirtualTree.DoMeasureItem(TargetCanvas: TCanvas; Node: PVirtualNode; var NodeHeight: Integer);
 
 begin
+  if not (vsInitialized in Node.States) then
+    InitNode(Node);
   if Assigned(FOnMeasureItem) then
     FOnMeasureItem(Self, TargetCanvas, Node, NodeHeight);
 end;
@@ -24008,7 +24020,7 @@ begin
   begin
     DoStateChange([tsEditPending]);
     FEditColumn := FFocusedColumn;
-    SetTimer(Handle, EditTimer, FEditDelay, nil);
+    SetTimer(Handle, EditTimer, 0, nil);
   end;
 end;
 
@@ -25388,7 +25400,7 @@ begin
     RTLOffset := ComputeRTLOffset(True)
   else
     RTLOffset := 0;
-   FHeader.Columns.PaintHeader(Canvas,FHeaderRect,Point(-RTLOffset, 0), -FEffectiveOffsetX);
+
   // The update rect has already been filled in WMPaint, as it is the window's update rect, which gets
   // reset when BeginPaint is called (in the ancestor).
   // The difference to the DC's clipbox is that it is also valid with internal paint operations used
@@ -27307,6 +27319,7 @@ begin
     end;
     Result := Parent.LastChild;
 
+    //TODO: The above code implicitely triggers OnMeasureItem, but the NodeData is not set then. Consider doing this similar to InsertNode() with a combination of MakeNewNode and InternalConnectNode()
     // Check if there is initial user data and there is also enough user data space allocated.
     if Assigned(UserData) then
       if FNodeDataSize >= SizeOf(Pointer) then
@@ -28228,8 +28241,10 @@ begin
       end;
     end;
 
-    if FUpdateCount = 0 then
-      DoUpdating(usEnd)
+    if FUpdateCount = 0 then begin
+      DoUpdating(usEnd);
+      EnsureNodeSelected();
+    end
     else
       DoUpdating(usUpdate);
   end;
@@ -30160,6 +30175,48 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+function TBaseVirtualTree.GetNodeData<T>(pNode: PVirtualNode): T;
+
+// Returns associated data converted to the type given in the generic part of the function.
+
+begin
+  if Assigned(pNode) then
+    Result := T(Self.GetNodeData(pNode)^)
+  else
+    Result := Default(T);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TBaseVirtualTree.GetNodeDataAt<T>(pXCoord, pYCoord: Integer): T;
+
+// Returns associated data at the specified coordinates converted to the type given in the generic part of the function.
+
+var
+  lNode: PVirtualNode;
+begin
+  lNode := GetNodeAt(pXCoord, pYCoord);
+
+  if not Assigned(lNode) then
+  begin
+    Exit(nil);
+  end;
+
+  Result := T(Self.GetNodeData(lNode)^);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+function TBaseVirtualTree.GetFirstSelectedNodeData<T>(): T;
+
+// Returns of the first selected node associated data converted to the type given in the generic part of the function.
+
+begin
+  Result := T(Self.GetNodeData(GetFirstSelected())^);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 function TBaseVirtualTree.GetNodeLevel(Node: PVirtualNode): Cardinal;
 
 // returns the level of the given node
@@ -31567,7 +31624,7 @@ begin
     if (toVariableNodeHeight in FOptions.FMiscOptions) then
     begin
       NewNodeHeight := Node.NodeHeight;
-      // Anonymous methods help to make this thread safe easily. In Delphi 2007 and lower developers must take care themselves about thread synchronization when consuming the OnMeasureItemHeight event
+      // Anonymous methods help to make this thread safe easily. 
       if (MainThreadId <> GetCurrentThreadId) then
         TThread.Synchronize(nil,
           procedure
@@ -34962,8 +35019,8 @@ begin
     //       for 9x/Me.
     if vsMultiline in Node.States then
     begin
-      Height := ComputeNodeHeight(Canvas, Node, Column);
       DoPaintText(Node, Canvas, Column, ttNormal);
+      Height := ComputeNodeHeight(Canvas, Node, Column);
       // Disabled node color overrides all other variants.
       if (vsDisabled in Node.States) or not Enabled then
         Canvas.Font.Color := FColors.DisabledColor;
@@ -35268,7 +35325,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 function TCustomVirtualStringTree.CalculateTextWidth(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  Text: string): Integer;
+  const Text: string): Integer;
 
 // Determines the width of the given text.
 
@@ -35511,7 +35568,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TCustomVirtualStringTree.DoTextDrawing(var PaintInfo: TVTPaintInfo; Text: string; CellRect: TRect;
+procedure TCustomVirtualStringTree.DoTextDrawing(var PaintInfo: TVTPaintInfo; const Text: string; CellRect: TRect;
   DrawFormat: Cardinal);
 
 var
@@ -35528,7 +35585,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 function TCustomVirtualStringTree.DoTextMeasuring(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  Text: string): TSize;
+  const Text: string): TSize;
 
 var
   R: TRect;
@@ -35731,7 +35788,7 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 function TCustomVirtualStringTree.ComputeNodeHeight(Canvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  S: string): Integer;
+ S: string): Integer;
 
 // Default node height calculation for multi line nodes. This method can be used by the application to delegate the
 // computation to the string tree.
@@ -37041,7 +37098,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TCustomVirtualStringTree.ContentToUnicode(Source: TVSTTextSourceType; Separator: WideChar): string;
+function TCustomVirtualStringTree.ContentToUnicode(Source: TVSTTextSourceType; Separator: Char): string;
 
 begin
   Result := ContentToUnicode(Source, string(Separator));
