@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2015 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VTAccessibilityFactory.pas' rev: 28.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VTAccessibilityFactory.pas' rev: 29.00 (Windows)
 
 #ifndef VtaccessibilityfactoryHPP
 #define VtaccessibilityfactoryHPP
@@ -12,27 +12,26 @@
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
 #pragma pack(push,8)
-#include <System.hpp>	// Pascal unit
-#include <SysInit.hpp>	// Pascal unit
-#include <Winapi.oleacc.hpp>	// Pascal unit
-#include <System.Classes.hpp>	// Pascal unit
-#include <VirtualTrees.hpp>	// Pascal unit
+#include <System.hpp>
+#include <SysInit.hpp>
+#include <System.Classes.hpp>
+#include <Winapi.oleacc.hpp>
+#include <VirtualTrees.hpp>
 
 //-- user supplied -----------------------------------------------------------
 
 namespace Vtaccessibilityfactory
 {
-//-- type declarations -------------------------------------------------------
+//-- forward type declarations -----------------------------------------------
 __interface IVTAccessibleProvider;
 typedef System::DelphiInterface<IVTAccessibleProvider> _di_IVTAccessibleProvider;
+class DELPHICLASS TVTAccessibilityFactory;
+//-- type declarations -------------------------------------------------------
 __interface IVTAccessibleProvider  : public System::IInterface 
 {
-	
-public:
 	virtual _di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree) = 0 ;
 };
 
-class DELPHICLASS TVTAccessibilityFactory;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTAccessibilityFactory : public System::TObject
 {
@@ -51,8 +50,8 @@ public:
 	__fastcall virtual ~TVTAccessibilityFactory(void);
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 	static TVTAccessibilityFactory* __fastcall GetAccessibilityFactory();
-	void __fastcall RegisterAccessibleProvider(_di_IVTAccessibleProvider AProvider);
-	void __fastcall UnRegisterAccessibleProvider(_di_IVTAccessibleProvider AProvider);
+	void __fastcall RegisterAccessibleProvider(const _di_IVTAccessibleProvider AProvider);
+	void __fastcall UnRegisterAccessibleProvider(const _di_IVTAccessibleProvider AProvider);
 };
 
 #pragma pack(pop)

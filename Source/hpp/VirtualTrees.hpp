@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2015 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.pas' rev: 28.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.pas' rev: 29.00 (Windows)
 
 #ifndef VirtualtreesHPP
 #define VirtualtreesHPP
@@ -12,28 +12,28 @@
 #pragma option -w-      // All warnings off
 #pragma option -Vx      // Zero-length empty class member 
 #pragma pack(push,8)
-#include <System.hpp>	// Pascal unit
-#include <SysInit.hpp>	// Pascal unit
-#include <Winapi.Windows.hpp>	// Pascal unit
-#include <Winapi.oleacc.hpp>	// Pascal unit
-#include <Winapi.Messages.hpp>	// Pascal unit
-#include <System.SysUtils.hpp>	// Pascal unit
-#include <Vcl.Graphics.hpp>	// Pascal unit
-#include <Vcl.Controls.hpp>	// Pascal unit
-#include <Vcl.Forms.hpp>	// Pascal unit
-#include <Vcl.ImgList.hpp>	// Pascal unit
-#include <Winapi.ActiveX.hpp>	// Pascal unit
-#include <Vcl.StdCtrls.hpp>	// Pascal unit
-#include <System.Classes.hpp>	// Pascal unit
-#include <Vcl.Menus.hpp>	// Pascal unit
-#include <Vcl.Printers.hpp>	// Pascal unit
-#include <System.Types.hpp>	// Pascal unit
-#include <Winapi.CommCtrl.hpp>	// Pascal unit
-#include <Vcl.Themes.hpp>	// Pascal unit
-#include <Winapi.UxTheme.hpp>	// Pascal unit
-#include <Winapi.ShlObj.hpp>	// Pascal unit
-#include <System.UITypes.hpp>	// Pascal unit
-#include <System.Generics.Collections.hpp>	// Pascal unit
+#include <System.hpp>
+#include <SysInit.hpp>
+#include <Winapi.Windows.hpp>
+#include <Winapi.oleacc.hpp>
+#include <Winapi.Messages.hpp>
+#include <System.SysUtils.hpp>
+#include <Vcl.Graphics.hpp>
+#include <Vcl.Controls.hpp>
+#include <Vcl.Forms.hpp>
+#include <Vcl.ImgList.hpp>
+#include <Winapi.ActiveX.hpp>
+#include <Vcl.StdCtrls.hpp>
+#include <System.Classes.hpp>
+#include <Vcl.Menus.hpp>
+#include <Vcl.Printers.hpp>
+#include <System.Types.hpp>
+#include <Winapi.CommCtrl.hpp>
+#include <Vcl.Themes.hpp>
+#include <Winapi.UxTheme.hpp>
+#include <Winapi.ShlObj.hpp>
+#include <System.UITypes.hpp>
+#include <System.Generics.Collections.hpp>
 
 //-- user supplied -----------------------------------------------------------
 #include <objidl.h>
@@ -44,8 +44,50 @@
 
 namespace Virtualtrees
 {
-//-- type declarations -------------------------------------------------------
+//-- forward type declarations -----------------------------------------------
 class DELPHICLASS EVirtualTreeError;
+struct TCacheEntry;
+class DELPHICLASS TCustomVirtualTreeOptions;
+class DELPHICLASS TVirtualTreeOptions;
+struct TVTReference;
+struct TVirtualNode;
+struct TVTHeaderHitInfo;
+struct THitInfo;
+struct TInternalStgMedium;
+class DELPHICLASS TEnumFormatEtc;
+__interface IVTDragManager;
+typedef System::DelphiInterface<IVTDragManager> _di_IVTDragManager;
+class DELPHICLASS TVTDataObject;
+class DELPHICLASS TVTDragManager;
+struct TVTHintData;
+class DELPHICLASS TVirtualTreeHintWindow;
+class DELPHICLASS TVTDragImage;
+class DELPHICLASS TVirtualTreeColumn;
+class DELPHICLASS TVirtualTreeColumns;
+class DELPHICLASS TVTFixedAreaConstraints;
+class DELPHICLASS TVTHeader;
+__interface IVTEditLink;
+typedef System::DelphiInterface<IVTEditLink> _di_IVTEditLink;
+struct THeaderPaintInfo;
+class DELPHICLASS TScrollBarOptions;
+class DELPHICLASS TVTColors;
+struct TVTImageInfo;
+struct TVTPaintInfo;
+class DELPHICLASS TClipboardFormats;
+__interface TVTGetNodeProc;
+typedef System::DelphiInterface<TVTGetNodeProc> _di_TVTGetNodeProc;
+struct TVTVirtualNodeEnumerator;
+struct TVTVirtualNodeEnumeration;
+class DELPHICLASS TBaseVirtualTree;
+class DELPHICLASS TCustomStringTreeOptions;
+class DELPHICLASS TStringTreeOptions;
+class DELPHICLASS TVTEdit;
+class DELPHICLASS TStringEditLink;
+class DELPHICLASS TCustomVirtualStringTree;
+class DELPHICLASS TVirtualStringTree;
+class DELPHICLASS TCustomVirtualDrawTree;
+class DELPHICLASS TVirtualDrawTree;
+//-- type declarations -------------------------------------------------------
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION EVirtualTreeError : public System::Sysutils::Exception
 {
@@ -142,13 +184,12 @@ typedef System::Set<TVTMiscOption, TVTMiscOption::toAcceptOLEDrop, TVTMiscOption
 
 enum DECLSPEC_DENUM TVTExportMode : unsigned char { emAll, emChecked, emUnchecked, emVisibleDueToExpansion, emSelected };
 
-enum DECLSPEC_DENUM TVTOperationKind : unsigned char { okAutoFitColumns, okGetMaxColumnWidth, okSortNode, okSortTree };
+enum DECLSPEC_DENUM TVTOperationKind : unsigned char { okAutoFitColumns, okGetMaxColumnWidth, okSortNode, okSortTree, okExport, okExpand };
 
-typedef System::Set<TVTOperationKind, TVTOperationKind::okAutoFitColumns, TVTOperationKind::okSortTree> TVTOperationKinds;
+typedef System::Set<TVTOperationKind, TVTOperationKind::okAutoFitColumns, TVTOperationKind::okExpand> TVTOperationKinds;
 
 typedef System::TMetaClass* TVirtualTreeClass;
 
-struct TVirtualNode;
 typedef TVirtualNode *PVirtualNode;
 
 typedef int TColumnIndex;
@@ -167,8 +208,6 @@ typedef System::DynamicArray<TCacheEntry> TCache;
 
 typedef System::DynamicArray<PVirtualNode> TNodeArray;
 
-class DELPHICLASS TCustomVirtualTreeOptions;
-class DELPHICLASS TBaseVirtualTree;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TCustomVirtualTreeOptions : public System::Classes::TPersistent
 {
@@ -188,17 +227,15 @@ private:
 	void __fastcall SetPaintOptions(const TVTPaintOptions Value);
 	void __fastcall SetSelectionOptions(const TVTSelectionOptions Value);
 	
-protected:
+public:
+	__fastcall virtual TCustomVirtualTreeOptions(TBaseVirtualTree* AOwner);
+	virtual void __fastcall AssignTo(System::Classes::TPersistent* Dest);
 	__property TVTAnimationOptions AnimationOptions = {read=FAnimationOptions, write=SetAnimationOptions, default=0};
 	__property TVTAutoOptions AutoOptions = {read=FAutoOptions, write=SetAutoOptions, default=1369};
 	__property TVTExportMode ExportMode = {read=FExportMode, write=FExportMode, default=0};
 	__property TVTMiscOptions MiscOptions = {read=FMiscOptions, write=SetMiscOptions, default=16809};
 	__property TVTPaintOptions PaintOptions = {read=FPaintOptions, write=SetPaintOptions, default=7008};
 	__property TVTSelectionOptions SelectionOptions = {read=FSelectionOptions, write=SetSelectionOptions, default=0};
-	
-public:
-	__fastcall virtual TCustomVirtualTreeOptions(TBaseVirtualTree* AOwner);
-	virtual void __fastcall AssignTo(System::Classes::TPersistent* Dest);
 	__property TBaseVirtualTree* Owner = {read=FOwner};
 public:
 	/* TPersistent.Destroy */ inline __fastcall virtual ~TCustomVirtualTreeOptions(void) { }
@@ -209,7 +246,6 @@ public:
 
 typedef System::TMetaClass* TTreeOptionsClass;
 
-class DELPHICLASS TVirtualTreeOptions;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVirtualTreeOptions : public TCustomVirtualTreeOptions
 {
@@ -232,7 +268,6 @@ public:
 
 #pragma pack(pop)
 
-struct TVTReference;
 typedef TVTReference *PVTReference;
 
 struct DECLSPEC_DRECORD TVTReference
@@ -246,6 +281,7 @@ public:
 #pragma pack(push,1)
 struct DECLSPEC_DRECORD TVirtualNode
 {
+	
 private:
 	struct DECLSPEC_DRECORD _TVirtualNode__1
 	{
@@ -316,7 +352,6 @@ public:
 
 typedef System::DynamicArray<TInternalStgMedium> TInternalStgMediumArray;
 
-class DELPHICLASS TEnumFormatEtc;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TEnumFormatEtc : public System::TInterfacedObject
 {
@@ -328,7 +363,7 @@ private:
 	int FCurrentIndex;
 	
 public:
-	__fastcall TEnumFormatEtc(TBaseVirtualTree* Tree, TFormatEtcArray AFormatEtcArray);
+	__fastcall TEnumFormatEtc(TBaseVirtualTree* Tree, const TFormatEtcArray AFormatEtcArray);
 	HRESULT __stdcall Clone(/* out */ _di_IEnumFORMATETC &Enum);
 	HRESULT __stdcall Next(int celt, /* out */ void *elt, System::PLongInt pceltFetched);
 	HRESULT __stdcall Reset(void);
@@ -345,7 +380,7 @@ public:
 	operator _di_IEnumFORMATETC()
 	{
 		_di_IEnumFORMATETC intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -356,12 +391,8 @@ public:
 
 #pragma pack(pop)
 
-__interface IVTDragManager;
-typedef System::DelphiInterface<IVTDragManager> _di_IVTDragManager;
 __interface  INTERFACE_UUID("{C4B25559-14DA-446B-8901-0C879000EB16}") IVTDragManager  : public System::IInterface 
 {
-	
-public:
 	virtual void __stdcall ForceDragLeave(void) = 0 ;
 	virtual _di_IDataObject __stdcall GetDataObject(void) = 0 ;
 	virtual TBaseVirtualTree* __stdcall GetDragSource(void) = 0 ;
@@ -373,7 +404,6 @@ public:
 	__property bool IsDropTarget = {read=GetIsDropTarget};
 };
 
-class DELPHICLASS TVTDataObject;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTDataObject : public System::TInterfacedObject
 {
@@ -387,13 +417,13 @@ private:
 	_di_IDataAdviseHolder FAdviseHolder;
 	
 protected:
-	System::_di_IInterface __fastcall CanonicalIUnknown(System::_di_IInterface TestUnknown);
+	System::_di_IInterface __fastcall CanonicalIUnknown(const System::_di_IInterface TestUnknown);
 	bool __fastcall EqualFormatEtc(const tagFORMATETC &FormatEtc1, const tagFORMATETC &FormatEtc2);
 	int __fastcall FindFormatEtc(const tagFORMATETC &TestFormatEtc, const TFormatEtcArray FormatEtcArray);
 	Winapi::Activex::PStgMedium __fastcall FindInternalStgMedium(System::Word Format);
 	NativeUInt __fastcall HGlobalClone(NativeUInt HGlobal);
 	bool __fastcall RenderInternalOLEData(const tagFORMATETC &FormatEtcIn, tagSTGMEDIUM &Medium, HRESULT &OLEResult);
-	HRESULT __fastcall StgMediumIncRef(const tagSTGMEDIUM &InStgMedium, tagSTGMEDIUM &OutStgMedium, bool CopyInMedium, _di_IDataObject DataObject);
+	HRESULT __fastcall StgMediumIncRef(const tagSTGMEDIUM &InStgMedium, tagSTGMEDIUM &OutStgMedium, bool CopyInMedium, const _di_IDataObject DataObject);
 	__property bool ForClipboard = {read=FForClipboard, nodefault};
 	__property TFormatEtcArray FormatEtcArray = {read=FFormatEtcArray, write=FFormatEtcArray};
 	__property TInternalStgMediumArray InternalStgMediumArray = {read=FInternalStgMediumArray, write=FInternalStgMediumArray};
@@ -410,7 +440,7 @@ public:
 	virtual HRESULT __stdcall GetData(const tagFORMATETC &FormatEtcIn, /* out */ tagSTGMEDIUM &Medium);
 	virtual HRESULT __stdcall GetDataHere(const tagFORMATETC &FormatEtc, /* out */ tagSTGMEDIUM &Medium);
 	virtual HRESULT __stdcall QueryGetData(const tagFORMATETC &FormatEtc);
-	virtual HRESULT __stdcall SetData(const tagFORMATETC &FormatEtc, tagSTGMEDIUM &Medium, BOOL DoRelease);
+	virtual HRESULT __stdcall SetData(const tagFORMATETC &FormatEtc, tagSTGMEDIUM &Medium, System::LongBool DoRelease);
 private:
 	void *__IDataObject;	// IDataObject 
 	
@@ -420,7 +450,7 @@ public:
 	operator _di_IDataObject()
 	{
 		_di_IDataObject intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -431,7 +461,6 @@ public:
 
 #pragma pack(pop)
 
-class DELPHICLASS TVTDragManager;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTDragManager : public System::TInterfacedObject
 {
@@ -443,7 +472,7 @@ private:
 	bool FIsDropTarget;
 	_di_IDataObject FDataObject;
 	_di_IDropTargetHelper FDropTargetHelper;
-	BOOL FFullDragging;
+	System::LongBool FFullDragging;
 	_di_IDataObject __stdcall GetDataObject(void);
 	TBaseVirtualTree* __stdcall GetDragSource(void);
 	bool __stdcall GetDropTargetHelperSupported(void);
@@ -458,7 +487,7 @@ public:
 	HRESULT __stdcall Drop(const _di_IDataObject DataObject, int KeyState, const System::Types::TPoint Pt, int &Effect);
 	void __stdcall ForceDragLeave(void);
 	HRESULT __stdcall GiveFeedback(int Effect);
-	HRESULT __stdcall QueryContinueDrag(BOOL EscapePressed, int KeyState);
+	HRESULT __stdcall QueryContinueDrag(System::LongBool EscapePressed, int KeyState);
 private:
 	void *__IDropTarget;	// IDropTarget 
 	void *__IDropSource;	// IDropSource 
@@ -470,7 +499,7 @@ public:
 	operator _di_IDropTarget()
 	{
 		_di_IDropTarget intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -481,7 +510,7 @@ public:
 	operator _di_IDropSource()
 	{
 		_di_IDropSource intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -492,7 +521,7 @@ public:
 	operator _di_IVTDragManager()
 	{
 		_di_IVTDragManager intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -503,7 +532,6 @@ public:
 
 #pragma pack(pop)
 
-struct TVTHintData;
 typedef TVTHintData *PVTHintData;
 
 struct DECLSPEC_DRECORD TVTHintData
@@ -523,7 +551,6 @@ public:
 
 enum DECLSPEC_DENUM THintAnimationType : unsigned char { hatNone, hatFade, hatSlide, hatSystemDefault };
 
-class DELPHICLASS TVirtualTreeHintWindow;
 class PASCALIMPLEMENTATION TVirtualTreeHintWindow : public Vcl::Controls::THintWindow
 {
 	typedef Vcl::Controls::THintWindow inherited;
@@ -574,7 +601,6 @@ enum DECLSPEC_DENUM Virtualtrees__9 : unsigned char { disHidden, disInDrag, disP
 
 typedef System::Set<Virtualtrees__9, Virtualtrees__9::disHidden, Virtualtrees__9::disSystemSupport> TVTDragImageStates;
 
-class DELPHICLASS TVTDragImage;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTDragImage : public System::TObject
 {
@@ -628,8 +654,6 @@ enum DECLSPEC_DENUM TVTHeaderColumnLayout : unsigned char { blGlyphLeft, blGlyph
 
 enum DECLSPEC_DENUM TSortDirection : unsigned char { sdAscending, sdDescending };
 
-class DELPHICLASS TVirtualTreeColumn;
-class DELPHICLASS TVirtualTreeColumns;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVirtualTreeColumn : public System::Classes::TCollectionItem
 {
@@ -752,7 +776,6 @@ typedef System::DynamicArray<unsigned> TCardinalArray;
 
 typedef System::DynamicArray<TColumnIndex> TIndexArray;
 
-class DELPHICLASS TVTHeader;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVirtualTreeColumns : public System::Classes::TCollection
 {
@@ -847,7 +870,6 @@ typedef System::TMetaClass* TVirtualTreeColumnsClass;
 
 typedef System::Int8 TVTConstraintPercent;
 
-class DELPHICLASS TVTFixedAreaConstraints;
 class PASCALIMPLEMENTATION TVTFixedAreaConstraints : public System::Classes::TPersistent
 {
 	typedef System::Classes::TPersistent inherited;
@@ -918,6 +940,7 @@ private:
 	TVTFixedAreaConstraints* FFixedAreaConstraints;
 	Vcl::Imglist::TCustomImageList* FImages;
 	Vcl::Imglist::TChangeLink* FImageChangeLink;
+	int fSplitterHitTolerance;
 	TColumnIndex FSortColumn;
 	TSortDirection FSortDirection;
 	TVTDragImage* FDragImage;
@@ -1015,6 +1038,7 @@ __published:
 	__property Vcl::Menus::TPopupMenu* PopupMenu = {read=FPopupMenu, write=FPopupMenu};
 	__property TColumnIndex SortColumn = {read=FSortColumn, write=SetSortColumn, default=-1};
 	__property TSortDirection SortDirection = {read=FSortDirection, write=SetSortDirection, default=0};
+	__property int SplitterHitTolerance = {read=fSplitterHitTolerance, write=fSplitterHitTolerance, default=8};
 	__property TVTHeaderStyle Style = {read=FStyle, write=SetStyle, default=0};
 };
 
@@ -1022,12 +1046,8 @@ __published:
 
 typedef System::TMetaClass* TVTHeaderClass;
 
-__interface IVTEditLink;
-typedef System::DelphiInterface<IVTEditLink> _di_IVTEditLink;
 __interface  INTERFACE_UUID("{2BE3EAFA-5ACB-45B4-9D9A-B58BCC496E17}") IVTEditLink  : public System::IInterface 
 {
-	
-public:
 	virtual bool __stdcall BeginEdit(void) = 0 ;
 	virtual bool __stdcall CancelEdit(void) = 0 ;
 	virtual bool __stdcall EndEdit(void) = 0 ;
@@ -1099,7 +1119,6 @@ typedef void __fastcall (__closure *TVTColumnExportEvent)(TBaseVirtualTree* Send
 
 typedef void __fastcall (__closure *TVTTreeExportEvent)(TBaseVirtualTree* Sender, TVTExportType aExportType);
 
-class DELPHICLASS TScrollBarOptions;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TScrollBarOptions : public System::Classes::TPersistent
 {
@@ -1136,7 +1155,6 @@ public:
 
 #pragma pack(pop)
 
-class DELPHICLASS TVTColors;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TVTColors : public System::Classes::TPersistent
 {
@@ -1239,7 +1257,6 @@ enum DECLSPEC_DENUM TVTCellPaintMode : unsigned char { cpmPaint, cpmGetContentMa
 
 enum DECLSPEC_DENUM TVTCellContentMarginType : unsigned char { ccmtAllSides, ccmtTopLeftOnly, ccmtBottomRightOnly };
 
-class DELPHICLASS TClipboardFormats;
 class PASCALIMPLEMENTATION TClipboardFormats : public System::Classes::TStringList
 {
 	typedef System::Classes::TStringList inherited;
@@ -1258,12 +1275,8 @@ public:
 };
 
 
-__interface TVTGetNodeProc;
-typedef System::DelphiInterface<TVTGetNodeProc> _di_TVTGetNodeProc;
 __interface TVTGetNodeProc  : public System::IInterface 
 {
-	
-public:
 	virtual void __fastcall Invoke(TBaseVirtualTree* Sender, PVirtualNode Node, void * Data, bool &Abort) = 0 ;
 };
 
@@ -1421,6 +1434,8 @@ typedef void __fastcall (__closure *TVTGetLineStyleEvent)(TBaseVirtualTree* Send
 
 typedef void __fastcall (__closure *TVTMeasureItemEvent)(TBaseVirtualTree* Sender, Vcl::Graphics::TCanvas* TargetCanvas, PVirtualNode Node, int &NodeHeight);
 
+typedef void __fastcall (__closure *TVTPrepareButtonImagesEvent)(TBaseVirtualTree* Sender, Vcl::Graphics::TBitmap* const APlusBM, Vcl::Graphics::TBitmap* const APlusHotBM, Vcl::Graphics::TBitmap* const APlusSelectedHotBM, Vcl::Graphics::TBitmap* const AMinusBM, Vcl::Graphics::TBitmap* const AMinusHotBM, Vcl::Graphics::TBitmap* const AMinusSelectedHotBM, System::Types::TSize &ASize);
+
 typedef void __fastcall (__closure *TVTCompareEvent)(TBaseVirtualTree* Sender, PVirtualNode Node1, PVirtualNode Node2, TColumnIndex Column, int &Result);
 
 typedef void __fastcall (__closure *TVTIncrementalSearchEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, const System::UnicodeString SearchText, int &Result);
@@ -1459,7 +1474,6 @@ typedef PVirtualNode __fastcall (__closure *TGetNextNodeProc)(PVirtualNode Node,
 
 enum DECLSPEC_DENUM TVZVirtualNodeEnumerationMode : unsigned char { vneAll, vneChecked, vneChild, vneCutCopy, vneInitialized, vneLeaf, vneLevel, vneNoInit, vneSelected, vneVisible, vneVisibleChild, vneVisibleNoInitChild, vneVisibleNoInit };
 
-struct TVTVirtualNodeEnumeration;
 typedef TVTVirtualNodeEnumeration *PVTVirtualNodeEnumeration;
 
 struct DECLSPEC_DRECORD TVTVirtualNodeEnumerator
@@ -1495,108 +1509,12 @@ private:
 };
 
 
-class DELPHICLASS TVclStyleScrollBarsHook;
-#pragma pack(push,4)
-class PASCALIMPLEMENTATION TVclStyleScrollBarsHook : public Vcl::Themes::TMouseTrackControlStyleHook
-{
-	typedef Vcl::Themes::TMouseTrackControlStyleHook inherited;
-	
-private:
-	class DELPHICLASS TVclStyleScrollBarWindow;
-	#pragma pack(push,8)
-	class PASCALIMPLEMENTATION TVclStyleScrollBarWindow : public Vcl::Controls::TWinControl
-	{
-		typedef Vcl::Controls::TWinControl inherited;
-		
-private:
-		TVclStyleScrollBarsHook* FScrollBarWindowOwner;
-		bool FScrollBarVertical;
-		bool FScrollBarVisible;
-		bool FScrollBarEnabled;
-		HIDESBASE MESSAGE void __fastcall WMNCHitTest(Winapi::Messages::TWMNCHitTest &Msg);
-		HIDESBASE MESSAGE void __fastcall WMEraseBkgnd(Winapi::Messages::TMessage &Msg);
-		HIDESBASE MESSAGE void __fastcall WMPaint(Winapi::Messages::TWMPaint &Msg);
-		
-protected:
-		virtual void __fastcall CreateParams(Vcl::Controls::TCreateParams &Params);
-		
-public:
-		__fastcall virtual TVclStyleScrollBarWindow(System::Classes::TComponent* AOwner);
-		__property TVclStyleScrollBarsHook* ScrollBarWindowOwner = {read=FScrollBarWindowOwner, write=FScrollBarWindowOwner};
-		__property bool ScrollBarVertical = {read=FScrollBarVertical, write=FScrollBarVertical, nodefault};
-		__property bool ScrollBarVisible = {read=FScrollBarVisible, write=FScrollBarVisible, nodefault};
-		__property bool ScrollBarEnabled = {read=FScrollBarEnabled, write=FScrollBarEnabled, nodefault};
-public:
-		/* TWinControl.CreateParented */ inline __fastcall TVclStyleScrollBarWindow(HWND ParentWindow) : Vcl::Controls::TWinControl(ParentWindow) { }
-		/* TWinControl.Destroy */ inline __fastcall virtual ~TVclStyleScrollBarWindow(void) { }
-		
-	};
-	
-	#pragma pack(pop)
-	
-	
-private:
-	System::Types::TRect FHorzScrollBarDownButtonRect;
-	Vcl::Themes::TThemedScrollBar FHorzScrollBarDownButtonState;
-	System::Types::TRect FHorzScrollBarRect;
-	Vcl::Themes::TThemedScrollBar FHorzScrollBarSliderState;
-	System::Types::TRect FHorzScrollBarSliderTrackRect;
-	System::Types::TRect FHorzScrollBarUpButtonRect;
-	Vcl::Themes::TThemedScrollBar FHorzScrollBarUpButtonState;
-	TVclStyleScrollBarWindow* FHorzScrollBarWindow;
-	bool FLeftMouseButtonDown;
-	int FPrevScrollPos;
-	float FScrollPos;
-	System::Types::TRect FVertScrollBarDownButtonRect;
-	Vcl::Themes::TThemedScrollBar FVertScrollBarDownButtonState;
-	System::Types::TRect FVertScrollBarRect;
-	Vcl::Themes::TThemedScrollBar FVertScrollBarSliderState;
-	System::Types::TRect FVertScrollBarSliderTrackRect;
-	System::Types::TRect FVertScrollBarUpButtonRect;
-	Vcl::Themes::TThemedScrollBar FVertScrollBarUpButtonState;
-	TVclStyleScrollBarWindow* FVertScrollBarWindow;
-	MESSAGE void __fastcall CMUpdateVclStyleScrollbars(Winapi::Messages::TMessage &Message);
-	MESSAGE void __fastcall WMKeyDown(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMKeyUp(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMLButtonDown(Winapi::Messages::TWMMouse &Msg);
-	MESSAGE void __fastcall WMLButtonUp(Winapi::Messages::TWMMouse &Msg);
-	MESSAGE void __fastcall WMNCLButtonDown(Winapi::Messages::TWMMouse &Msg);
-	HIDESBASE MESSAGE void __fastcall WMNCMouseMove(Winapi::Messages::TWMMouse &Msg);
-	MESSAGE void __fastcall WMNCLButtonUp(Winapi::Messages::TWMMouse &Msg);
-	HIDESBASE MESSAGE void __fastcall WMNCPaint(Winapi::Messages::TMessage &Msg);
-	HIDESBASE MESSAGE void __fastcall WMMouseMove(Winapi::Messages::TWMMouse &Msg);
-	MESSAGE void __fastcall WMMouseWheel(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMVScroll(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMHScroll(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMCaptureChanged(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMNCLButtonDblClk(Winapi::Messages::TWMMouse &Msg);
-	MESSAGE void __fastcall WMSize(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMMove(Winapi::Messages::TMessage &Msg);
-	MESSAGE void __fastcall WMPosChanged(Winapi::Messages::TMessage &Msg);
-	
-protected:
-	virtual void __fastcall CalcScrollBarsRect(void);
-	virtual void __fastcall DrawHorzScrollBar(HDC DC);
-	virtual void __fastcall DrawVertScrollBar(HDC DC);
-	System::Types::TRect __fastcall GetHorzScrollBarSliderRect(void);
-	System::Types::TRect __fastcall GetVertScrollBarSliderRect(void);
-	virtual void __fastcall MouseLeave(void);
-	virtual void __fastcall PaintScrollBars(void);
-	bool __fastcall PointInTreeHeader(const System::Types::TPoint &P);
-	void __fastcall UpdateScrollBarWindow(void);
-	
-public:
-	__fastcall virtual TVclStyleScrollBarsHook(Vcl::Controls::TWinControl* AControl);
-	__fastcall virtual ~TVclStyleScrollBarsHook(void);
-};
-
-#pragma pack(pop)
-
 class PASCALIMPLEMENTATION TBaseVirtualTree : public Vcl::Controls::TCustomControl
 {
 	typedef Vcl::Controls::TCustomControl inherited;
 	
 private:
+	static unsigned FTotalInternalDataSize;
 	Vcl::Forms::TFormBorderStyle FBorderStyle;
 	TVTHeader* FHeader;
 	TVirtualNode *FRoot;
@@ -1660,6 +1578,8 @@ private:
 	Vcl::Graphics::TBitmap* FMinusBM;
 	Vcl::Graphics::TBitmap* FHotPlusBM;
 	Vcl::Graphics::TBitmap* FHotMinusBM;
+	Vcl::Graphics::TBitmap* FSelectedHotPlusBM;
+	Vcl::Graphics::TBitmap* FSelectedHotMinusBM;
 	Vcl::Imglist::TCustomImageList* FImages;
 	Vcl::Imglist::TCustomImageList* FStateImages;
 	Vcl::Imglist::TCustomImageList* FCustomCheckImages;
@@ -1713,7 +1633,6 @@ private:
 	TVirtualNode *FLastSearchNode;
 	TVTSearchDirection FSearchDirection;
 	TVTSearchStart FSearchStart;
-	unsigned FTotalInternalDataSize;
 	HWND FPanningWindow;
 	HICON FPanningCursor;
 	Vcl::Graphics::TBitmap* FPanningImage;
@@ -1808,6 +1727,7 @@ private:
 	TVTAfterCellPaintEvent FOnAfterCellPaint;
 	TVTBeforeCellPaintEvent FOnBeforeCellPaint;
 	TVTHeaderPaintEvent FOnHeaderDraw;
+	TVTPrepareButtonImagesEvent FOnPrepareButtonImages;
 	TVTHeaderPaintQueryElementsEvent FOnHeaderDrawQueryElements;
 	TVTAdvancedHeaderPaintEvent FOnAdvancedHeaderDraw;
 	TVTGetLineStyleEvent FOnGetLineStyle;
@@ -1890,7 +1810,6 @@ private:
 	void __fastcall ImageListChange(System::TObject* Sender);
 	void __fastcall InitializeFirstColumnValues(TVTPaintInfo &PaintInfo);
 	void __fastcall InitRootNode(unsigned OldSize = (unsigned)(0x0));
-	void __fastcall InterruptValidation(void);
 	bool __fastcall IsFirstVisibleChild(PVirtualNode Parent, PVirtualNode Node);
 	bool __fastcall IsLastVisibleChild(PVirtualNode Parent, PVirtualNode Node);
 	PVirtualNode __fastcall MakeNewNode(void);
@@ -1951,7 +1870,7 @@ private:
 	void __fastcall SetVisiblePath(PVirtualNode Node, bool Value);
 	void __fastcall StaticBackground(Vcl::Graphics::TBitmap* Source, Vcl::Graphics::TCanvas* Target, const System::Types::TPoint &OffsetPosition, const System::Types::TRect &R);
 	void __fastcall StopTimer(int ID);
-	void __fastcall SetWindowTheme(System::UnicodeString Theme);
+	void __fastcall SetWindowTheme(const System::UnicodeString Theme);
 	void __fastcall TileBackground(Vcl::Graphics::TBitmap* Source, Vcl::Graphics::TCanvas* Target, const System::Types::TPoint &Offset, const System::Types::TRect &R);
 	bool __fastcall ToggleCallback(int Step, int StepSize, void * Data);
 	MESSAGE void __fastcall CMColorChange(Winapi::Messages::TMessage &Message);
@@ -2011,7 +1930,6 @@ private:
 	unsigned __fastcall GetRangeX(void);
 	bool __fastcall GetDoubleBuffered(void);
 	HIDESBASE void __fastcall SetDoubleBuffered(const bool Value);
-	void __fastcall ChangeTreeStatesAsync(TChangeStates EnterStates, TChangeStates LeaveStates);
 	bool __fastcall GetIsSeBorderInStyleElement(void);
 	
 protected:
@@ -2023,13 +1941,14 @@ protected:
 	virtual void __fastcall AdjustPaintCellRect(TVTPaintInfo &PaintInfo, TColumnIndex &NextNonEmpty);
 	virtual void __fastcall AdjustPanningCursor(int X, int Y);
 	virtual void __fastcall AdviseChangeEvent(bool StructureChange, PVirtualNode Node, TChangeReason Reason);
-	virtual unsigned __fastcall AllocateInternalDataArea(unsigned Size);
+	__classmethod virtual unsigned __fastcall AllocateInternalDataArea(unsigned Size);
 	virtual void __fastcall Animate(unsigned Steps, unsigned Duration, TVTAnimationCallback Callback, void * Data);
 	virtual bool __fastcall CalculateSelectionRect(int X, int Y);
 	virtual bool __fastcall CanAutoScroll(void);
 	virtual bool __fastcall CanShowDragImage(void);
 	bool __fastcall CanSplitterResizeNode(const System::Types::TPoint &P, PVirtualNode Node, TColumnIndex Column);
 	virtual void __fastcall Change(PVirtualNode Node);
+	void __fastcall ChangeTreeStatesAsync(TChangeStates EnterStates, TChangeStates LeaveStates);
 	DYNAMIC void __fastcall ChangeScale(int M, int D);
 	virtual bool __fastcall CheckParentCheckState(PVirtualNode Node, TCheckState NewCheckState);
 	virtual void __fastcall ClearTempCache(void);
@@ -2079,7 +1998,7 @@ protected:
 	virtual void __fastcall DoDragExpand(void);
 	virtual void __fastcall DoBeforeDrawLineImage(PVirtualNode Node, int Level, int &XPos);
 	virtual bool __fastcall DoDragOver(System::TObject* Source, System::Classes::TShiftState Shift, System::Uitypes::TDragState State, const System::Types::TPoint &Pt, TDropMode Mode, int &Effect);
-	virtual void __fastcall DoDragDrop(System::TObject* Source, _di_IDataObject DataObject, TFormatArray Formats, System::Classes::TShiftState Shift, const System::Types::TPoint &Pt, int &Effect, TDropMode Mode);
+	virtual void __fastcall DoDragDrop(System::TObject* Source, const _di_IDataObject DataObject, const TFormatArray Formats, System::Classes::TShiftState Shift, const System::Types::TPoint &Pt, int &Effect, TDropMode Mode);
 	void __fastcall DoDrawHint(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, const System::Types::TRect &R, TColumnIndex Column);
 	virtual void __fastcall DoEdit(void);
 	DYNAMIC void __fastcall DoEndDrag(System::TObject* Target, int X, int Y);
@@ -2152,7 +2071,7 @@ protected:
 	virtual void __fastcall DoTimerScroll(void);
 	virtual void __fastcall DoUpdating(TVTUpdateState State);
 	virtual bool __fastcall DoValidateCache(void);
-	virtual void __fastcall DragAndDrop(unsigned AllowedEffects, _di_IDataObject DataObject, int &DragEffect);
+	virtual void __fastcall DragAndDrop(unsigned AllowedEffects, const _di_IDataObject DataObject, int &DragEffect);
 	DYNAMIC void __fastcall DragCanceled(void);
 	HIDESBASE virtual HRESULT __fastcall DragDrop(const _di_IDataObject DataObject, int KeyState, const System::Types::TPoint &Pt, int &Effect);
 	virtual HRESULT __fastcall DragEnter(int KeyState, const System::Types::TPoint &Pt, int &Effect);
@@ -2198,6 +2117,7 @@ protected:
 	void * __fastcall InternalData(PVirtualNode Node);
 	virtual void __fastcall InternalDisconnectNode(PVirtualNode Node, bool KeepFocus, bool Reindex = true);
 	virtual void __fastcall InternalRemoveFromSelection(PVirtualNode Node);
+	void __fastcall InterruptValidation(void);
 	void __fastcall InvalidateCache(void);
 	virtual void __fastcall Loaded(void);
 	virtual void __fastcall MainColumnChanged(void);
@@ -2209,7 +2129,7 @@ protected:
 	virtual void __fastcall PaintCheckImage(Vcl::Graphics::TCanvas* Canvas, const TVTImageInfo &ImageInfo, bool Selected);
 	virtual void __fastcall PaintImage(TVTPaintInfo &PaintInfo, TVTImageInfoIndex ImageInfoIndex, bool DoOverlay);
 	virtual void __fastcall PaintNodeButton(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, const System::Types::TRect &R, int ButtonX, int ButtonY, System::Classes::TBiDiMode BidiMode);
-	virtual void __fastcall PaintTreeLines(const TVTPaintInfo &PaintInfo, int VAlignment, int IndentSize, TLineImage LineImage);
+	virtual void __fastcall PaintTreeLines(const TVTPaintInfo &PaintInfo, int VAlignment, int IndentSize, const TLineImage LineImage);
 	virtual void __fastcall PaintSelectionRectangle(Vcl::Graphics::TCanvas* Target, int WindowOrgX, const System::Types::TRect &SelectionRect, const System::Types::TRect &TargetRect);
 	virtual void __fastcall PanningWindowProc(Winapi::Messages::TMessage &Message);
 	virtual void __fastcall PrepareCell(TVTPaintInfo &PaintInfo, int WindowOrgX, int MaxWidth);
@@ -2244,6 +2164,7 @@ protected:
 	virtual void __fastcall WriteNode(System::Classes::TStream* Stream, PVirtualNode Node);
 	void __fastcall VclStyleChanged(void);
 	__property bool VclStyleEnabled = {read=FVclStyleEnabled, nodefault};
+	/* static */ __property unsigned TotalInternalDataSize = {read=FTotalInternalDataSize, nodefault};
 	__property System::Classes::TAlignment Alignment = {read=FAlignment, write=SetAlignment, default=0};
 	__property unsigned AnimationDuration = {read=FAnimationDuration, write=SetAnimationDuration, default=200};
 	__property unsigned AutoExpandDelay = {read=FAutoExpandDelay, write=FAutoExpandDelay, default=1000};
@@ -2310,7 +2231,6 @@ protected:
 	__property unsigned SelectionCurveRadius = {read=FSelectionCurveRadius, write=SetSelectionCurveRadius, default=0};
 	__property Vcl::Imglist::TCustomImageList* StateImages = {read=FStateImages, write=SetStateImages};
 	__property int TextMargin = {read=FTextMargin, write=SetTextMargin, default=4};
-	__property unsigned TotalInternalDataSize = {read=FTotalInternalDataSize, nodefault};
 	__property TCustomVirtualTreeOptions* TreeOptions = {read=FOptions, write=SetOptions};
 	__property bool WantTabs = {read=FWantTabs, write=FWantTabs, default=0};
 	__property TVTAddToSelectionEvent OnAddToSelection = {read=FOnAddToSelection, write=FOnAddToSelection};
@@ -2418,6 +2338,7 @@ protected:
 	__property TVTNodeMovedEvent OnNodeMoved = {read=FOnNodeMoved, write=FOnNodeMoved};
 	__property TVTNodeMovingEvent OnNodeMoving = {read=FOnNodeMoving, write=FOnNodeMoving};
 	__property TVTBackgroundPaintEvent OnPaintBackground = {read=FOnPaintBackground, write=FOnPaintBackground};
+	__property TVTPrepareButtonImagesEvent OnPrepareButtonBitmaps = {read=FOnPrepareButtonImages, write=FOnPrepareButtonImages};
 	__property TVTRemoveFromSelectionEvent OnRemoveFromSelection = {read=FOnRemoveFromSelection, write=FOnRemoveFromSelection};
 	__property TVTRenderOLEDataEvent OnRenderOLEData = {read=FOnRenderOLEData, write=FOnRenderOLEData};
 	__property TVTChangeEvent OnResetNode = {read=FOnResetNode, write=FOnResetNode};
@@ -2514,7 +2435,10 @@ public:
 	PVirtualNode __fastcall GetNodeAt(const System::Types::TPoint &P)/* overload */;
 	PVirtualNode __fastcall GetNodeAt(int X, int Y)/* overload */;
 	PVirtualNode __fastcall GetNodeAt(int X, int Y, bool Relative, int &NodeTop)/* overload */;
-	void * __fastcall GetNodeData(PVirtualNode Node);
+	void * __fastcall GetNodeData(PVirtualNode Node)/* overload */;
+	template<typename T> T __fastcall GetNodeData(PVirtualNode pNode)/* overload */;
+	template<typename T> T __fastcall GetNodeDataAt(int pXCoord, int pYCoord);
+	template<typename T> T __fastcall GetFirstSelectedNodeData(void);
 	unsigned __fastcall GetNodeLevel(PVirtualNode Node);
 	PVirtualNode __fastcall GetPrevious(PVirtualNode Node, bool ConsiderChildrenAbove = false);
 	PVirtualNode __fastcall GetPreviousChecked(PVirtualNode Node, TCheckState State = (TCheckState)(0x2), bool ConsiderChildrenAbove = false);
@@ -2555,8 +2479,8 @@ public:
 	virtual bool __fastcall PasteFromClipboard(void);
 	void __fastcall PrepareDragImage(const System::Types::TPoint &HotSpot, const _di_IDataObject DataObject);
 	void __fastcall Print(Vcl::Printers::TPrinter* Printer, bool PrintHeader);
-	bool __fastcall ProcessDrop(_di_IDataObject DataObject, PVirtualNode TargetNode, int &Effect, TVTNodeAttachMode Mode);
-	bool __fastcall ProcessOLEData(TBaseVirtualTree* Source, _di_IDataObject DataObject, PVirtualNode TargetNode, TVTNodeAttachMode Mode, bool Optimized);
+	bool __fastcall ProcessDrop(const _di_IDataObject DataObject, PVirtualNode TargetNode, int &Effect, TVTNodeAttachMode Mode);
+	bool __fastcall ProcessOLEData(TBaseVirtualTree* Source, const _di_IDataObject DataObject, PVirtualNode TargetNode, TVTNodeAttachMode Mode, bool Optimized);
 	void __fastcall RepaintNode(PVirtualNode Node);
 	virtual void __fastcall ReinitChildren(PVirtualNode Node, bool Recursive);
 	virtual void __fastcall ReinitNode(PVirtualNode Node, bool Recursive);
@@ -2650,7 +2574,6 @@ enum DECLSPEC_DENUM TVTStringOption : unsigned char { toSaveCaptions, toShowStat
 
 typedef System::Set<TVTStringOption, TVTStringOption::toSaveCaptions, TVTStringOption::toAutoAcceptEditChange> TVTStringOptions;
 
-class DELPHICLASS TCustomStringTreeOptions;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TCustomStringTreeOptions : public TCustomVirtualTreeOptions
 {
@@ -2673,7 +2596,6 @@ public:
 
 #pragma pack(pop)
 
-class DELPHICLASS TStringTreeOptions;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TStringTreeOptions : public TCustomStringTreeOptions
 {
@@ -2697,8 +2619,6 @@ public:
 
 #pragma pack(pop)
 
-class DELPHICLASS TVTEdit;
-class DELPHICLASS TStringEditLink;
 class PASCALIMPLEMENTATION TVTEdit : public Vcl::Stdctrls::TCustomEdit
 {
 	typedef Vcl::Stdctrls::TCustomEdit inherited;
@@ -2737,7 +2657,6 @@ public:
 };
 
 
-class DELPHICLASS TCustomVirtualStringTree;
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TStringEditLink : public System::TInterfacedObject
 {
@@ -2777,7 +2696,7 @@ public:
 	operator _di_IVTEditLink()
 	{
 		_di_IVTEditLink intf;
-		GetInterface(intf);
+		this->GetInterface(intf);
 		return intf;
 	}
 	#else
@@ -2811,10 +2730,15 @@ class PASCALIMPLEMENTATION TCustomVirtualStringTree : public TBaseVirtualTree
 	typedef TBaseVirtualTree inherited;
 	
 private:
+	static unsigned FInternalDataOffset;
+	
+private:
+	// __classmethod void __fastcall Create@();
+	
+private:
 	System::UnicodeString FDefaultText;
 	int FTextHeight;
 	int FEllipsisWidth;
-	unsigned FInternalDataOffset;
 	TVTPaintText FOnPaintText;
 	TVSTGetTextEvent FOnGetText;
 	TVSTGetHintEvent FOnGetHint;
@@ -2843,8 +2767,8 @@ protected:
 	virtual void __fastcall PaintStaticText(const TVTPaintInfo &PaintInfo, int TextOutFlags, const System::UnicodeString Text);
 	virtual void __fastcall AdjustPaintCellRect(TVTPaintInfo &PaintInfo, TColumnIndex &NextNonEmpty);
 	bool __fastcall CanExportNode(PVirtualNode Node);
-	virtual int __fastcall CalculateStaticTextWidth(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, System::UnicodeString Text);
-	virtual int __fastcall CalculateTextWidth(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, System::UnicodeString Text);
+	virtual int __fastcall CalculateStaticTextWidth(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Text);
+	virtual int __fastcall CalculateTextWidth(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Text);
 	virtual bool __fastcall ColumnIsEmpty(PVirtualNode Node, TColumnIndex Column);
 	virtual void __fastcall DefineProperties(System::Classes::TFiler* Filer);
 	virtual _di_IVTEditLink __fastcall DoCreateEditor(PVirtualNode Node, TColumnIndex Column);
@@ -2854,12 +2778,12 @@ protected:
 	virtual int __fastcall DoGetNodeWidth(PVirtualNode Node, TColumnIndex Column, Vcl::Graphics::TCanvas* Canvas = (Vcl::Graphics::TCanvas*)(0x0));
 	virtual void __fastcall DoGetText(PVirtualNode Node, TColumnIndex Column, TVSTTextType TextType, System::UnicodeString &Text);
 	virtual int __fastcall DoIncrementalSearch(PVirtualNode Node, const System::UnicodeString Text);
-	virtual void __fastcall DoNewText(PVirtualNode Node, TColumnIndex Column, System::UnicodeString Text);
+	virtual void __fastcall DoNewText(PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Text);
 	virtual void __fastcall DoPaintNode(TVTPaintInfo &PaintInfo);
 	virtual void __fastcall DoPaintText(PVirtualNode Node, Vcl::Graphics::TCanvas* const Canvas, TColumnIndex Column, TVSTTextType TextType);
 	virtual System::UnicodeString __fastcall DoShortenString(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, const System::UnicodeString S, int Width, int EllipsisWidth = 0x0);
-	virtual void __fastcall DoTextDrawing(TVTPaintInfo &PaintInfo, System::UnicodeString Text, const System::Types::TRect &CellRect, unsigned DrawFormat);
-	virtual System::Types::TSize __fastcall DoTextMeasuring(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, System::UnicodeString Text);
+	virtual void __fastcall DoTextDrawing(TVTPaintInfo &PaintInfo, const System::UnicodeString Text, const System::Types::TRect &CellRect, unsigned DrawFormat);
+	virtual System::Types::TSize __fastcall DoTextMeasuring(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Text);
 	virtual TTreeOptionsClass __fastcall GetOptionsClass(void);
 	HIDESBASE void * __fastcall InternalData(PVirtualNode Node);
 	virtual void __fastcall MainColumnChanged(void);
@@ -2886,7 +2810,7 @@ public:
 	virtual int __fastcall ComputeNodeHeight(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, System::UnicodeString S = System::UnicodeString());
 	NativeUInt __fastcall ContentToClipboard(System::Word Format, TVSTTextSourceType Source);
 	void __fastcall ContentToCustom(TVSTTextSourceType Source);
-	System::RawByteString __fastcall ContentToHTML(TVSTTextSourceType Source, System::UnicodeString Caption = System::UnicodeString());
+	System::RawByteString __fastcall ContentToHTML(TVSTTextSourceType Source, const System::UnicodeString Caption = System::UnicodeString());
 	System::RawByteString __fastcall ContentToRTF(TVSTTextSourceType Source);
 	System::AnsiString __fastcall ContentToText(TVSTTextSourceType Source, System::WideChar Separator)/* overload */;
 	System::AnsiString __fastcall ContentToText(TVSTTextSourceType Source, const System::AnsiString Separator)/* overload */;
@@ -2902,6 +2826,9 @@ public:
 	__property System::UnicodeString ImageText[PVirtualNode Node][TVTImageKind Kind][TColumnIndex Column] = {read=GetImageText};
 	__property System::UnicodeString StaticText[PVirtualNode Node][TColumnIndex Column] = {read=GetStaticText};
 	__property System::UnicodeString Text[PVirtualNode Node][TColumnIndex Column] = {read=GetText, write=SetText};
+	
+private:
+	// __classmethod void __fastcall Destroy@();
 public:
 	/* TWinControl.CreateParented */ inline __fastcall TCustomVirtualStringTree(HWND ParentWindow) : TBaseVirtualTree(ParentWindow) { }
 	
@@ -2913,7 +2840,6 @@ protected:
 };
 
 
-class DELPHICLASS TVirtualStringTree;
 class PASCALIMPLEMENTATION TVirtualStringTree : public TCustomVirtualStringTree
 {
 	typedef TCustomVirtualStringTree inherited;
@@ -2924,9 +2850,6 @@ private:
 	
 protected:
 	virtual TTreeOptionsClass __fastcall GetOptionsClass(void);
-	
-private:
-	// __classmethod void __fastcall Create@();
 	
 public:
 	__property Canvas;
@@ -3142,6 +3065,7 @@ __published:
 	__property OnNodeMoved;
 	__property OnNodeMoving;
 	__property OnPaintBackground;
+	__property OnPrepareButtonBitmaps;
 	__property OnRemoveFromSelection;
 	__property OnRenderOLEData;
 	__property OnResetNode;
@@ -3160,9 +3084,6 @@ __published:
 	__property OnCanResize;
 	__property OnGesture;
 	__property Touch;
-	
-private:
-	// __classmethod void __fastcall Destroy@();
 public:
 	/* TCustomVirtualStringTree.Create */ inline __fastcall virtual TVirtualStringTree(System::Classes::TComponent* AOwner) : TCustomVirtualStringTree(AOwner) { }
 	/* TCustomVirtualStringTree.Destroy */ inline __fastcall virtual ~TVirtualStringTree(void) { }
@@ -3179,7 +3100,6 @@ typedef void __fastcall (__closure *TVTGetCellContentMarginEvent)(TBaseVirtualTr
 
 typedef void __fastcall (__closure *TVTGetNodeWidthEvent)(TBaseVirtualTree* Sender, Vcl::Graphics::TCanvas* HintCanvas, PVirtualNode Node, TColumnIndex Column, int &NodeWidth);
 
-class DELPHICLASS TCustomVirtualDrawTree;
 class PASCALIMPLEMENTATION TCustomVirtualDrawTree : public TBaseVirtualTree
 {
 	typedef TBaseVirtualTree inherited;
@@ -3207,7 +3127,6 @@ public:
 };
 
 
-class DELPHICLASS TVirtualDrawTree;
 class PASCALIMPLEMENTATION TVirtualDrawTree : public TCustomVirtualDrawTree
 {
 	typedef TCustomVirtualDrawTree inherited;
@@ -3218,9 +3137,6 @@ private:
 	
 protected:
 	virtual TTreeOptionsClass __fastcall GetOptionsClass(void);
-	
-private:
-	// __classmethod void __fastcall Create@();
 	
 public:
 	__property Canvas;
@@ -3422,6 +3338,7 @@ __published:
 	__property OnNodeMoved;
 	__property OnNodeMoving;
 	__property OnPaintBackground;
+	__property OnPrepareButtonBitmaps;
 	__property OnRemoveFromSelection;
 	__property OnRenderOLEData;
 	__property OnResetNode;
@@ -3440,9 +3357,6 @@ __published:
 	__property OnGesture;
 	__property Touch;
 	__property StyleElements = {default=7};
-	
-private:
-	// __classmethod void __fastcall Destroy@();
 public:
 	/* TBaseVirtualTree.Create */ inline __fastcall virtual TVirtualDrawTree(System::Classes::TComponent* AOwner) : TCustomVirtualDrawTree(AOwner) { }
 	/* TBaseVirtualTree.Destroy */ inline __fastcall virtual ~TVirtualDrawTree(void) { }
@@ -3452,8 +3366,6 @@ public:
 	
 };
 
-
-enum DECLSPEC_DENUM TBlendMode : unsigned char { bmConstantAlpha, bmPerPixelAlpha, bmMasterAlpha, bmConstantAlphaAndColor };
 
 //-- var, const, procedure ---------------------------------------------------
 #define VTVersion L"6.0.0"
@@ -3501,7 +3413,6 @@ static const System::Word ThemeChangedTimerDelay = System::Word(0x1f4);
 static const System::Word WM_CHANGESTATE = System::Word(0x8020);
 static const System::Word CM_DENYSUBCLASSING = System::Word(0xce3);
 static const System::Word CM_AUTOADJUST = System::Word(0xce8);
-static const System::Word CM_UPDATE_VCLSTYLE_SCROLLBARS = System::Word(0xd15);
 #define CFSTR_VIRTUALTREE L"Virtual Tree Data"
 #define CFSTR_VTREFERENCE L"Virtual Tree Reference"
 #define CFSTR_HTML L"HTML Format"
@@ -3538,19 +3449,9 @@ extern DELPHI_PACKAGE bool IsWinVistaOrAbove;
 #define DefaultMiscOptions (System::Set<TVTMiscOption, TVTMiscOption::toAcceptOLEDrop, TVTMiscOption::toReverseFullExpandHotKey>() << TVTMiscOption::toAcceptOLEDrop << TVTMiscOption::toFullRepaintOnResize << TVTMiscOption::toInitOnSave << TVTMiscOption::toToggleOnDblClick << TVTMiscOption::toWheelPanning << TVTMiscOption::toEditOnClick )
 #define DefaultColumnOptions (System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coEditable>() << TVTColumnOption::coAllowClick << TVTColumnOption::coDraggable << TVTColumnOption::coEnabled << TVTColumnOption::coParentBidiMode << TVTColumnOption::coParentColor << TVTColumnOption::coResizable << TVTColumnOption::coShowDropMark << TVTColumnOption::coVisible << TVTColumnOption::coAllowFocus << TVTColumnOption::coEditable )
 #define DefaultStringOptions (System::Set<TVTStringOption, TVTStringOption::toSaveCaptions, TVTStringOption::toAutoAcceptEditChange>() << TVTStringOption::toSaveCaptions << TVTStringOption::toAutoAcceptEditChange )
-extern DELPHI_PACKAGE void __fastcall EnumerateVTClipboardFormats(TVirtualTreeClass TreeClass, System::Classes::TStrings* const List)/* overload */;
-extern DELPHI_PACKAGE void __fastcall EnumerateVTClipboardFormats(TVirtualTreeClass TreeClass, TFormatEtcArray &Formats)/* overload */;
-extern DELPHI_PACKAGE System::UnicodeString __fastcall GetVTClipboardFormatDescription(System::Word AFormat);
-extern DELPHI_PACKAGE void __fastcall RegisterVTClipboardFormat(System::Word AFormat, TVirtualTreeClass TreeClass, unsigned Priority)/* overload */;
-extern DELPHI_PACKAGE System::Word __fastcall RegisterVTClipboardFormat(System::UnicodeString Description, TVirtualTreeClass TreeClass, unsigned Priority, int tymed = 0x1, Winapi::Activex::PDVTargetDevice ptd = (Winapi::Activex::PDVTargetDevice)(0x0), int dwAspect = 0x1, int lindex = 0xffffffff)/* overload */;
 extern DELPHI_PACKAGE Vcl::Imglist::TCustomImageList* __fastcall GetUtilityImages(void);
-extern DELPHI_PACKAGE void __fastcall ShowError(System::UnicodeString Msg, int HelpContext);
+extern DELPHI_PACKAGE void __fastcall ShowError(const System::UnicodeString Msg, int HelpContext);
 extern DELPHI_PACKAGE TBaseVirtualTree* __fastcall TreeFromNode(PVirtualNode Node);
-extern DELPHI_PACKAGE System::UnicodeString __fastcall ShortenString(HDC DC, const System::UnicodeString S, int Width, int EllipsisWidth = 0x0);
-extern DELPHI_PACKAGE System::UnicodeString __fastcall WrapString(HDC DC, const System::UnicodeString S, const System::Types::TRect &Bounds, bool RTL, unsigned DrawFormat);
-extern DELPHI_PACKAGE void __fastcall GetStringDrawRect(HDC DC, const System::UnicodeString S, System::Types::TRect &Bounds, unsigned DrawFormat);
-extern DELPHI_PACKAGE void __fastcall AlphaBlend(HDC Source, HDC Destination, const System::Types::TRect &R, const System::Types::TPoint &Target, TBlendMode Mode, int ConstantAlpha, int Bias);
-extern DELPHI_PACKAGE void __fastcall PrtStretchDrawDIB(Vcl::Graphics::TCanvas* Canvas, const System::Types::TRect &DestRect, Vcl::Graphics::TBitmap* ABitmap);
 }	/* namespace Virtualtrees */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_VIRTUALTREES)
 using namespace Virtualtrees;
