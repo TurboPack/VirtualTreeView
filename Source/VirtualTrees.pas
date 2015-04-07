@@ -20885,12 +20885,12 @@ begin
   GetCursorPos(P);
   P := ScreenToClient(P);
   if tsRightButtonDown in FStates then
-    Perform(WM_RBUTTONUP, 0, LPARAM(NativeInt(PointToSmallPoint(P))))
+    Perform(WM_RBUTTONUP, 0, LPARAM(LongInt(PointToSmallPoint(P))))
   else
     if tsMiddleButtonDown in FStates then
-      Perform(WM_MBUTTONUP, 0, LPARAM(NativeInt(PointToSmallPoint(P))))
+      Perform(WM_MBUTTONUP, 0, LPARAM(LongInt(PointToSmallPoint(P))))
     else
-      Perform(WM_LBUTTONUP, 0, LPARAM(NativeInt(PointToSmallPoint(P))));
+      Perform(WM_LBUTTONUP, 0, LPARAM(LongInt(PointToSmallPoint(P))));
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
