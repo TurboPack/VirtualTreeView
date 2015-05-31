@@ -56,7 +56,7 @@
         <SanitizedProjectName>VirtualTreesDD</SanitizedProjectName>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
-        <DCC_Description>TurboPack Delphi designtime package</DCC_Description>
+        <DCC_Description>TurboPack VirtualTree Delphi designtime package</DCC_Description>
         <DCC_CBuilderOutput>All</DCC_CBuilderOutput>
         <DesignOnlyPackage>true</DesignOnlyPackage>
         <DCC_UnitSearchPath>..\..\source;.\$(Platform)\$(Config);$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
