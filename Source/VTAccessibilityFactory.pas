@@ -61,7 +61,7 @@ type
     procedure UnRegisterAccessibleProvider(const AProvider: IVTAccessibleProvider);
   end;
 
-
+  
 implementation
 
 { TVTAccessibilityFactory }

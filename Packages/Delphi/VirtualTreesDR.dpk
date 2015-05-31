@@ -25,7 +25,7 @@ package VirtualTreesDR;
 {$IMAGEBASE $400000}
 {$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'TurboPack VirtualTree Delphi runtime package'}
+{$DESCRIPTION 'VirtualTree Delphi runtime package'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
@@ -34,15 +34,17 @@ requires
   vclx;
 
 contains
-  VirtualTrees in '..\..\Source\VirtualTrees.pas',
-  VTHeaderPopup in '..\..\Source\VTHeaderPopup.pas',
-  VTAccessibilityFactory in '..\..\Source\VTAccessibilityFactory.pas',
-  VTAccessibility in '..\..\Source\VTAccessibility.pas',
+  VirtualTrees.Actions in '..\..\Source\VirtualTrees.Actions.pas',
   VirtualTrees.Classes in '..\..\Source\VirtualTrees.Classes.pas',
   VirtualTrees.ClipBoard in '..\..\Source\VirtualTrees.ClipBoard.pas',
+  VirtualTrees.Export in '..\..\Source\VirtualTrees.Export.pas',
+  VirtualTrees in '..\..\Source\VirtualTrees.pas',
   VirtualTrees.StyleHooks in '..\..\Source\VirtualTrees.StyleHooks.pas',
   VirtualTrees.Utils in '..\..\Source\VirtualTrees.Utils.pas',
-  VirtualTrees.WorkerThread in '..\..\Source\VirtualTrees.WorkerThread.pas';
+  VirtualTrees.WorkerThread in '..\..\Source\VirtualTrees.WorkerThread.pas',
+  VTAccessibility in '..\..\Source\VTAccessibility.pas',
+  VTAccessibilityFactory in '..\..\Source\VTAccessibilityFactory.pas',
+  VTHeaderPopup in '..\..\Source\VTHeaderPopup.pas';
 
 end.
 

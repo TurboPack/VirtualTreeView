@@ -23,12 +23,12 @@ namespace Virtualtrees
 namespace Classes
 {
 //-- forward type declarations -----------------------------------------------
-class DELPHICLASS TBufferedAnsiString;
-class DELPHICLASS TWideBufferedString;
+class DELPHICLASS TBufferedRawByteString;
+class DELPHICLASS TBufferedString;
 class DELPHICLASS TCriticalSection;
 //-- type declarations -------------------------------------------------------
 #pragma pack(push,4)
-class PASCALIMPLEMENTATION TBufferedAnsiString : public System::TObject
+class PASCALIMPLEMENTATION TBufferedRawByteString : public System::TObject
 {
 	typedef System::TObject inherited;
 	
@@ -39,19 +39,19 @@ private:
 	System::RawByteString __fastcall GetAsString(void);
 	
 public:
-	__fastcall virtual ~TBufferedAnsiString(void);
+	__fastcall virtual ~TBufferedRawByteString(void);
 	void __fastcall Add(const System::RawByteString S);
 	void __fastcall AddNewLine(void);
 	__property System::RawByteString AsString = {read=GetAsString};
 public:
-	/* TObject.Create */ inline __fastcall TBufferedAnsiString(void) : System::TObject() { }
+	/* TObject.Create */ inline __fastcall TBufferedRawByteString(void) : System::TObject() { }
 	
 };
 
 #pragma pack(pop)
 
 #pragma pack(push,4)
-class PASCALIMPLEMENTATION TWideBufferedString : public System::TObject
+class PASCALIMPLEMENTATION TBufferedString : public System::TObject
 {
 	typedef System::TObject inherited;
 	
@@ -62,12 +62,12 @@ private:
 	System::UnicodeString __fastcall GetAsString(void);
 	
 public:
-	__fastcall virtual ~TWideBufferedString(void);
+	__fastcall virtual ~TBufferedString(void);
 	void __fastcall Add(const System::UnicodeString S);
 	void __fastcall AddNewLine(void);
 	__property System::UnicodeString AsString = {read=GetAsString};
 public:
-	/* TObject.Create */ inline __fastcall TWideBufferedString(void) : System::TObject() { }
+	/* TObject.Create */ inline __fastcall TBufferedString(void) : System::TObject() { }
 	
 };
 

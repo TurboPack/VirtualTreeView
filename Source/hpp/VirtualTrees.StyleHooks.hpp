@@ -92,6 +92,7 @@ private:
 	Vcl::Themes::TThemedScrollBar FVertScrollBarUpButtonState;
 	TVclStyleScrollBarWindow* FVertScrollBarWindow;
 	MESSAGE void __fastcall CMUpdateVclStyleScrollbars(Winapi::Messages::TMessage &Message);
+	HIDESBASE MESSAGE void __fastcall WMEraseBkgnd(Winapi::Messages::TWMEraseBkgnd &Message);
 	MESSAGE void __fastcall WMKeyDown(Winapi::Messages::TMessage &Msg);
 	MESSAGE void __fastcall WMKeyUp(Winapi::Messages::TMessage &Msg);
 	MESSAGE void __fastcall WMLButtonDown(Winapi::Messages::TWMMouse &Msg);
