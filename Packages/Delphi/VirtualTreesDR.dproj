@@ -74,8 +74,9 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_HppOutput>..\..\source\hpp\$(Platform)\$(Config)</DCC_HppOutput>
         <DCC_CBuilderOutput>All</DCC_CBuilderOutput>
-        <DCC_Description>VirtualTree Delphi runtime package</DCC_Description>
+        <DCC_Description>TurboPack Delphi runtime package</DCC_Description>
         <SanitizedProjectName>VirtualTreesDR</SanitizedProjectName>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
@@ -209,10 +210,10 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k210.bpl">Embarcadero C++Builder-Package für Office 2000-Server</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp210.bpl">Embarcadero C++Builder-Package für Office XP-Server</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k210.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automatisierungsserver</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp210.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcboffice2k220.bpl">Embarcadero C++Builder-Package für Office 2000-Server</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\bcbofficexp220.bpl">Embarcadero C++Builder-Package für Office XP-Server</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k220.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automatisierungsserver</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp220.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
@@ -548,13 +549,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

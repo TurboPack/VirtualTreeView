@@ -86,7 +86,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
         <ILINK_Description>TurboPack VirtualTree CBuilder designtime package</ILINK_Description>
-        <DCC_HppOutput>..\..\source\hpp</DCC_HppOutput>
+        <DCC_HppOutput>..\..\source\hpp\$(Platform)\$(Config)</DCC_HppOutput>
         <SanitizedProjectName>VirtualTreesCD</SanitizedProjectName>
         <DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
         <DCC_UnitSearchPath>..\..\source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
