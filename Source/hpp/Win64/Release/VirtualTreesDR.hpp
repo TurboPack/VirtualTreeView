@@ -2,7 +2,7 @@
 // Copyright (c) 1995, 2015 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTreesDR.dpk' rev: 29.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTreesDR.dpk' rev: 30.00 (Windows)
 
 #ifndef VirtualtreesdrHPP
 #define VirtualtreesdrHPP
@@ -68,6 +68,9 @@
 #include <System.Diagnostics.hpp>	// (rtl)
 #include <System.SyncObjs.hpp>	// (rtl)
 #include <Winapi.TpcShrd.hpp>	// (rtl)
+#include <System.Win.ComConst.hpp>	// (rtl)
+#include <System.Win.ComObj.hpp>	// (rtl)
+#include <Winapi.MsCTF.hpp>	// (rtl)
 #include <Winapi.UxTheme.hpp>	// (rtl)
 #include <System.Win.Crtl.hpp>	// (rtl)
 #include <System.ZLib.hpp>	// (rtl)
@@ -104,12 +107,11 @@
 #include <Vcl.Themes.hpp>	// (vcl)
 #include <Winapi.MsInkAut.hpp>	// (rtl)
 #include <Winapi.PenInputPanel.hpp>	// (rtl)
-#include <System.Win.ComConst.hpp>	// (rtl)
-#include <System.Win.ComObj.hpp>	// (rtl)
 #include <Vcl.Controls.hpp>	// (vcl)
 #include <Vcl.Menus.hpp>	// (vcl)
 #include <System.Win.Taskbar.hpp>	// (rtl)
 #include <System.Win.TaskbarCore.hpp>	// (rtl)
+#include <Winapi.ShellScaling.hpp>	// (rtl)
 #include <Winapi.FlatSB.hpp>	// (rtl)
 #include <Vcl.Forms.hpp>	// (vcl)
 #include <Vcl.ImgList.hpp>	// (vcl)

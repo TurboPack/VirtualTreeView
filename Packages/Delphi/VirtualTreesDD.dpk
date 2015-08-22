@@ -27,7 +27,7 @@ package VirtualTreesDD;
 {$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TurboPack VirtualTree Delphi designtime package'}
-{$LIBSUFFIX '220'}
+{$LIBSUFFIX '230'}
 {$DESIGNONLY}
 {$IMPLICITBUILD OFF}
 
