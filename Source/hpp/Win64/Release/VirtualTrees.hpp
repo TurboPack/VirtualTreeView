@@ -115,9 +115,9 @@ typedef unsigned *PCardinal;
 
 typedef System::Word TAutoScrollInterval;
 
-enum DECLSPEC_DENUM TVirtualNodeState : unsigned char { vsInitialized, vsChecking, vsCutOrCopy, vsDisabled, vsDeleting, vsExpanded, vsHasChildren, vsVisible, vsSelected, vsOnFreeNodeCallRequired, vsAllChildrenHidden, vsReleaseCallOnUserDataRequired, vsMultiline, vsHeightMeasured, vsToggling, vsFiltered };
+enum DECLSPEC_DENUM TVirtualNodeState : unsigned char { vsInitialized, vsChecking, vsCutOrCopy, vsDisabled, vsDeleting, vsExpanded, vsHasChildren, vsVisible, vsSelected, vsOnFreeNodeCallRequired, vsAllChildrenHidden, vsReleaseCallOnUserDataRequired, vsMultiline, vsHeightMeasured, vsToggling, vsFiltered, vsInitializing };
 
-typedef System::Set<TVirtualNodeState, TVirtualNodeState::vsInitialized, TVirtualNodeState::vsFiltered> TVirtualNodeStates;
+typedef System::Set<TVirtualNodeState, TVirtualNodeState::vsInitialized, TVirtualNodeState::vsInitializing> TVirtualNodeStates;
 
 enum DECLSPEC_DENUM TVirtualNodeInitState : unsigned char { ivsDisabled, ivsExpanded, ivsHasChildren, ivsMultiline, ivsSelected, ivsFiltered, ivsReInit };
 
@@ -790,6 +790,7 @@ private:
 	int FDefaultWidth;
 	bool FNeedPositionsFix;
 	bool FClearing;
+	Vcl::Menus::TPopupMenu* FColumnPopupMenu;
 	HIDESBASE int __fastcall GetCount(void);
 	HIDESBASE TVirtualTreeColumn* __fastcall GetItem(TColumnIndex Index);
 	bool __fastcall GetNewIndex(System::Types::TPoint P, TColumnIndex &OldIndex);
@@ -1192,7 +1193,7 @@ public:
 struct DECLSPEC_DRECORD TVTImageInfo
 {
 public:
-	int Index;
+	System::Uitypes::TImageIndex Index;
 	int XPos;
 	int YPos;
 	bool Ghosted;
@@ -1293,9 +1294,9 @@ typedef void __fastcall (__closure *TVTAddToSelectionEvent)(TBaseVirtualTree* Se
 
 typedef void __fastcall (__closure *TVTRemoveFromSelectionEvent)(TBaseVirtualTree* Sender, PVirtualNode Node);
 
-typedef void __fastcall (__closure *TVTGetImageEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, int &ImageIndex);
+typedef void __fastcall (__closure *TVTGetImageEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, System::Uitypes::TImageIndex &ImageIndex);
 
-typedef void __fastcall (__closure *TVTGetImageExEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, int &ImageIndex, Vcl::Imglist::TCustomImageList* &ImageList);
+typedef void __fastcall (__closure *TVTGetImageExEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, System::Uitypes::TImageIndex &ImageIndex, Vcl::Imglist::TCustomImageList* &ImageList);
 
 typedef void __fastcall (__closure *TVTGetImageTextEvent)(TBaseVirtualTree* Sender, PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, System::UnicodeString &ImageText);
 
@@ -2010,7 +2011,7 @@ protected:
 	virtual void __fastcall DoGetHeaderCursor(HICON &Cursor);
 	virtual void __fastcall DoGetHintSize(PVirtualNode Node, TColumnIndex Column, System::Types::TRect &R);
 	void __fastcall DoGetHintKind(PVirtualNode Node, TColumnIndex Column, TVTHintKind &Kind);
-	virtual Vcl::Imglist::TCustomImageList* __fastcall DoGetImageIndex(PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, int &Index);
+	virtual Vcl::Imglist::TCustomImageList* __fastcall DoGetImageIndex(PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, bool &Ghosted, System::Uitypes::TImageIndex &Index);
 	virtual void __fastcall DoGetImageText(PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column, System::UnicodeString &ImageText);
 	virtual void __fastcall DoGetLineStyle(void * &Bits);
 	virtual System::UnicodeString __fastcall DoGetNodeHint(PVirtualNode Node, TColumnIndex Column, TVTTooltipLineBreakStyle &LineBreakStyle);
@@ -2155,7 +2156,7 @@ protected:
 	virtual void __fastcall WndProc(Winapi::Messages::TMessage &Message);
 	virtual void __fastcall WriteChunks(System::Classes::TStream* Stream, PVirtualNode Node);
 	virtual void __fastcall WriteNode(System::Classes::TStream* Stream, PVirtualNode Node);
-	void __fastcall VclStyleChanged(void);
+	virtual void __fastcall VclStyleChanged(void);
 	__property bool VclStyleEnabled = {read=FVclStyleEnabled, nodefault};
 	__property unsigned TotalInternalDataSize = {read=FTotalInternalDataSize, nodefault};
 	__property System::Classes::TAlignment Alignment = {read=FAlignment, write=SetAlignment, default=0};
@@ -2347,7 +2348,9 @@ public:
 	__fastcall virtual TBaseVirtualTree(System::Classes::TComponent* AOwner);
 	__fastcall virtual ~TBaseVirtualTree(void);
 	unsigned __fastcall AbsoluteIndex(PVirtualNode Node);
-	virtual PVirtualNode __fastcall AddChild(PVirtualNode Parent, void * UserData = (void *)(0x0));
+	virtual PVirtualNode __fastcall AddChild(PVirtualNode Parent, void * UserData = (void *)(0x0))/* overload */;
+	PVirtualNode __fastcall AddChild(PVirtualNode Parent, const System::_di_IInterface UserData)/* overload */;
+	PVirtualNode __fastcall AddChild(PVirtualNode Parent, System::TObject* const UserData)/* overload */;
 	void __fastcall AddFromStream(System::Classes::TStream* Stream, PVirtualNode TargetNode);
 	virtual void __fastcall AfterConstruction(void);
 	virtual void __fastcall Assign(System::Classes::TPersistent* Source);
@@ -2429,6 +2432,7 @@ public:
 	PVirtualNode __fastcall GetNodeAt(int X, int Y, bool Relative, int &NodeTop)/* overload */;
 	void * __fastcall GetNodeData(PVirtualNode Node)/* overload */;
 	template<typename T> T __fastcall GetNodeData(PVirtualNode pNode)/* overload */;
+	template<typename T> System::TArray__1<T> __fastcall GetSelectedData(void)/* overload */;
 	template<typename T> T __fastcall GetInterfaceFromNodeData(PVirtualNode pNode)/* overload */;
 	template<typename T> T __fastcall GetNodeDataAt(int pXCoord, int pYCoord);
 	template<typename T> T __fastcall GetFirstSelectedNodeData(void);
@@ -2809,7 +2813,7 @@ protected:
 public:
 	__fastcall virtual TCustomVirtualStringTree(System::Classes::TComponent* AOwner);
 	__fastcall virtual ~TCustomVirtualStringTree(void);
-	virtual PVirtualNode __fastcall AddChild(PVirtualNode Parent, void * UserData = (void *)(0x0));
+	virtual PVirtualNode __fastcall AddChild(PVirtualNode Parent, void * UserData = (void *)(0x0))/* overload */;
 	virtual int __fastcall ComputeNodeHeight(Vcl::Graphics::TCanvas* Canvas, PVirtualNode Node, TColumnIndex Column, System::UnicodeString S = System::UnicodeString());
 	NativeUInt __fastcall ContentToClipboard(System::Word Format, TVSTTextSourceType Source);
 	void __fastcall ContentToCustom(TVSTTextSourceType Source);
@@ -2832,6 +2836,10 @@ public:
 	/* TWinControl.CreateParented */ inline __fastcall TCustomVirtualStringTree(HWND ParentWindow) : TBaseVirtualTree(ParentWindow) { }
 	
 	/* Hoisted overloads: */
+	
+public:
+	inline PVirtualNode __fastcall  AddChild(PVirtualNode Parent, const System::_di_IInterface UserData){ return TBaseVirtualTree::AddChild(Parent, UserData); }
+	inline PVirtualNode __fastcall  AddChild(PVirtualNode Parent, System::TObject* const UserData){ return TBaseVirtualTree::AddChild(Parent, UserData); }
 	
 protected:
 	inline void __fastcall  AddToSelection(const TNodeArray NewItems, int NewLength, bool ForceInsert = false){ TBaseVirtualTree::AddToSelection(NewItems, NewLength, ForceInsert); }
@@ -2980,6 +2988,7 @@ __published:
 	__property OnColumnDblClick;
 	__property OnColumnExport;
 	__property OnColumnResize;
+	__property OnColumnVisibilityChanged;
 	__property OnColumnWidthDblClickResize;
 	__property OnColumnWidthTracking;
 	__property OnCompareNodes;
@@ -3006,6 +3015,7 @@ __published:
 	__property OnFocusChanged;
 	__property OnFocusChanging;
 	__property OnFreeNode;
+	__property OnGetCellText;
 	__property OnGetCellIsEmpty;
 	__property OnGetCursor;
 	__property OnGetHeaderCursor;
@@ -3262,6 +3272,7 @@ __published:
 	__property OnColumnDblClick;
 	__property OnColumnExport;
 	__property OnColumnResize;
+	__property OnColumnVisibilityChanged;
 	__property OnColumnWidthDblClickResize;
 	__property OnColumnWidthTracking;
 	__property OnCompareNodes;
