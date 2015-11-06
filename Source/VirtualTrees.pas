@@ -63,7 +63,7 @@ interface
 {$HPPEMIT '#include <oleidl.h>'}
 {$HPPEMIT '#include <oleacc.h>'}
 {$HPPEMIT '#include <ShlObj.hpp>'}
-{$HPPEMIT '#pragma link "VirtualTreesDR.lib"'}
+//{$HPPEMIT '#pragma link "VirtualTreesDR.lib"'}
 
 uses
   Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,

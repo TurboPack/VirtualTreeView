@@ -40,7 +40,6 @@
 #include <oleidl.h>
 #include <oleacc.h>
 #include <ShlObj.hpp>
-#pragma link "VirtualTreesDR.lib"
 
 namespace Virtualtrees
 {
