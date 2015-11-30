@@ -40,6 +40,7 @@
 #include <oleidl.h>
 #include <oleacc.h>
 #include <ShlObj.hpp>
+#pragma link "VirtualTreesDR.lib"
 
 namespace Virtualtrees
 {
@@ -1772,7 +1773,6 @@ private:
 	void __fastcall FixupTotalCount(PVirtualNode Node);
 	void __fastcall FixupTotalHeight(PVirtualNode Node);
 	PVirtualNode __fastcall GetBottomNode(void);
-	int __fastcall GetCheckedCount(void);
 	TCheckState __fastcall GetCheckState(PVirtualNode Node);
 	TCheckType __fastcall GetCheckType(PVirtualNode Node);
 	unsigned __fastcall GetChildCount(PVirtualNode Node);
@@ -1820,7 +1820,6 @@ private:
 	void __fastcall SetCheckImageKind(TCheckImageKind Value);
 	void __fastcall SetCheckState(PVirtualNode Node, TCheckState Value);
 	void __fastcall SetCheckType(PVirtualNode Node, TCheckType Value);
-	void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	void __fastcall SetClipboardFormats(TClipboardFormats* const Value);
 	void __fastcall SetColors(TVTColors* const Value);
 	void __fastcall SetCustomCheckImages(Vcl::Imglist::TCustomImageList* const Value);
@@ -2079,6 +2078,7 @@ protected:
 	virtual void __fastcall FinishChunkHeader(System::Classes::TStream* Stream, int StartPos, int EndPos);
 	HIDESBASE virtual void __fastcall FontChanged(System::TObject* AFont);
 	virtual System::Types::TSize __fastcall GetBorderDimensions(void);
+	int __fastcall GetCheckedCount(void);
 	virtual int __fastcall GetCheckImage(PVirtualNode Node, TCheckType ImgCheckType = (TCheckType)(0x0), TCheckState ImgCheckState = (TCheckState)(0x0), bool ImgEnabled = true);
 	__classmethod virtual Vcl::Imglist::TCustomImageList* __fastcall GetCheckImageListFor(TCheckImageKind Kind);
 	virtual TVirtualTreeColumnClass __fastcall GetColumnClass(void);
@@ -2135,6 +2135,7 @@ protected:
 	virtual void __fastcall ResetRangeAnchor(void);
 	virtual void __fastcall RestoreFontChangeEvent(Vcl::Graphics::TCanvas* Canvas);
 	virtual void __fastcall SelectNodes(PVirtualNode StartNode, PVirtualNode EndNode, bool AddOnly);
+	virtual void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	virtual void __fastcall SetFocusedNodeAndColumn(PVirtualNode Node, TColumnIndex Column);
 	virtual void __fastcall SkipNode(System::Classes::TStream* Stream);
 	void __fastcall StartOperation(TVTOperationKind OperationKind);
@@ -2757,6 +2758,7 @@ private:
 	System::UnicodeString __fastcall GetStaticText(PVirtualNode Node, TColumnIndex Column);
 	HIDESBASE System::UnicodeString __fastcall GetText(PVirtualNode Node, TColumnIndex Column);
 	void __fastcall ReadText(System::Classes::TReader* Reader);
+	void __fastcall ResetInternalData(PVirtualNode Node, bool Recursive);
 	void __fastcall SetDefaultText(const System::UnicodeString Value);
 	HIDESBASE void __fastcall SetOptions(TCustomStringTreeOptions* const Value);
 	HIDESBASE void __fastcall SetText(PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Value);
@@ -2795,6 +2797,7 @@ protected:
 	virtual bool __fastcall ReadChunk(System::Classes::TStream* Stream, int Version, PVirtualNode Node, int ChunkType, int ChunkSize);
 	void __fastcall ReadOldStringOptions(System::Classes::TReader* Reader);
 	virtual HRESULT __fastcall RenderOLEData(const tagFORMATETC &FormatEtcIn, /* out */ tagSTGMEDIUM &Medium, bool ForClipboard);
+	virtual void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	virtual void __fastcall WriteChunks(System::Classes::TStream* Stream, PVirtualNode Node);
 	__property System::UnicodeString DefaultText = {read=FDefaultText, write=SetDefaultText, stored=false};
 	__property int EllipsisWidth = {read=FEllipsisWidth, nodefault};
@@ -3377,7 +3380,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.1.0"
+#define VTVersion L"6.2.1"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);
