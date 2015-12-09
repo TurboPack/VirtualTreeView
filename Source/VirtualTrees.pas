@@ -73,7 +73,7 @@ uses
   Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.ImgList, Winapi.ActiveX, Vcl.StdCtrls, System.Classes,
   Vcl.Menus, Vcl.Printers, System.Types, Winapi.CommCtrl, Vcl.Themes, Winapi.UxTheme,
-  Winapi.ShlObj, System.UITypes, System.Generics.Collections;
+  Winapi.ShlObj, System.UITypes, System.Generics.Collections, VirtualTrees.Classes;
 
 const
   VTVersion = '6.2.1';
@@ -1911,6 +1911,8 @@ type
 
   // ----- TBaseVirtualTree
   TBaseVirtualTree = class(TCustomControl)
+  strict private class var
+    FWatcher: TCriticalSection;
   private
     FTotalInternalDataSize: Cardinal;            // Cache of the sum of the necessary internal data size for all tree
     FBorderStyle: TBorderStyle;
@@ -2401,7 +2403,6 @@ type
     function GetRangeX: Cardinal;
     function GetDoubleBuffered: Boolean;
     procedure SetDoubleBuffered(const Value: Boolean);
-
   protected
     FFontChanged: Boolean;                       // flag for keeping informed about font changes in the off screen buffer   // [IPK] - private to protected
     procedure AutoScale(); virtual;
@@ -2865,6 +2866,7 @@ type
     property OnUpdating: TVTUpdatingEvent read FOnUpdating write FOnUpdating;
   public
     constructor Create(AOwner: TComponent); override;
+    class destructor Destroy;
     destructor Destroy; override;
     function AbsoluteIndex(Node: PVirtualNode): Cardinal;
     function AddChild(Parent: PVirtualNode; UserData: Pointer = nil): PVirtualNode; overload; virtual;
@@ -2986,6 +2988,7 @@ type
     function GetTreeRect: TRect;
     function GetVisibleParent(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function HasAsParent(Node, PotentialParent: PVirtualNode): Boolean;
+    class procedure Init;
     function InsertNode(Node: PVirtualNode; Mode: TVTNodeAttachMode; UserData: Pointer = nil): PVirtualNode;
     procedure InvalidateChildren(Node: PVirtualNode; Recursive: Boolean);
     procedure InvalidateColumn(Column: TColumnIndex);
@@ -3043,8 +3046,10 @@ type
     function CheckedNodes(State: TCheckState = csCheckedNormal; ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function ChildNodes(Node: PVirtualNode): TVTVirtualNodeEnumeration;
     function CutCopyNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
+    class procedure Enter;
     function InitializedNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function LeafNodes: TVTVirtualNodeEnumeration;
+    class procedure Leave;
     function LevelNodes(NodeLevel: Cardinal): TVTVirtualNodeEnumeration;
     function NoInitNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function SelectedNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
@@ -3886,7 +3891,6 @@ uses
   VTAccessibilityFactory,
   Vcl.GraphUtil,               // accessibility helper class
   VirtualTrees.StyleHooks,
-  VirtualTrees.Classes,
   VirtualTrees.WorkerThread,
   VirtualTrees.ClipBoard,
   VirtualTrees.Utils, VTHeaderPopup, VirtualTrees.Export;
@@ -4006,7 +4010,6 @@ const
   WideLF = Char(#10);
 
 var
-  Watcher: TCriticalSection;
   LightCheckImages,                    // global light check images
   DarkCheckImages,                     // global heavy check images
   LightTickImages,                     // global light tick images
@@ -4115,7 +4118,7 @@ var
   Dest: TRect;
 
 begin
-  Watcher.Enter;
+  TBaseVirtualTree.Enter;
   try
     // Since we want the image list appearing in the correct system colors, we have to remap its colors.
     Images := TBitmap.Create;
@@ -4148,7 +4151,7 @@ begin
       OneImage.Free;
     end;
   finally
-    Watcher.Leave;
+    TBaseVirtualTree.Leave;
   end;
 end;
 
@@ -12012,8 +12015,12 @@ end;
 
 //----------------- TBaseVirtualTree -----------------------------------------------------------------------------------
 
-constructor TBaseVirtualTree.Create(AOwner: TComponent);
+class procedure TBaseVirtualTree.Init;
+begin
+  FWatcher := TCriticalSection.Create;
+end;
 
+constructor TBaseVirtualTree.Create(AOwner: TComponent);
 begin
   if not Initialized then
     InitializeGlobalStructures;
@@ -12109,11 +12116,16 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-destructor TBaseVirtualTree.Destroy;
+class destructor TBaseVirtualTree.Destroy;
+begin
+  FWatcher.Free;
+end;
 
+destructor TBaseVirtualTree.Destroy;
 begin
   InterruptValidation();
-  Exclude(FOptions.FMiscOptions, toReadOnly);
+  if FOptions <> nil then
+    Exclude(FOptions.FMiscOptions, toReadOnly);
   ReleaseThreadReference(Self);
   StopWheelPanning;
   CancelEditNode;
@@ -25841,7 +25853,7 @@ end;
 procedure TBaseVirtualTree.Clear;
 
 begin
-  if not (toReadOnly in FOptions.FMiscOptions) or (csDestroying in ComponentState) then
+  if (csDestroying in ComponentState) or (FOptions = nil) or (not (toReadOnly in FOptions.FMiscOptions))  then
   begin
     BeginUpdate;
     try
@@ -31033,10 +31045,22 @@ begin
     Kind := DefaultHintKind;
 end;
 
+class procedure TBaseVirtualTree.Enter;
+begin
+  if FWatcher <> nil then
+    FWatcher.Enter;
+end;
+
 function TBaseVirtualTree.GetDefaultHintKind: TVTHintKind;
 
 begin
   Result := vhkText;
+end;
+
+class procedure TBaseVirtualTree.Leave;
+begin
+  if FWatcher <> nil then
+    FWatcher.Leave;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -34454,14 +34478,9 @@ begin
 end;
 
 initialization
-  // This watcher is used whenever a global structure could be modified by more than one thread.
-  Watcher := TCriticalSection.Create;
 
 finalization
   if Initialized then
     FinalizeGlobalStructures;
-
-  Watcher.Free;
-  Watcher := nil;
 
 end.
