@@ -34,13 +34,14 @@
 #include <Winapi.ShlObj.hpp>
 #include <System.UITypes.hpp>
 #include <System.Generics.Collections.hpp>
+#include <VirtualTrees.Classes.hpp>
 
 //-- user supplied -----------------------------------------------------------
 #include <objidl.h>
 #include <oleidl.h>
 #include <oleacc.h>
 #include <ShlObj.hpp>
-#pragma link "VirtualTreesR.lib"
+#pragma link "VirtualTreesCR.lib"
 
 namespace Virtualtrees
 {
@@ -1506,6 +1507,9 @@ class PASCALIMPLEMENTATION TBaseVirtualTree : public Vcl::Controls::TCustomContr
 	typedef Vcl::Controls::TCustomControl inherited;
 	
 private:
+	static Virtualtrees::Classes::TCriticalSection* FWatcher;
+	
+private:
 	unsigned FTotalInternalDataSize;
 	Vcl::Forms::TFormBorderStyle FBorderStyle;
 	TVTHeader* FHeader;
@@ -1773,7 +1777,6 @@ private:
 	void __fastcall FixupTotalCount(PVirtualNode Node);
 	void __fastcall FixupTotalHeight(PVirtualNode Node);
 	PVirtualNode __fastcall GetBottomNode(void);
-	int __fastcall GetCheckedCount(void);
 	TCheckState __fastcall GetCheckState(PVirtualNode Node);
 	TCheckType __fastcall GetCheckType(PVirtualNode Node);
 	unsigned __fastcall GetChildCount(PVirtualNode Node);
@@ -1821,7 +1824,6 @@ private:
 	void __fastcall SetCheckImageKind(TCheckImageKind Value);
 	void __fastcall SetCheckState(PVirtualNode Node, TCheckState Value);
 	void __fastcall SetCheckType(PVirtualNode Node, TCheckType Value);
-	void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	void __fastcall SetClipboardFormats(TClipboardFormats* const Value);
 	void __fastcall SetColors(TVTColors* const Value);
 	void __fastcall SetCustomCheckImages(Vcl::Imglist::TCustomImageList* const Value);
@@ -2080,6 +2082,7 @@ protected:
 	virtual void __fastcall FinishChunkHeader(System::Classes::TStream* Stream, int StartPos, int EndPos);
 	HIDESBASE virtual void __fastcall FontChanged(System::TObject* AFont);
 	virtual System::Types::TSize __fastcall GetBorderDimensions(void);
+	int __fastcall GetCheckedCount(void);
 	virtual int __fastcall GetCheckImage(PVirtualNode Node, TCheckType ImgCheckType = (TCheckType)(0x0), TCheckState ImgCheckState = (TCheckState)(0x0), bool ImgEnabled = true);
 	__classmethod virtual Vcl::Imglist::TCustomImageList* __fastcall GetCheckImageListFor(TCheckImageKind Kind);
 	virtual TVirtualTreeColumnClass __fastcall GetColumnClass(void);
@@ -2136,6 +2139,7 @@ protected:
 	virtual void __fastcall ResetRangeAnchor(void);
 	virtual void __fastcall RestoreFontChangeEvent(Vcl::Graphics::TCanvas* Canvas);
 	virtual void __fastcall SelectNodes(PVirtualNode StartNode, PVirtualNode EndNode, bool AddOnly);
+	virtual void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	virtual void __fastcall SetFocusedNodeAndColumn(PVirtualNode Node, TColumnIndex Column);
 	virtual void __fastcall SkipNode(System::Classes::TStream* Stream);
 	void __fastcall StartOperation(TVTOperationKind OperationKind);
@@ -2346,6 +2350,11 @@ protected:
 	
 public:
 	__fastcall virtual TBaseVirtualTree(System::Classes::TComponent* AOwner);
+	
+private:
+	// __classmethod void __fastcall Destroy@();
+	
+public:
 	__fastcall virtual ~TBaseVirtualTree(void);
 	unsigned __fastcall AbsoluteIndex(PVirtualNode Node);
 	virtual PVirtualNode __fastcall AddChild(PVirtualNode Parent, void * UserData = (void *)(0x0))/* overload */;
@@ -2457,6 +2466,7 @@ public:
 	System::Types::TRect __fastcall GetTreeRect(void);
 	PVirtualNode __fastcall GetVisibleParent(PVirtualNode Node, bool IncludeFiltered = false);
 	bool __fastcall HasAsParent(PVirtualNode Node, PVirtualNode PotentialParent);
+	__classmethod void __fastcall Init();
 	PVirtualNode __fastcall InsertNode(PVirtualNode Node, TVTNodeAttachMode Mode, void * UserData = (void *)(0x0));
 	void __fastcall InvalidateChildren(PVirtualNode Node, bool Recursive);
 	void __fastcall InvalidateColumn(TColumnIndex Column);
@@ -2507,8 +2517,10 @@ public:
 	TVTVirtualNodeEnumeration __fastcall CheckedNodes(TCheckState State = (TCheckState)(0x2), bool ConsiderChildrenAbove = false);
 	TVTVirtualNodeEnumeration __fastcall ChildNodes(PVirtualNode Node);
 	TVTVirtualNodeEnumeration __fastcall CutCopyNodes(bool ConsiderChildrenAbove = false);
+	__classmethod void __fastcall Enter();
 	TVTVirtualNodeEnumeration __fastcall InitializedNodes(bool ConsiderChildrenAbove = false);
 	TVTVirtualNodeEnumeration __fastcall LeafNodes(void);
+	__classmethod void __fastcall Leave();
 	TVTVirtualNodeEnumeration __fastcall LevelNodes(unsigned NodeLevel);
 	TVTVirtualNodeEnumeration __fastcall NoInitNodes(bool ConsiderChildrenAbove = false);
 	TVTVirtualNodeEnumeration __fastcall SelectedNodes(bool ConsiderChildrenAbove = false);
@@ -2565,6 +2577,9 @@ public:
 	__property bool VisiblePath[PVirtualNode Node] = {read=GetVisiblePath, write=SetVisiblePath};
 	__property unsigned UpdateCount = {read=FUpdateCount, nodefault};
 	__property bool DoubleBuffered = {read=GetDoubleBuffered, write=SetDoubleBuffered, default=1};
+	
+private:
+	// __classmethod void __fastcall Create@();
 public:
 	/* TWinControl.CreateParented */ inline __fastcall TBaseVirtualTree(HWND ParentWindow) : Vcl::Controls::TCustomControl(ParentWindow) { }
 	
@@ -2758,6 +2773,7 @@ private:
 	System::UnicodeString __fastcall GetStaticText(PVirtualNode Node, TColumnIndex Column);
 	HIDESBASE System::UnicodeString __fastcall GetText(PVirtualNode Node, TColumnIndex Column);
 	void __fastcall ReadText(System::Classes::TReader* Reader);
+	void __fastcall ResetInternalData(PVirtualNode Node, bool Recursive);
 	void __fastcall SetDefaultText(const System::UnicodeString Value);
 	HIDESBASE void __fastcall SetOptions(TCustomStringTreeOptions* const Value);
 	HIDESBASE void __fastcall SetText(PVirtualNode Node, TColumnIndex Column, const System::UnicodeString Value);
@@ -2796,6 +2812,7 @@ protected:
 	virtual bool __fastcall ReadChunk(System::Classes::TStream* Stream, int Version, PVirtualNode Node, int ChunkType, int ChunkSize);
 	void __fastcall ReadOldStringOptions(System::Classes::TReader* Reader);
 	virtual HRESULT __fastcall RenderOLEData(const tagFORMATETC &FormatEtcIn, /* out */ tagSTGMEDIUM &Medium, bool ForClipboard);
+	virtual void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	virtual void __fastcall WriteChunks(System::Classes::TStream* Stream, PVirtualNode Node);
 	__property System::UnicodeString DefaultText = {read=FDefaultText, write=SetDefaultText, stored=false};
 	__property int EllipsisWidth = {read=FEllipsisWidth, nodefault};
@@ -3378,7 +3395,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.1.0"
+#define VTVersion L"6.2.1"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);

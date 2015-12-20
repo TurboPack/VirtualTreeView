@@ -41,16 +41,21 @@ private:
 	static TVTAccessibilityFactory* FVTAccessibleFactory;
 	System::Classes::TInterfaceList* FAccessibleProviders;
 	
-private:
-	__classmethod void __fastcall FreeFactory();
-	
 public:
 	__fastcall TVTAccessibilityFactory(void);
+	
+private:
+	// __classmethod void __fastcall Destroy@();
+	
+public:
 	__fastcall virtual ~TVTAccessibilityFactory(void);
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 	static TVTAccessibilityFactory* __fastcall GetAccessibilityFactory();
 	void __fastcall RegisterAccessibleProvider(const _di_IVTAccessibleProvider AProvider);
 	void __fastcall UnRegisterAccessibleProvider(const _di_IVTAccessibleProvider AProvider);
+	
+private:
+	// __classmethod void __fastcall Create@();
 };
 
 
