@@ -68,12 +68,13 @@ interface
 {$else}
   {$HPPEMIT '#pragma link "VirtualTreesDR.lib"'}
 {$endif}
+{$HPPEMIT '#pragma link "Shell32.lib"'}
 
 uses
   Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.ImgList, Winapi.ActiveX, Vcl.StdCtrls, System.Classes,
   Vcl.Menus, Vcl.Printers, System.Types, Winapi.CommCtrl, Vcl.Themes, Winapi.UxTheme,
-  Winapi.ShlObj, System.UITypes, System.Generics.Collections, VirtualTrees.Classes;
+  Winapi.ShlObj, System.UITypes, System.Generics.Collections;
 
 const
   VTVersion = '6.2.1';
@@ -1911,8 +1912,6 @@ type
 
   // ----- TBaseVirtualTree
   TBaseVirtualTree = class(TCustomControl)
-  strict private class var
-    FWatcher: TCriticalSection;
   private
     FTotalInternalDataSize: Cardinal;            // Cache of the sum of the necessary internal data size for all tree
     FBorderStyle: TBorderStyle;
@@ -2403,6 +2402,7 @@ type
     function GetRangeX: Cardinal;
     function GetDoubleBuffered: Boolean;
     procedure SetDoubleBuffered(const Value: Boolean);
+
   protected
     FFontChanged: Boolean;                       // flag for keeping informed about font changes in the off screen buffer   // [IPK] - private to protected
     procedure AutoScale(); virtual;
@@ -2866,7 +2866,6 @@ type
     property OnUpdating: TVTUpdatingEvent read FOnUpdating write FOnUpdating;
   public
     constructor Create(AOwner: TComponent); override;
-    class destructor Destroy;
     destructor Destroy; override;
     function AbsoluteIndex(Node: PVirtualNode): Cardinal;
     function AddChild(Parent: PVirtualNode; UserData: Pointer = nil): PVirtualNode; overload; virtual;
@@ -2988,7 +2987,6 @@ type
     function GetTreeRect: TRect;
     function GetVisibleParent(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
     function HasAsParent(Node, PotentialParent: PVirtualNode): Boolean;
-    class procedure Init;
     function InsertNode(Node: PVirtualNode; Mode: TVTNodeAttachMode; UserData: Pointer = nil): PVirtualNode;
     procedure InvalidateChildren(Node: PVirtualNode; Recursive: Boolean);
     procedure InvalidateColumn(Column: TColumnIndex);
@@ -3017,6 +3015,7 @@ type
                             Mode: TVTNodeAttachMode; Optimized: Boolean): Boolean;
     procedure RepaintNode(Node: PVirtualNode);
     procedure ReinitChildren(Node: PVirtualNode; Recursive: Boolean); virtual;
+    procedure InitRecursive(Node: PVirtualNode; Levels: Cardinal = MaxInt; pVisibleOnly: Boolean = True);
     procedure ReinitNode(Node: PVirtualNode; Recursive: Boolean); virtual;
     procedure ResetNode(Node: PVirtualNode); virtual;
     procedure SaveToFile(const FileName: TFileName);
@@ -3046,10 +3045,8 @@ type
     function CheckedNodes(State: TCheckState = csCheckedNormal; ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function ChildNodes(Node: PVirtualNode): TVTVirtualNodeEnumeration;
     function CutCopyNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
-    class procedure Enter;
     function InitializedNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function LeafNodes: TVTVirtualNodeEnumeration;
-    class procedure Leave;
     function LevelNodes(NodeLevel: Cardinal): TVTVirtualNodeEnumeration;
     function NoInitNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
     function SelectedNodes(ConsiderChildrenAbove: Boolean = False): TVTVirtualNodeEnumeration;
@@ -3891,6 +3888,7 @@ uses
   VTAccessibilityFactory,
   Vcl.GraphUtil,               // accessibility helper class
   VirtualTrees.StyleHooks,
+  VirtualTrees.Classes,
   VirtualTrees.WorkerThread,
   VirtualTrees.ClipBoard,
   VirtualTrees.Utils, VTHeaderPopup, VirtualTrees.Export;
@@ -4010,6 +4008,7 @@ const
   WideLF = Char(#10);
 
 var
+  gWatcher: TCriticalSection = nil;
   LightCheckImages,                    // global light check images
   DarkCheckImages,                     // global heavy check images
   LightTickImages,                     // global light tick images
@@ -4019,7 +4018,7 @@ var
   UtilityImages,                       // some small additional images (e.g for header dragging)
   SystemCheckImages,                   // global system check images
   SystemFlatCheckImages: TImageList;   // global flat system check images
-  Initialized: Boolean = False;        // True if global structures have been initialized.
+  gInitialized: Integer = 0;           // >0 if global structures have been initialized; otherwise 0
   NeedToUnitialize: Boolean = False;   // True if the OLE subsystem could be initialized successfully.
 
 
@@ -4118,7 +4117,7 @@ var
   Dest: TRect;
 
 begin
-  TBaseVirtualTree.Enter;
+  gWatcher.Enter();
   try
     // Since we want the image list appearing in the correct system colors, we have to remap its colors.
     Images := TBitmap.Create;
@@ -4151,7 +4150,7 @@ begin
       OneImage.Free;
     end;
   finally
-    TBaseVirtualTree.Leave;
+    gWatcher.Leave();
   end;
 end;
 
@@ -4269,7 +4268,7 @@ end;
 
 
 
-procedure InitializeGlobalStructures;
+procedure InitializeGlobalStructures();
 
 // initialization of stuff global to the unit
 
@@ -4277,7 +4276,11 @@ var
   Flags: Cardinal;
 
 begin
-  Initialized := True;
+  if (gInitialized > 0) or (InterlockedIncrement(gInitialized) <> 1) then // Ensure threadsafe that this code is executed only once
+    exit;
+
+  // This watcher is used whenever a global structure could be modified by more than one thread.
+  gWatcher := TCriticalSection.Create();
 
   // For the drag image a fast MMX blend routine is used. We have to make sure MMX is available.
   MMXAvailable := HasMMX;
@@ -4352,12 +4355,15 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure FinalizeGlobalStructures;
+procedure FinalizeGlobalStructures();
 
 var
   HintWasEnabled: Boolean;
 
 begin
+  if gInitialized = 0 then
+    exit; // Was not initialized
+
   LightCheckImages.Free;
   LightCheckImages := nil;
   DarkCheckImages.Free;
@@ -4390,6 +4396,8 @@ begin
     if HintWasEnabled then
       Application.ShowHint := True;
   end;
+  gWatcher.Free;
+  gWatcher := nil;
 end;
 
 
@@ -11871,10 +11879,16 @@ begin
     case Index of
       0:
         StyleServices.GetElementColor(StyleServices.GetElementDetails(ttItemDisabled), ecTextColor, Result); // DisabledColor
-      1, 2, 3, 6, 10, 12, 13:
-        Result := StyleServices.GetSystemColor(clHighlight); // 1:DropMarkColor 2:DropTargetColor 3: FocusedSelectionColor
-                                                             // 6:UnfocusedSelectionColor 10:UnfocusedSelectionBorderColor
-                                                             // 12:SelectionRectangleBlendColor 13:SelectionRectangleBorderColor
+      1, 2, 3, 12, 13:
+        if FColors[Index] = clHighlight then // the default value?
+          Result := StyleServices.GetSystemColor(clHighlight)  // 1:DropMarkColor 2:DropTargetColor 3: FocusedSelectionColor
+        else                                                   // 12:SelectionRectangleBlendColor 13:SelectionRectangleBorderColor
+          Result := FColors[Index];
+      6, 10:
+        if FColors[Index] = clBtnFace then // the default value?
+          Result := StyleServices.GetSystemColor(clHighlight) // 6:UnfocusedSelectionColor 10:UnfocusedSelectionBorderColor
+        else
+          Result := FColors[Index];
       4:
         Result := StyleServices.GetSystemColor(clBtnFace); // GridLineColor
       5:
@@ -12015,15 +12029,10 @@ end;
 
 //----------------- TBaseVirtualTree -----------------------------------------------------------------------------------
 
-class procedure TBaseVirtualTree.Init;
-begin
-  FWatcher := TCriticalSection.Create;
-end;
-
 constructor TBaseVirtualTree.Create(AOwner: TComponent);
+
 begin
-  if not Initialized then
-    InitializeGlobalStructures;
+  InitializeGlobalStructures();
 
   inherited;
 
@@ -12116,16 +12125,11 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class destructor TBaseVirtualTree.Destroy;
-begin
-  FWatcher.Free;
-end;
-
 destructor TBaseVirtualTree.Destroy;
+
 begin
   InterruptValidation();
-  if FOptions <> nil then
-    Exclude(FOptions.FMiscOptions, toReadOnly);
+  Exclude(FOptions.FMiscOptions, toReadOnly);
   ReleaseThreadReference(Self);
   StopWheelPanning;
   CancelEditNode;
@@ -13665,6 +13669,30 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+
+procedure TBaseVirtualTree.InitRecursive(Node: PVirtualNode; Levels: Cardinal = MaxInt; pVisibleOnly: Boolean = True);
+
+// Initializes a node and optionally its children up to a certain level.
+
+var
+  Run: PVirtualNode;
+begin
+  if Assigned(Node) then begin
+    if (Node <> FRoot) and not (vsInitialized in Node.States) then
+      InitNode(Node);
+    if (Levels = 0) or (pVisibleOnly and not (vsExpanded in Node.States))  then
+      exit;
+    Run := Node.FirstChild;
+  end
+  else
+    Run := FRoot.FirstChild;
+
+  while Assigned(Run) do
+  begin
+    InitRecursive(Run, Levels - 1, pVisibleOnly);
+    Run := Run.NextSibling;
+  end;
+end;
 
 procedure TBaseVirtualTree.InitRootNode(OldSize: Cardinal = 0);
 
@@ -17434,13 +17462,9 @@ begin
     DC := GetDCEx(Handle, Message.Rgn, Flags or DCX_INTERSECTRGN);
 
   if DC <> 0 then
-  begin
-    if hoVisible in FHeader.FOptions then
-    begin
-      R := FHeaderRect;
-      FHeader.FColumns.PaintHeader(DC, R, -FEffectiveOffsetX);
-    end;
+  try
     OriginalWMNCPaint(DC);
+  finally
     ReleaseDC(Handle, DC);
   end;
   if (((tsUseThemes in FStates) and not VclStyleEnabled) or (VclStyleEnabled and (seBorder in StyleElements))) then
@@ -17453,7 +17477,8 @@ end;
 //----------------------------------------------------------------------------------------------------------------------
 
 procedure TBaseVirtualTree.WMPaint(var Message: TWMPaint);
-
+var
+  DC: HDC;
 begin
   if tsVCLDragging in FStates then
     ImageList_DragShowNolock(False);
@@ -17461,11 +17486,22 @@ begin
     FUpdateRect := ClientRect
   else
     GetUpdateRect(Handle, FUpdateRect, True);
-  
+
   inherited;
- 
+
   if tsVCLDragging in FStates then
     ImageList_DragShowNolock(True);
+
+  if hoVisible in FHeader.FOptions then
+  begin
+    DC := GetDCEx(Handle, 0, DCX_CACHE or DCX_CLIPSIBLINGS or DCX_WINDOW or DCX_VALIDATE);
+    if DC <> 0 then
+      try
+        FHeader.FColumns.PaintHeader(DC, FHeaderRect, -FEffectiveOffsetX);
+    finally
+      ReleaseDC(Handle, DC);
+    end;
+  end;//if header visible
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -18241,7 +18277,7 @@ begin
 
   if FUpdateCount = 0 then
   begin
-    if (FChangeDelay > 0) and not (tsSynchMode in FStates) then
+    if (FChangeDelay > 0) and HandleAllocated and not (tsSynchMode in FStates) then
       SetTimer(Handle, ChangeTimer, FChangeDelay, nil)
     else
       DoChange(Node);
@@ -24824,7 +24860,7 @@ begin
 
   if FUpdateCount = 0 then
   begin
-    if (FChangeDelay > 0) and not (tsSynchMode in FStates) then
+    if (FChangeDelay > 0) and HandleAllocated and not (tsSynchMode in FStates) then
       SetTimer(Handle, StructureChangeTimer, FChangeDelay, nil)
     else
       DoStructureChange(Node, Reason);
@@ -25853,7 +25889,7 @@ end;
 procedure TBaseVirtualTree.Clear;
 
 begin
-  if (csDestroying in ComponentState) or (FOptions = nil) or (not (toReadOnly in FOptions.FMiscOptions))  then
+  if not (toReadOnly in FOptions.FMiscOptions) or (csDestroying in ComponentState) then
   begin
     BeginUpdate;
     try
@@ -31045,22 +31081,10 @@ begin
     Kind := DefaultHintKind;
 end;
 
-class procedure TBaseVirtualTree.Enter;
-begin
-  if FWatcher <> nil then
-    FWatcher.Enter;
-end;
-
 function TBaseVirtualTree.GetDefaultHintKind: TVTHintKind;
 
 begin
   Result := vhkText;
-end;
-
-class procedure TBaseVirtualTree.Leave;
-begin
-  if FWatcher <> nil then
-    FWatcher.Leave;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -34480,7 +34504,6 @@ end;
 initialization
 
 finalization
-  if Initialized then
-    FinalizeGlobalStructures;
+  FinalizeGlobalStructures();
 
 end.
