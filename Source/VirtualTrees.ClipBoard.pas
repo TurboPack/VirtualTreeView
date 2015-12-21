@@ -80,13 +80,12 @@ type
   end;
 
   TClipboardFormatList = class
-  strict private class var
+  private
+    class var
       FList : TList;
-  strict protected
+  protected
    class procedure Sort;
   public
-    class constructor Create;
-    class destructor Destroy;
     class procedure Add(const FormatString: string; AClass: TVirtualTreeClass; Priority: Cardinal; AFormatEtc: TFormatEtc);
     class procedure Clear;
     class procedure EnumerateFormats(TreeClass: TVirtualTreeClass; var Formats: TFormatEtcArray;  const AllowedFormats: TClipboardFormats = nil); overload;
@@ -190,18 +189,6 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class constructor TClipboardFormatList.Create;
-begin
-  FList := TList.Create;
-  TBaseVirtualTree.Init;
-end;
-
-class destructor TClipboardFormatList.Destroy;
-begin
-  Clear;
-  FList.Free;
-end;
-
 class procedure TClipboardFormatList.Sort;
 
 // Sorts all entry for priority (increasing priority value).
@@ -255,17 +242,14 @@ var
   Entry: PClipboardFormatListEntry;
 
 begin
-  if FList <> nil then
-  begin
-    New(Entry);
-    Entry.Description := FormatString;
-    Entry.TreeClass := AClass;
-    Entry.Priority := Priority;
-    Entry.FormatEtc := AFormatEtc;
-    FList.Add(Entry);
+  New(Entry);
+  Entry.Description := FormatString;
+  Entry.TreeClass := AClass;
+  Entry.Priority := Priority;
+  Entry.FormatEtc := AFormatEtc;
+  FList.Add(Entry);
 
-    Sort;
-  end;
+  Sort;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -398,4 +382,11 @@ begin
   end;
 end;
 
+
+//Note - not using class constructors as they are not supported on C++ Builder.
+initialization
+  TClipboardFormatList.FList := TList.Create;
+finalization
+  TClipboardFormatList.Clear;
+  TClipboardFormatList.FList.Free;
 end.

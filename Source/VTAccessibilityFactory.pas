@@ -50,9 +50,10 @@ type
     FVTAccessibleFactory: TVTAccessibilityFactory;
   strict private
     FAccessibleProviders: TInterfaceList;
+  private
+    class procedure FreeFactory;
   public
     constructor Create;
-    class destructor Destroy;
     destructor Destroy; override;
     function CreateIAccessible(ATree: TBaseVirtualTree): IAccessible;
     class function GetAccessibilityFactory: TVTAccessibilityFactory; static;
@@ -122,16 +123,16 @@ begin
   end;
 end;
 
-class destructor TVTAccessibilityFactory.Destroy;
-begin
-  FVTAccessibleFactory.Free;
-end;
-
 destructor TVTAccessibilityFactory.Destroy;
 begin
   FAccessibleProviders.Free;
   FAccessibleProviders := nil;
   inherited Destroy;
+end;
+
+class procedure TVTAccessibilityFactory.FreeFactory;
+begin
+  FVTAccessibleFactory.Free;
 end;
 
 procedure TVTAccessibilityFactory.RegisterAccessibleProvider(const AProvider: IVTAccessibleProvider);
@@ -168,6 +169,9 @@ begin
 end;
 
 initialization
+
+finalization
+  TVTAccessibilityFactory.FreeFactory;
 
 end.
 
