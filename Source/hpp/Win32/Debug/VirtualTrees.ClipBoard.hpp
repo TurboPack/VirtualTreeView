@@ -63,10 +63,6 @@ private:
 protected:
 	__classmethod void __fastcall Sort();
 	
-private:
-	// __classmethod void __fastcall Create@();
-	// __classmethod void __fastcall Destroy@();
-	
 public:
 	__classmethod void __fastcall Add(const System::UnicodeString FormatString, Virtualtrees::TVirtualTreeClass AClass, unsigned Priority, const tagFORMATETC &AFormatEtc);
 	__classmethod void __fastcall Clear();
