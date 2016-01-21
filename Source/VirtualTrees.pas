@@ -77,7 +77,7 @@ uses
   Winapi.ShlObj, System.UITypes, System.Generics.Collections;
 
 const
-  VTVersion = '6.2.1';
+  VTVersion = '6.2.2';
 
 const
   VTTreeStreamVersion = 2;
@@ -619,7 +619,7 @@ type
     function GetData(): Pointer; overload; inline;
     function GetData<T>(): T; overload; inline;
     procedure SetData(pUserData: Pointer); overload;
-    procedure SetData<T:class>(pUserData: T); overload;
+    procedure SetData<T>(pUserData: T); overload;
     procedure SetData(const pUserData: IInterface); overload;
   end;
 
@@ -3026,7 +3026,7 @@ type
     procedure SetCheckStateForAll(aCheckState: TCheckState; pSelectedOnly: Boolean);
     procedure SetNodeData(pNode: PVirtualNode; pUserData: Pointer); overload; inline;
     procedure SetNodeData(pNode: PVirtualNode; const pUserData: IInterface); overload; inline;
-    procedure SetNodeData<T:class>(pNode: PVirtualNode; pUserData: T); overload;
+    procedure SetNodeData<T>(pNode: PVirtualNode; pUserData: T); overload;
     procedure Sort(Node: PVirtualNode; Column: TColumnIndex; Direction: TSortDirection; DoInit: Boolean = True); virtual;
     procedure SortTree(Column: TColumnIndex; Direction: TSortDirection; DoInit: Boolean = True); virtual;
     procedure ToggleNode(Node: PVirtualNode);
@@ -13677,15 +13677,14 @@ procedure TBaseVirtualTree.InitRecursive(Node: PVirtualNode; Levels: Cardinal = 
 var
   Run: PVirtualNode;
 begin
-  if Assigned(Node) then begin
-    if (Node <> FRoot) and not (vsInitialized in Node.States) then
-      InitNode(Node);
-    if (Levels = 0) or (pVisibleOnly and not (vsExpanded in Node.States))  then
-      exit;
-    Run := Node.FirstChild;
-  end
-  else
-    Run := FRoot.FirstChild;
+  if not Assigned(Node) then
+    Node := FRoot;
+
+  if (Node <> FRoot) and not (vsInitialized in Node.States) then
+    InitNode(Node);
+  if (Levels = 0) or (pVisibleOnly and not (vsExpanded in Node.States))  then
+    exit;
+  Run := Node.FirstChild;
 
   while Assigned(Run) do
   begin
@@ -14778,7 +14777,7 @@ begin
       Include(Node.States, vsFiltered);
       if not (toShowFilteredNodes in FOptions.FPaintOptions) then
       begin
-        if vsInitializing in Node.States then
+        if (vsInitializing in Node.States) and not (vsHasChildren in Node.States) then
           AdjustTotalHeight(Node, 0, False)
         else
           AdjustTotalHeight(Node, -Integer(NodeHeight[Node]), True);
@@ -14957,7 +14956,7 @@ procedure TBaseVirtualTree.SetNodeData<T>(pNode: PVirtualNode; pUserData: T);
   // Can be used to set user data of a PVirtualNode to a class instance.
 
 begin
-  SetNodeData(pNode, Pointer(pUserData));
+  pNode.SetData<T>(pUserData);
 end;
 
 procedure TBaseVirtualTree.SetNodeData(pNode: PVirtualNode; const pUserData: IInterface);
@@ -19888,6 +19887,8 @@ end;
 
 procedure TBaseVirtualTree.DoFreeNode(Node: PVirtualNode);
 
+var
+  IntfData: IInterface;
 begin
   // Prevent invalid references
   if Node = FLastChangedNode then
@@ -19907,7 +19908,12 @@ begin
     FOnFreeNode(Self, Node);
 
   if vsReleaseCallOnUserDataRequired in Node.States then
-    GetInterfaceFromNodeData<IInterface>(Node)._Release();
+  begin
+    // Data may have been set to nil, in which case we can't call _Release on it
+    IntfData := GetInterfaceFromNodeData<IInterface>(Node);
+    if Assigned(IntfData) then
+      IntfData._Release();
+  end;
 
   FreeMem(Node);
   if Self.UpdateCount = 0 then
@@ -26263,7 +26269,7 @@ begin
         WasInSynchMode := tsSynchMode in FStates;
         Include(FStates, tsSynchMode);
         RemoveFromSelection(Node);
-        EnsureNodeSelected();
+        //EnsureNodeSelected(); // also done in  DoFreeNode()
         if not WasInSynchMode then
           Exclude(FStates, tsSynchMode);
         InvalidateToBottom(LastParent);
@@ -28947,11 +28953,9 @@ begin
               if Assigned(Result.PrevSibling) then
               begin
                 // No children anymore, so take the previous sibling.
-                if vsVisible in Result.PrevSibling.States then
-                begin
-                  Result := Result.PrevSibling;
+                Result := Result.PrevSibling;
+                if vsVisible in Result.States then
                   Break;
-                end;
               end
               else
               begin
@@ -34479,7 +34483,13 @@ end;
 procedure TVirtualNode.SetData<T>(pUserData: T);
 
 begin
-  SetData(Pointer(pUserData));
+  T(Pointer((PByte(@(Self.Data))))^) := pUserData;
+  case PTypeInfo(TypeInfo(T)).Kind of
+    tkClass:
+      Include(Self.States, vsOnFreeNodeCallRequired);
+    tkInterface:
+      Include(Self.States, vsReleaseCallOnUserDataRequired);
+  end;
 end;
 
 { TVTImageInfo }
