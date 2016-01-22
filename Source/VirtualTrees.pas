@@ -18288,7 +18288,7 @@ end;
 procedure TBaseVirtualTree.ChangeScale(M, D: Integer);
 
 begin
-  inherited;
+  inherited ChangeScale(M, D);
 
   if (M <> D) and (toAutoChangeScale in FOptions.FAutoOptions) then
   begin
