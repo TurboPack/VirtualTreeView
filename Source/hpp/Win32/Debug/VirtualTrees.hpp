@@ -40,13 +40,15 @@
 #include <oleidl.h>
 #include <oleacc.h>
 #include <ShlObj.hpp>
-#pragma link "VirtualTreesDR.lib"
+#pragma link "VirtualTreesCR.lib"
 #pragma link "Shell32.lib"
 
 namespace Virtualtrees
 {
 //-- forward type declarations -----------------------------------------------
 class DELPHICLASS EVirtualTreeError;
+typedef void *TCheckStateHelper;
+
 struct TCacheEntry;
 class DELPHICLASS TCustomVirtualTreeOptions;
 class DELPHICLASS TVirtualTreeOptions;
@@ -63,6 +65,8 @@ class DELPHICLASS TVTDragManager;
 struct TVTHintData;
 class DELPHICLASS TVirtualTreeHintWindow;
 class DELPHICLASS TVTDragImage;
+typedef void *TSortDirectionHelper;
+
 class DELPHICLASS TVirtualTreeColumn;
 class DELPHICLASS TVirtualTreeColumns;
 class DELPHICLASS TVTFixedAreaConstraints;
@@ -142,7 +146,7 @@ typedef System::Set<THitPosition, THitPosition::hiAbove, THitPosition::hiLowerSp
 
 enum DECLSPEC_DENUM TCheckType : unsigned char { ctNone, ctTriStateCheckBox, ctCheckBox, ctRadioButton, ctButton };
 
-enum DECLSPEC_DENUM TCheckState : unsigned char { csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed };
+enum DECLSPEC_DENUM TCheckState : unsigned char { csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDiabled };
 
 enum DECLSPEC_DENUM TCheckImageKind : unsigned char { ckLightCheck, ckDarkCheck, ckLightTick, ckDarkTick, ckFlat, ckXP, ckCustom, ckSystemFlat, ckSystemDefault };
 
@@ -1966,6 +1970,7 @@ protected:
 	void __fastcall ChangeTreeStatesAsync(TChangeStates EnterStates, TChangeStates LeaveStates);
 	DYNAMIC void __fastcall ChangeScale(int M, int D);
 	virtual bool __fastcall CheckParentCheckState(PVirtualNode Node, TCheckState NewCheckState);
+	virtual void __fastcall ClearSelection(bool pFireChangeEvent)/* overload */;
 	virtual void __fastcall ClearTempCache(void);
 	virtual bool __fastcall ColumnIsEmpty(PVirtualNode Node, TColumnIndex Column);
 	virtual int __fastcall ComputeRTLOffset(bool ExcludeScrollBar = false);
@@ -2389,7 +2394,7 @@ public:
 	DYNAMIC bool __fastcall CanFocus(void);
 	virtual void __fastcall Clear(void);
 	void __fastcall ClearChecked(void);
-	void __fastcall ClearSelection(void);
+	void __fastcall ClearSelection(void)/* overload */;
 	PVirtualNode __fastcall CopyTo(PVirtualNode Source, TBaseVirtualTree* Tree, TVTNodeAttachMode Mode, bool ChildrenOnly)/* overload */;
 	PVirtualNode __fastcall CopyTo(PVirtualNode Source, PVirtualNode Target, TVTNodeAttachMode Mode, bool ChildrenOnly)/* overload */;
 	virtual void __fastcall CopyToClipboard(void);
@@ -3412,7 +3417,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.2.1"
+#define VTVersion L"6.2.5"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);

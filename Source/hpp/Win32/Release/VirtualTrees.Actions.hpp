@@ -16,6 +16,7 @@
 #include <SysInit.hpp>
 #include <System.Classes.hpp>
 #include <System.Actions.hpp>
+#include <Vcl.Controls.hpp>
 #include <Vcl.ActnList.hpp>
 #include <VirtualTrees.hpp>
 #include <System.UITypes.hpp>
@@ -53,7 +54,7 @@ protected:
 	Virtualtrees::TVirtualNodeStates fFilter;
 	void __fastcall SetControl(Virtualtrees::TBaseVirtualTree* Value);
 	virtual void __fastcall Notification(System::Classes::TComponent* AComponent, System::Classes::TOperation Operation);
-	void __fastcall DoAfterExecute(void);
+	virtual void __fastcall DoAfterExecute(void);
 	__property bool SelectedOnly = {read=GetSelectedOnly, write=SetSelectedOnly, default=0};
 	
 public:
@@ -87,10 +88,12 @@ class PASCALIMPLEMENTATION TVirtualTreePerItemAction : public TVirtualTreeAction
 	
 private:
 	System::Classes::TNotifyEvent fOnBeforeExecute;
+	System::Uitypes::TCursor fOldCursor;
 	
 protected:
 	Virtualtrees::_di_TVTGetNodeProc fToExecute;
 	void __fastcall DoBeforeExecute(void);
+	virtual void __fastcall DoAfterExecute(void);
 	
 public:
 	__fastcall virtual TVirtualTreePerItemAction(System::Classes::TComponent* AOwner);
