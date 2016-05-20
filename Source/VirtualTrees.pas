@@ -316,16 +316,32 @@ type
     csMixedNormal,      // 3-state check box and not pressed
     csMixedPressed,     // 3-state check box and pressed
     csUncheckedDisabled,// disabled checkbox, not checkable
-    csCheckedDisabled,  // disbaled checkbox, not uncheckable
-    csMixedDiabled      // disabled 3-state checkbox
+    csCheckedDisabled,  // disabled checkbox, not uncheckable
+    csMixedDisabled     // disabled 3-state checkbox
   );
 
   /// Adds some convenience methods to type TCheckState
   TCheckStateHelper = record helper for TCheckState
-    function GetPressed(): TCheckState;
-    function GetUnpressed(): TCheckState;
-    function GetToggled(): TCheckState;
-    function IsDisabled(): Boolean;
+  strict private
+  const
+    // Lookup to quickly convert a specific check state into its pressed counterpart and vice versa.
+    cPressedState: array[TCheckState] of TCheckState = (
+      csUncheckedPressed, csUncheckedPressed, csCheckedPressed, csCheckedPressed, csMixedPressed, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDisabled);
+    cUnpressedState: array[TCheckState] of TCheckState = (
+      csUncheckedNormal, csUncheckedNormal, csCheckedNormal, csCheckedNormal, csMixedNormal, csMixedNormal, csUncheckedDisabled, csCheckedDisabled, csMixedDisabled);
+    cEnabledState: array[TCheckState] of TCheckState = (
+      csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed, csUncheckedNormal, csCheckedNormal, csMixedNormal);
+    cToggledState: array[TCheckState] of TCheckState = (
+      csCheckedNormal, csCheckedPressed, csUnCheckedNormal, csUnCheckedPressed, csCheckedNormal, csCheckedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDisabled);
+  public
+    function GetPressed(): TCheckState; inline;
+    function GetUnpressed(): TCheckState; inline;
+    function GetEnabled(): TCheckState; inline;
+    function GetToggled(): TCheckState; inline;
+    function IsDisabled(): Boolean; inline;
+    function IsChecked():   Boolean; inline;
+    function IsUnChecked(): Boolean; inline;
+    function IsMixed():     Boolean; inline;
   end;
 
   TCheckImageKind = (
@@ -906,9 +922,12 @@ type
     sdDescending
   );
 
-  TSortDirectionHelper = record helper for VirtualTrees.TSortDirection //TODO -oMarder -c11/2015: Move to VirtutalTrees.pas in delphiLib
-    /// Returns +1 for Ascending and -1 for descending.
-    function ToInt(): Integer;
+  TSortDirectionHelper = record helper for VirtualTrees.TSortDirection
+  strict private
+    const cSortDirectionToInt: Array [TSortDirection] of Integer = (1, -1);
+  public
+    /// Returns +1 for ascending and -1 for descending sort order.
+    function ToInt(): Integer; inline;
   end;
 
   TVirtualTreeColumn = class(TCollectionItem)
@@ -2435,7 +2454,7 @@ type
     function CanSplitterResizeNode(P: TPoint; Node: PVirtualNode; Column: TColumnIndex): Boolean;
     procedure Change(Node: PVirtualNode); virtual;
     procedure ChangeTreeStatesAsync(EnterStates, LeaveStates: TChangeStates);
-    procedure ChangeScale(M, D: Integer); override;
+    procedure ChangeScale(M, D: Integer; isDpiChange: Boolean); override;
     function CheckParentCheckState(Node: PVirtualNode; NewCheckState: TCheckState): Boolean; virtual;
     procedure ClearSelection(pFireChangeEvent: Boolean); overload; virtual;
     procedure ClearTempCache; virtual;
@@ -3010,7 +3029,7 @@ type
     procedure InvertSelection(VisibleOnly: Boolean);
     function IsEditing: Boolean;
     function IsMouseSelecting: Boolean;
-    function IsEmpty: Boolean;
+    function IsEmpty: Boolean; inline;
     function IterateSubtree(Node: PVirtualNode; Callback: TVTGetNodeProc; Data: Pointer; Filter: TVirtualNodeStates = [];
       DoInit: Boolean = False; ChildNodesOnly: Boolean = False): PVirtualNode;
     procedure LoadFromFile(const FileName: TFileName); virtual;
@@ -3038,7 +3057,7 @@ type
     function ScrollIntoView(Node: PVirtualNode; Center: Boolean; Horizontally: Boolean = False): Boolean; overload;
     function ScrollIntoView(Column: TColumnIndex; Center: Boolean): Boolean; overload;
     procedure SelectAll(VisibleOnly: Boolean);
-    procedure SetCheckStateForAll(aCheckState: TCheckState; pSelectedOnly: Boolean);
+    procedure SetCheckStateForAll(aCheckState: TCheckState; pSelectedOnly: Boolean; pExcludeDisabled: Boolean = True);
     procedure SetNodeData(pNode: PVirtualNode; pUserData: Pointer); overload; inline;
     procedure SetNodeData(pNode: PVirtualNode; const pUserData: IInterface); overload; inline;
     procedure SetNodeData<T>(pNode: PVirtualNode; pUserData: T); overload;
@@ -14390,11 +14409,12 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.SetCheckStateForAll(aCheckState: TCheckState; pSelectedOnly: Boolean);
+procedure TBaseVirtualTree.SetCheckStateForAll(aCheckState: TCheckState; pSelectedOnly: Boolean; pExcludeDisabled: Boolean = True);
 
 // Changes the check state for all or for all seledcted nodes.
 // aCheckState: The new check state.
-// pSelectedOnly: If passed True, only the selected nodes will bechnaged, I f apssed Falsee all nodes in the control will be changed.
+// pSelectedOnly: If passed True, only the selected nodes will bechnaged, if passed False all nodes in the control will be changed.
+// pExcludeDisabled: Optiopnal. If passed True (the default value), disabled checkboxes won't be changed, if passed False disabled checkboxes will be altered too.
 
 var
   lItem : PVirtualNode;
@@ -14409,7 +14429,8 @@ begin
         lItem := GetFirst;
       //for i:=0 to List.Items.Count-1 do begin
       while Assigned(lItem) do begin
-        CheckState[lItem] := aCheckState;
+        if not pExcludeDisabled or not CheckState[lItem].IsDisabled() then
+          CheckState[lItem] := aCheckState;
         if pSelectedOnly then
           lItem := GetNextSelected(lItem)
         else
@@ -18305,7 +18326,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.ChangeScale(M, D: Integer);
+procedure TBaseVirtualTree.ChangeScale(M, D: Integer; isDpiChange: Boolean);
 
 begin
   if (M <> D) and (toAutoChangeScale in FOptions.FAutoOptions) then
@@ -18317,7 +18338,7 @@ begin
     if sfHeight in ScalingFlags then
       Indent := MulDiv(Indent, M, D);
   end;
-  inherited ChangeScale(M, D);
+  inherited ChangeScale(M, D, isDpiChange);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -18356,7 +18377,7 @@ begin
       if Run.CheckType in [ctCheckBox, ctTriStateCheckBox] then
       begin
         Inc(BoxCount);
-        if NewCheckState in [csCheckedNormal, csCheckedPressed, csCheckedDisabled] then
+        if NewCheckState.IsChecked then
           Inc(CheckCount);
         PartialCheck := PartialCheck or (NewCheckState = csMixedNormal);
       end;
@@ -18365,7 +18386,7 @@ begin
       if Run.CheckType in [ctCheckBox, ctTriStateCheckBox] then
       begin
         Inc(BoxCount);
-        if Run.CheckState in [csCheckedNormal, csCheckedPressed, csCheckedDisabled] then
+        if Run.CheckState.IsChecked then
           Inc(CheckCount);
         PartialCheck := PartialCheck or (Run.CheckState = csMixedNormal);
       end;
@@ -21453,14 +21474,18 @@ end;
 
 procedure TBaseVirtualTree.EnsureNodeSelected();
 begin
-  if (toAlwaysSelectNode in TreeOptions.SelectionOptions) and (GetFirstSelected() = nil) and not SelectionLocked and not IsEmpty then
+  if (toAlwaysSelectNode in TreeOptions.SelectionOptions) and not IsEmpty then
   begin
-    if Assigned(FNextNodeToSelect) then
-      Selected[FNextNodeToSelect] := True
-    else if Self.Focused then
-      Selected[GetFirstVisible] := True;
+    if (GetFirstSelected() = nil) and not SelectionLocked then
+    begin
+      if Assigned(FNextNodeToSelect) then
+        Selected[FNextNodeToSelect] := True
+      else if Self.Focused then
+        Selected[GetFirstVisible] := True;
+    end;// if nothing selected
     EnsureNodeFocused();
-  end;//if
+    Self.ScrollIntoView(Self.GetFirstSelected, False);
+  end;//if toAlwaysSelectNode
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -21643,17 +21668,10 @@ begin
   else
     IsHot := False;
 
-  if ImgCheckState >= TCheckState.csUncheckedDisabled then begin // disabled image?
-    // Use disbaled images, map ImgCheckState value from disabled to normal
+  if ImgCheckState.IsDisabled then begin // disabled image?
+    // We need to use disabled images, so map ImgCheckState value from disabled to normal, as disabled state is expressed by ImgEnabled.
     ImgEnabled := False;
-    case ImgCheckState of
-      TCheckState.csUncheckedDisabled:
-        ImgCheckState := TCheckState.csUncheckedNormal;
-      TCheckState.csCheckedDisabled:
-        ImgCheckState := TCheckState.csCheckedNormal;
-      TCheckState.csMixedDiabled:
-        ImgCheckState := TCheckState.csMixedPressed;
-    end;//case
+    ImgCheckState := ImgCheckState.GetEnabled();
   end;//if
 
   if ImgCheckType = ctTriStateCheckBox then
@@ -25937,7 +25955,7 @@ end;
 procedure TBaseVirtualTree.Clear;
 
 begin
-  if not (toReadOnly in FOptions.FMiscOptions) or (csDestroying in ComponentState) then
+  if (not IsEmpty and not (toReadOnly in FOptions.FMiscOptions)) or (csDestroying in ComponentState) then
   begin
     BeginUpdate;
     try
@@ -34562,44 +34580,46 @@ begin
   Result := Self >= TCheckState.csUncheckedDisabled;
 end;
 
-function TCheckStateHelper.GetPressed(): TCheckState;
-const
-  // Lookup to quickly convert a specific check state into its pressed counterpart and vice versa.
-  PressedState: array[TCheckState] of TCheckState = (
-    csUncheckedPressed, csUncheckedPressed, csCheckedPressed, csCheckedPressed, csMixedPressed, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDiabled
-  );
+function TCheckStateHelper.IsChecked: Boolean;
 begin
-  Result := PressedState[Self];
+  Result := Self in [csCheckedNormal, csCheckedPressed, csCheckedDisabled];
+end;
+
+function TCheckStateHelper.IsUnChecked: Boolean;
+begin
+  Result := Self in [csUnCheckedNormal, csUnCheckedPressed, csUnCheckedDisabled];
+end;
+
+function TCheckStateHelper.IsMixed: Boolean;
+begin
+  Result := Self in [csMixedNormal, csMixedPressed, csMixedDisabled];
+end;
+
+function TCheckStateHelper.GetEnabled: TCheckState;
+begin
+  Result := cEnabledState[Self];
+end;
+
+function TCheckStateHelper.GetPressed(): TCheckState;
+begin
+  Result := cPressedState[Self];
 end;
 
 function TCheckStateHelper.GetUnpressed(): TCheckState;
-const
-  UnpressedState: array[TCheckState] of TCheckState = (
-    csUncheckedNormal, csUncheckedNormal, csCheckedNormal, csCheckedNormal, csMixedNormal, csMixedNormal, csUncheckedDisabled, csCheckedDisabled, csMixedDiabled
-  );
 begin
-  Result := UnpressedState[Self];
+  Result := cUnpressedState[Self];
 end;
-
 
 function TCheckStateHelper.GetToggled(): TCheckState;
 begin
-  if Self = csCheckedNormal then
-    Result := csUncheckedNormal
-  else if Self < csUncheckedDisabled then // do not modify disbaled checkboxes
-    Result := csCheckedNormal
-  else
-    Result := Self;
+  Result := cToggledState[Self];
 end;
 
 { TSortDirectionHelper }
 
-function TSortDirectionHelper.ToInt: Integer;
+function TSortDirectionHelper.ToInt(): Integer;
 begin
-  if Self = sdAscending then
-    Exit(1)
-  else
-    Exit(-1);
+  Result := cSortDirectionToInt[Self];
 end;
 
 

@@ -144,7 +144,7 @@ typedef System::Set<THitPosition, THitPosition::hiAbove, THitPosition::hiLowerSp
 
 enum DECLSPEC_DENUM TCheckType : unsigned char { ctNone, ctTriStateCheckBox, ctCheckBox, ctRadioButton, ctButton };
 
-enum DECLSPEC_DENUM TCheckState : unsigned char { csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDiabled };
+enum DECLSPEC_DENUM TCheckState : unsigned char { csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDisabled };
 
 enum DECLSPEC_DENUM TCheckImageKind : unsigned char { ckLightCheck, ckDarkCheck, ckLightTick, ckDarkTick, ckFlat, ckXP, ckCustom, ckSystemFlat, ckSystemDefault };
 
@@ -1944,7 +1944,7 @@ protected:
 	bool __fastcall CanSplitterResizeNode(System::Types::TPoint P, PVirtualNode Node, TColumnIndex Column);
 	virtual void __fastcall Change(PVirtualNode Node);
 	void __fastcall ChangeTreeStatesAsync(TChangeStates EnterStates, TChangeStates LeaveStates);
-	DYNAMIC void __fastcall ChangeScale(int M, int D)/* overload */;
+	DYNAMIC void __fastcall ChangeScale(int M, int D, bool isDpiChange)/* overload */;
 	virtual bool __fastcall CheckParentCheckState(PVirtualNode Node, TCheckState NewCheckState);
 	virtual void __fastcall ClearSelection(bool pFireChangeEvent)/* overload */;
 	virtual void __fastcall ClearTempCache(void);
@@ -2494,7 +2494,7 @@ public:
 	bool __fastcall ScrollIntoView(PVirtualNode Node, bool Center, bool Horizontally = false)/* overload */;
 	bool __fastcall ScrollIntoView(TColumnIndex Column, bool Center)/* overload */;
 	void __fastcall SelectAll(bool VisibleOnly);
-	void __fastcall SetCheckStateForAll(TCheckState aCheckState, bool pSelectedOnly);
+	void __fastcall SetCheckStateForAll(TCheckState aCheckState, bool pSelectedOnly, bool pExcludeDisabled = true);
 	void __fastcall SetNodeData(PVirtualNode pNode, void * pUserData)/* overload */;
 	void __fastcall SetNodeData(PVirtualNode pNode, const System::_di_IInterface pUserData)/* overload */;
 	template<typename T> void __fastcall SetNodeData(PVirtualNode pNode, T pUserData)/* overload */;
@@ -2578,7 +2578,7 @@ public:
 	/* Hoisted overloads: */
 	
 protected:
-	DYNAMIC inline void __fastcall  ChangeScale(int M, int D, bool isDpiChange){ Vcl::Controls::TWinControl::ChangeScale(M, D, isDpiChange); }
+	DYNAMIC inline void __fastcall  ChangeScale(int M, int D){ Vcl::Controls::TControl::ChangeScale(M, D); }
 	
 };
 
