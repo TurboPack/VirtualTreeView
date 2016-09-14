@@ -40,8 +40,8 @@
 #include <oleidl.h>
 #include <oleacc.h>
 #include <ShlObj.hpp>
-#pragma link "VirtualTreesDR.lib"
-#pragma link "Shell32.lib"
+#pragma comment(lib, "VirtualTreesDR")
+#pragma comment(lib, "Shell32")
 
 namespace Virtualtrees
 {
@@ -94,6 +94,8 @@ class DELPHICLASS TVirtualStringTree;
 class DELPHICLASS TCustomVirtualDrawTree;
 class DELPHICLASS TVirtualDrawTree;
 //-- type declarations -------------------------------------------------------
+using System::Uitypes::TImageIndex;
+
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION EVirtualTreeError : public System::Sysutils::Exception
 {
@@ -148,7 +150,7 @@ enum DECLSPEC_DENUM TCheckType : unsigned char { ctNone, ctTriStateCheckBox, ctC
 
 enum DECLSPEC_DENUM TCheckState : unsigned char { csUncheckedNormal, csUncheckedPressed, csCheckedNormal, csCheckedPressed, csMixedNormal, csMixedPressed, csUncheckedDisabled, csCheckedDisabled, csMixedDisabled };
 
-enum DECLSPEC_DENUM TCheckImageKind : unsigned char { ckLightCheck, ckDarkCheck, ckLightTick, ckDarkTick, ckFlat, ckXP, ckCustom, ckSystemFlat, ckSystemDefault };
+enum DECLSPEC_DENUM TCheckImageKind : unsigned char { ckCustom, ckSystemDefault };
 
 enum DECLSPEC_DENUM TVTNodeAttachMode : unsigned char { amNoWhere, amInsertBefore, amInsertAfter, amAddChildFirst, amAddChildLast };
 
@@ -183,6 +185,8 @@ typedef System::Set<TVTAutoOption, TVTAutoOption::toAutoDropExpand, TVTAutoOptio
 enum DECLSPEC_DENUM TVTSelectionOption : unsigned char { toDisableDrawSelection, toExtendedFocus, toFullRowSelect, toLevelSelectConstraint, toMiddleClickSelect, toMultiSelect, toRightClickSelect, toSiblingSelectConstraint, toCenterScrollIntoView, toSimpleDrawSelection, toAlwaysSelectNode, toRestoreSelection };
 
 typedef System::Set<TVTSelectionOption, TVTSelectionOption::toDisableDrawSelection, TVTSelectionOption::toRestoreSelection> TVTSelectionOptions;
+
+enum DECLSPEC_DENUM TVTEditOptions : unsigned char { toDefaultEdit, toVerticalEdit, toHorizontalEdit };
 
 enum DECLSPEC_DENUM TVTMiscOption : unsigned char { toAcceptOLEDrop, toCheckSupport, toEditable, toFullRepaintOnResize, toGridExtensions, toInitOnSave, toReportMode, toToggleOnDblClick, toWheelPanning, toReadOnly, toVariableNodeHeight, toFullRowDrag, toNodeHeightResize, toNodeHeightDblClickResize, toEditOnClick, toEditOnDblClick, toReverseFullExpandHotKey };
 
@@ -227,6 +231,7 @@ private:
 	TVTSelectionOptions FSelectionOptions;
 	TVTMiscOptions FMiscOptions;
 	TVTExportMode FExportMode;
+	TVTEditOptions FEditOptions;
 	void __fastcall SetAnimationOptions(const TVTAnimationOptions Value);
 	void __fastcall SetAutoOptions(const TVTAutoOptions Value);
 	void __fastcall SetMiscOptions(const TVTMiscOptions Value);
@@ -242,6 +247,7 @@ public:
 	__property TVTMiscOptions MiscOptions = {read=FMiscOptions, write=SetMiscOptions, default=16809};
 	__property TVTPaintOptions PaintOptions = {read=FPaintOptions, write=SetPaintOptions, default=7008};
 	__property TVTSelectionOptions SelectionOptions = {read=FSelectionOptions, write=SetSelectionOptions, default=0};
+	__property TVTEditOptions EditOptions = {read=FEditOptions, write=FEditOptions, default=0};
 	__property TBaseVirtualTree* Owner = {read=FOwner};
 public:
 	/* TPersistent.Destroy */ inline __fastcall virtual ~TCustomVirtualTreeOptions(void) { }
@@ -690,6 +696,8 @@ private:
 	int FMargin;
 	int FSpacing;
 	TVTColumnOptions FOptions;
+	TVTEditOptions FEditOptions;
+	int FEditNextColumn;
 	NativeInt FTag;
 	System::Classes::TAlignment FAlignment;
 	System::Classes::TAlignment FCaptionAlignment;
@@ -774,6 +782,8 @@ __published:
 	__property int MaxWidth = {read=FMaxWidth, write=SetMaxWidth, default=10000};
 	__property int MinWidth = {read=FMinWidth, write=SetMinWidth, default=10};
 	__property TVTColumnOptions Options = {read=FOptions, write=SetOptions, default=35071};
+	__property TVTEditOptions EditOptions = {read=FEditOptions, write=FEditOptions, default=0};
+	__property int EditNextColumn = {read=FEditNextColumn, write=FEditNextColumn, default=-1};
 	__property TColumnPosition Position = {read=FPosition, write=SetPosition, nodefault};
 	__property int Spacing = {read=FSpacing, write=SetSpacing, default=3};
 	__property TVirtualTreeColumnStyle Style = {read=FStyle, write=SetStyle, default=0};
@@ -1956,7 +1966,7 @@ protected:
 	virtual void __fastcall AutoScale(void);
 	virtual void __fastcall AddToSelection(PVirtualNode Node)/* overload */;
 	virtual void __fastcall AddToSelection(const TNodeArray NewItems, int NewLength, bool ForceInsert = false)/* overload */;
-	virtual void __fastcall AdjustImageBorder(Vcl::Imglist::TCustomImageList* Images, System::Classes::TBiDiMode BidiMode, int VAlign, System::Types::TRect &R, TVTImageInfo &ImageInfo);
+	virtual void __fastcall AdjustImageBorder(System::Classes::TBiDiMode BidiMode, int VAlign, System::Types::TRect &R, TVTImageInfo &ImageInfo);
 	virtual void __fastcall AdjustPaintCellRect(TVTPaintInfo &PaintInfo, TColumnIndex &NextNonEmpty);
 	virtual void __fastcall AdjustPanningCursor(int X, int Y);
 	virtual void __fastcall AdviseChangeEvent(bool StructureChange, PVirtualNode Node, TChangeReason Reason);
@@ -2110,13 +2120,13 @@ protected:
 	virtual System::Types::TSize __fastcall GetBorderDimensions(void);
 	int __fastcall GetCheckedCount(void);
 	virtual int __fastcall GetCheckImage(PVirtualNode Node, TCheckType ImgCheckType = (TCheckType)(0x0), TCheckState ImgCheckState = (TCheckState)(0x0), bool ImgEnabled = true);
-	__classmethod virtual Vcl::Imglist::TCustomImageList* __fastcall GetCheckImageListFor(TCheckImageKind Kind);
 	virtual TVirtualTreeColumnClass __fastcall GetColumnClass(void);
 	virtual TVTHintKind __fastcall GetDefaultHintKind(void);
 	virtual TVTHeaderClass __fastcall GetHeaderClass(void);
 	virtual Vcl::Controls::THintWindowClass __fastcall GetHintWindowClass(void);
-	virtual void __fastcall GetImageIndex(TVTPaintInfo &Info, TVTImageKind Kind, TVTImageInfoIndex InfoIndex, Vcl::Imglist::TCustomImageList* DefaultImages);
-	virtual System::Types::TSize __fastcall GetNodeImageSize(PVirtualNode Node);
+	virtual void __fastcall GetImageIndex(TVTPaintInfo &Info, TVTImageKind Kind, TVTImageInfoIndex InfoIndex);
+	virtual System::Types::TSize __fastcall GetImageSize(PVirtualNode Node, TVTImageKind Kind = (TVTImageKind)(0x0), TColumnIndex Column = (TColumnIndex)(0x0), bool IncludePadding = true);
+	virtual System::Types::TSize __fastcall GetNodeImageSize _DEPRECATED_ATTRIBUTE1("Use GetImageWidth instead") (PVirtualNode Node);
 	virtual unsigned __fastcall GetMaxRightExtend(void);
 	virtual void __fastcall GetNativeClipboardFormats(TFormatEtcArray &Formats);
 	bool __fastcall GetOperationCanceled(void);
@@ -2127,7 +2137,7 @@ protected:
 	virtual void __fastcall HandleMouseDblClick(Winapi::Messages::TWMMouse &Message, const THitInfo &HitInfo);
 	virtual void __fastcall HandleMouseDown(Winapi::Messages::TWMMouse &Message, THitInfo &HitInfo);
 	virtual void __fastcall HandleMouseUp(Winapi::Messages::TWMMouse &Message, const THitInfo &HitInfo);
-	virtual bool __fastcall HasImage(PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column);
+	virtual bool __fastcall HasImage _DEPRECATED_ATTRIBUTE1("Use GetImageWidth instead") (PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column);
 	virtual bool __fastcall HasPopupMenu(PVirtualNode Node, TColumnIndex Column, const System::Types::TPoint &Pos);
 	virtual void __fastcall InitChildren(PVirtualNode Node);
 	virtual void __fastcall InitNode(PVirtualNode Node);
@@ -2202,7 +2212,7 @@ protected:
 	__property TVTButtonFillMode ButtonFillMode = {read=FButtonFillMode, write=SetButtonFillMode, default=0};
 	__property TVTButtonStyle ButtonStyle = {read=FButtonStyle, write=SetButtonStyle, default=0};
 	__property unsigned ChangeDelay = {read=FChangeDelay, write=FChangeDelay, default=0};
-	__property TCheckImageKind CheckImageKind = {read=FCheckImageKind, write=SetCheckImageKind, default=8};
+	__property TCheckImageKind CheckImageKind = {read=FCheckImageKind, write=SetCheckImageKind, stored=false, default=1};
 	__property TClipboardFormats* ClipboardFormats = {read=FClipboardFormats, write=SetClipboardFormats};
 	__property TVTColors* Colors = {read=FColors, write=SetColors};
 	__property Vcl::Imglist::TCustomImageList* CustomCheckImages = {read=FCustomCheckImages, write=SetCustomCheckImages};
@@ -2515,6 +2525,7 @@ public:
 	virtual void __fastcall ResetNode(PVirtualNode Node);
 	void __fastcall SaveToFile(const System::Sysutils::TFileName FileName);
 	virtual void __fastcall SaveToStream(System::Classes::TStream* Stream, PVirtualNode Node = (PVirtualNode)(0x0));
+	int __fastcall ScaledPixels(int pPixels);
 	bool __fastcall ScrollIntoView(PVirtualNode Node, bool Center, bool Horizontally = false)/* overload */;
 	bool __fastcall ScrollIntoView(TColumnIndex Column, bool Center)/* overload */;
 	void __fastcall SelectAll(bool VisibleOnly);
@@ -2646,6 +2657,7 @@ __published:
 	__property PaintOptions = {default=7008};
 	__property SelectionOptions = {default=0};
 	__property StringOptions = {default=5};
+	__property EditOptions = {default=0};
 public:
 	/* TCustomStringTreeOptions.Create */ inline __fastcall virtual TStringTreeOptions(TBaseVirtualTree* AOwner) : TCustomStringTreeOptions(AOwner) { }
 	
@@ -2932,7 +2944,7 @@ __published:
 	__property ButtonStyle = {default=0};
 	__property BorderWidth = {default=0};
 	__property ChangeDelay = {default=0};
-	__property CheckImageKind = {default=8};
+	__property CheckImageKind = {default=1};
 	__property ClipboardFormats;
 	__property Color = {default=-16777211};
 	__property Colors;
@@ -3219,7 +3231,7 @@ __published:
 	__property ButtonStyle = {default=0};
 	__property BorderWidth = {default=0};
 	__property ChangeDelay = {default=0};
-	__property CheckImageKind = {default=8};
+	__property CheckImageKind = {default=1};
 	__property ClipboardFormats;
 	__property Color = {default=-16777211};
 	__property Colors;

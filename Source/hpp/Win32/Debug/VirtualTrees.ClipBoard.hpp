@@ -27,7 +27,7 @@ namespace Clipboard
 {
 //-- forward type declarations -----------------------------------------------
 struct TClipboardFormatEntry;
-struct TClipboardFormatListEntry;
+class DELPHICLASS TClipboardFormatListEntry;
 class DELPHICLASS TClipboardFormatList;
 //-- type declarations -------------------------------------------------------
 struct DECLSPEC_DRECORD TClipboardFormatEntry
@@ -40,17 +40,23 @@ public:
 
 typedef System::StaticArray<TClipboardFormatEntry, 17> Virtualtrees_Clipboard__1;
 
-typedef TClipboardFormatListEntry *PClipboardFormatListEntry;
-
-struct DECLSPEC_DRECORD TClipboardFormatListEntry
+#pragma pack(push,4)
+class PASCALIMPLEMENTATION TClipboardFormatListEntry : public System::TObject
 {
+	typedef System::TObject inherited;
+	
 public:
 	System::UnicodeString Description;
 	Virtualtrees::TVirtualTreeClass TreeClass;
 	unsigned Priority;
 	tagFORMATETC FormatEtc;
+public:
+	/* TObject.Create */ inline __fastcall TClipboardFormatListEntry(void) : System::TObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TClipboardFormatListEntry(void) { }
+	
 };
 
+#pragma pack(pop)
 
 #pragma pack(push,4)
 class PASCALIMPLEMENTATION TClipboardFormatList : public System::TObject
@@ -58,7 +64,8 @@ class PASCALIMPLEMENTATION TClipboardFormatList : public System::TObject
 	typedef System::TObject inherited;
 	
 private:
-	static System::Classes::TList* FList;
+	static System::Classes::TList* __fastcall GetList();
+	/* static */ __property System::Classes::TList* List = {read=GetList};
 	
 protected:
 	__classmethod void __fastcall Sort();
@@ -68,7 +75,7 @@ public:
 	__classmethod void __fastcall Clear();
 	__classmethod void __fastcall EnumerateFormats(Virtualtrees::TVirtualTreeClass TreeClass, Virtualtrees::TFormatEtcArray &Formats, Virtualtrees::TClipboardFormats* const AllowedFormats = (Virtualtrees::TClipboardFormats*)(0x0))/* overload */;
 	__classmethod void __fastcall EnumerateFormats(Virtualtrees::TVirtualTreeClass TreeClass, System::Classes::TStrings* const Formats)/* overload */;
-	__classmethod PClipboardFormatListEntry __fastcall FindFormat(const System::UnicodeString FormatString)/* overload */;
+	__classmethod TClipboardFormatListEntry* __fastcall FindFormat(const System::UnicodeString FormatString)/* overload */;
 	__classmethod Virtualtrees::TVirtualTreeClass __fastcall FindFormat(const System::UnicodeString FormatString, System::Word &Fmt)/* overload */;
 	__classmethod Virtualtrees::TVirtualTreeClass __fastcall FindFormat(System::Word Fmt, System::UnicodeString &Description)/* overload */;
 public:
