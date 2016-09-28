@@ -91,7 +91,6 @@ private:
 	System::Types::TRect FVertScrollBarUpButtonRect;
 	Vcl::Themes::TThemedScrollBar FVertScrollBarUpButtonState;
 	TVclStyleScrollBarWindow* FVertScrollBarWindow;
-	MESSAGE void __fastcall CMUpdateVclStyleScrollbars(Winapi::Messages::TMessage &Message);
 	HIDESBASE MESSAGE void __fastcall WMEraseBkgnd(Winapi::Messages::TWMEraseBkgnd &Message);
 	MESSAGE void __fastcall WMKeyDown(Winapi::Messages::TMessage &Msg);
 	MESSAGE void __fastcall WMKeyUp(Winapi::Messages::TMessage &Msg);
@@ -130,7 +129,6 @@ public:
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-static const System::Word CM_UPDATE_VCLSTYLE_SCROLLBARS = System::Word(0xb802);
 }	/* namespace Stylehooks */
 }	/* namespace Virtualtrees */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_VIRTUALTREES_STYLEHOOKS)

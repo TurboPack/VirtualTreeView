@@ -134,9 +134,9 @@ typedef System::Set<TVirtualNodeInitState, TVirtualNodeInitState::ivsDisabled, T
 
 enum DECLSPEC_DENUM TScrollBarStyle : unsigned char { sbmRegular, sbm3D };
 
-enum DECLSPEC_DENUM TVTColumnOption : unsigned char { coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring, coFixed, coSmartResize, coAllowFocus, coDisableAnimatedResize, coWrapCaption, coUseCaptionAlignment, coEditable };
+enum DECLSPEC_DENUM TVTColumnOption : unsigned char { coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring, coFixed, coSmartResize, coAllowFocus, coDisableAnimatedResize, coWrapCaption, coUseCaptionAlignment, coEditable, coStyleColor };
 
-typedef System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coEditable> TVTColumnOptions;
+typedef System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coStyleColor> TVTColumnOptions;
 
 enum DECLSPEC_DENUM TVTHeaderHitPosition : unsigned char { hhiNoWhere, hhiOnColumn, hhiOnIcon, hhiOnCheckbox };
 
@@ -760,6 +760,7 @@ public:
 	void __fastcall ParentBiDiModeChanged(void);
 	void __fastcall ParentColorChanged(void);
 	void __fastcall RestoreLastWidth(void);
+	System::Uitypes::TColor __fastcall GetEffectiveColor(void);
 	void __fastcall SaveToStream(System::Classes::TStream* const Stream);
 	bool __fastcall UseRightToLeftReading(void);
 	__property int Left = {read=GetLeft, nodefault};
@@ -3434,7 +3435,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.2.5"
+#define VTVersion L"6.4"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);
@@ -3513,7 +3514,7 @@ extern DELPHI_PACKAGE bool IsWinVistaOrAbove;
 #define DefaultAutoOptions (System::Set<TVTAutoOption, TVTAutoOption::toAutoDropExpand, TVTAutoOption::toAutoBidiColumnOrdering>() << TVTAutoOption::toAutoDropExpand << TVTAutoOption::toAutoScrollOnExpand << TVTAutoOption::toAutoSort << TVTAutoOption::toAutoTristateTracking << TVTAutoOption::toAutoDeleteMovedNodes << TVTAutoOption::toAutoChangeScale )
 #define DefaultSelectionOptions System::Set<System::Byte>()
 #define DefaultMiscOptions (System::Set<TVTMiscOption, TVTMiscOption::toAcceptOLEDrop, TVTMiscOption::toReverseFullExpandHotKey>() << TVTMiscOption::toAcceptOLEDrop << TVTMiscOption::toFullRepaintOnResize << TVTMiscOption::toInitOnSave << TVTMiscOption::toToggleOnDblClick << TVTMiscOption::toWheelPanning << TVTMiscOption::toEditOnClick )
-#define DefaultColumnOptions (System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coEditable>() << TVTColumnOption::coAllowClick << TVTColumnOption::coDraggable << TVTColumnOption::coEnabled << TVTColumnOption::coParentBidiMode << TVTColumnOption::coParentColor << TVTColumnOption::coResizable << TVTColumnOption::coShowDropMark << TVTColumnOption::coVisible << TVTColumnOption::coAllowFocus << TVTColumnOption::coEditable )
+#define DefaultColumnOptions (System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coStyleColor>() << TVTColumnOption::coAllowClick << TVTColumnOption::coDraggable << TVTColumnOption::coEnabled << TVTColumnOption::coParentBidiMode << TVTColumnOption::coParentColor << TVTColumnOption::coResizable << TVTColumnOption::coShowDropMark << TVTColumnOption::coVisible << TVTColumnOption::coAllowFocus << TVTColumnOption::coEditable )
 #define DefaultStringOptions (System::Set<TVTStringOption, TVTStringOption::toSaveCaptions, TVTStringOption::toAutoAcceptEditChange>() << TVTStringOption::toSaveCaptions << TVTStringOption::toAutoAcceptEditChange )
 extern DELPHI_PACKAGE Vcl::Imglist::TCustomImageList* __fastcall GetUtilityImages(void);
 extern DELPHI_PACKAGE void __fastcall ShowError(const System::UnicodeString Msg, int HelpContext);
