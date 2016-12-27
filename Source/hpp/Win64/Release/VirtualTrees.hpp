@@ -1571,6 +1571,7 @@ private:
 	TNodeArray FTempNodeCache;
 	unsigned FTempNodeCount;
 	Vcl::Graphics::TPicture* FBackground;
+	bool FBackgroundImageTransparent;
 	int FMargin;
 	int FTextMargin;
 	int FBackgroundOffsetX;
@@ -1827,6 +1828,7 @@ private:
 	void __fastcall SetAlignment(const System::Classes::TAlignment Value);
 	void __fastcall SetAnimationDuration(const unsigned Value);
 	void __fastcall SetBackground(Vcl::Graphics::TPicture* const Value);
+	void __fastcall SetBackGroundImageTransparent(const bool Value);
 	void __fastcall SetBackgroundOffset(const int Index, const int Value);
 	void __fastcall SetBorderStyle(Vcl::Forms::TBorderStyle Value);
 	void __fastcall SetBottomNode(PVirtualNode Node);
@@ -1875,10 +1877,11 @@ private:
 	void __fastcall SetVerticalAlignment(PVirtualNode Node, System::Byte Value);
 	HIDESBASE void __fastcall SetVisible(PVirtualNode Node, bool Value);
 	void __fastcall SetVisiblePath(PVirtualNode Node, bool Value);
-	void __fastcall StaticBackground(Vcl::Graphics::TBitmap* Source, Vcl::Graphics::TCanvas* Target, System::Types::TPoint OffsetPosition, const System::Types::TRect &R);
+	void __fastcall PrepareBackGroundPicture(Vcl::Graphics::TPicture* Source, Vcl::Graphics::TBitmap* DrawBitmap, int DrawBitmapWidth, int DrawBitMapHeight, System::Uitypes::TColor ABkgcolor);
+	void __fastcall StaticBackground(Vcl::Graphics::TPicture* Source, Vcl::Graphics::TCanvas* Target, System::Types::TPoint OffsetPosition, const System::Types::TRect &R, System::Uitypes::TColor aBkgColor);
 	void __fastcall StopTimer(int ID);
 	void __fastcall SetWindowTheme(const System::UnicodeString Theme);
-	void __fastcall TileBackground(Vcl::Graphics::TBitmap* Source, Vcl::Graphics::TCanvas* Target, System::Types::TPoint Offset, const System::Types::TRect &R);
+	void __fastcall TileBackground(Vcl::Graphics::TPicture* Source, Vcl::Graphics::TCanvas* Target, System::Types::TPoint Offset, const System::Types::TRect &R, System::Uitypes::TColor aBkgColor);
 	bool __fastcall ToggleCallback(int Step, int StepSize, void * Data);
 	MESSAGE void __fastcall CMColorChange(Winapi::Messages::TMessage &Message);
 	HIDESBASE MESSAGE void __fastcall CMCtl3DChanged(Winapi::Messages::TMessage &Message);
@@ -1940,7 +1943,7 @@ private:
 	
 protected:
 	bool FFontChanged;
-	virtual void __fastcall AutoScale(void);
+	virtual void __fastcall AutoScale(bool isDpiChange);
 	virtual void __fastcall AddToSelection(PVirtualNode Node)/* overload */;
 	virtual void __fastcall AddToSelection(const TNodeArray NewItems, int NewLength, bool ForceInsert = false)/* overload */;
 	virtual void __fastcall AdjustImageBorder(System::Classes::TBiDiMode BidiMode, int VAlign, System::Types::TRect &R, TVTImageInfo &ImageInfo);
@@ -2154,6 +2157,7 @@ protected:
 	virtual void __fastcall SelectNodes(PVirtualNode StartNode, PVirtualNode EndNode, bool AddOnly);
 	virtual void __fastcall SetChildCount(PVirtualNode Node, unsigned NewChildCount);
 	virtual void __fastcall SetFocusedNodeAndColumn(PVirtualNode Node, TColumnIndex Column);
+	void __fastcall SetRangeX(unsigned value);
 	virtual void __fastcall SkipNode(System::Classes::TStream* Stream);
 	void __fastcall StartOperation(TVTOperationKind OperationKind);
 	virtual void __fastcall StartWheelPanning(System::Types::TPoint Position);
@@ -2182,6 +2186,7 @@ protected:
 	__property unsigned AutoScrollDelay = {read=FAutoScrollDelay, write=FAutoScrollDelay, default=1000};
 	__property TAutoScrollInterval AutoScrollInterval = {read=FAutoScrollInterval, write=FAutoScrollInterval, default=1};
 	__property Vcl::Graphics::TPicture* Background = {read=FBackground, write=SetBackground};
+	__property bool BackGroundImageTransparent = {read=FBackgroundImageTransparent, write=SetBackGroundImageTransparent, default=0};
 	__property int BackgroundOffsetX = {read=FBackgroundOffsetX, write=SetBackgroundOffset, index=0, default=0};
 	__property int BackgroundOffsetY = {read=FBackgroundOffsetY, write=SetBackgroundOffset, index=1, default=0};
 	__property Vcl::Forms::TBorderStyle BorderStyle = {read=FBorderStyle, write=SetBorderStyle, default=1};
@@ -2513,7 +2518,7 @@ public:
 	virtual void __fastcall Sort(PVirtualNode Node, TColumnIndex Column, TSortDirection Direction, bool DoInit = true);
 	virtual void __fastcall SortTree(TColumnIndex Column, TSortDirection Direction, bool DoInit = true);
 	void __fastcall ToggleNode(PVirtualNode Node);
-	void __fastcall UpdateHorizontalRange(void);
+	virtual void __fastcall UpdateHorizontalRange(void);
 	void __fastcall UpdateHorizontalScrollBar(bool DoRepaint);
 	void __fastcall UpdateRanges(void);
 	virtual void __fastcall UpdateScrollBars(bool DoRepaint);
@@ -2901,6 +2906,7 @@ __published:
 	__property AutoScrollDelay = {default=1000};
 	__property AutoScrollInterval = {default=1};
 	__property Background;
+	__property BackGroundImageTransparent = {default=0};
 	__property BackgroundOffsetX = {index=0, default=0};
 	__property BackgroundOffsetY = {index=1, default=0};
 	__property BiDiMode;
@@ -3405,7 +3411,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.4"
+#define VTVersion L"6.4.1"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);
