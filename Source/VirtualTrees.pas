@@ -30,7 +30,7 @@ unit VirtualTrees;
 //   Anthony Mills, Alexander Egorushkin (BCB), Mathias Torell (BCB), Frank van den Bergh, Vadim Sedulin, Peter Evans,
 //   Milan Vandrovec (BCB), Steve Moss, Joe White, David Clark, Anders Thomsen, Igor Afanasyev, Eugene Programmer,
 //   Corbin Dunn, Richard Pringle, Uli Gerhardt, Azza, Igor Savkic, Daniel Bauten, Timo Tegtmeier, Dmitry Zegebart,
-//   Andreas Hausladen, Joachim Marder, Roman Kassebaum, Vincent Parret
+//   Andreas Hausladen, Joachim Marder, Roman Kassebaum, Vincent Parret, Dietmar Rösler
 // Beta testers:
 //   Freddy Ertl, Hans-Jürgen Schnorrenberg, Werner Lehmann, Jim Kueneman, Vadim Sedulin, Moritz Franckenstein,
 //   Wim van der Vegt, Franc v/d Westelaken
@@ -75,7 +75,7 @@ uses
   Winapi.ShlObj, System.UITypes, System.Generics.Collections;
 
 const
-  VTVersion = '6.4';
+  VTVersion = '6.4.1';
 
 const
   VTTreeStreamVersion = 2;
@@ -819,6 +819,8 @@ type
   end;
 
   // Determines the kind of animation when a hint is activated.
+  // Note: If toHotTrack is present, animation defaults to hatNone to avoid
+  // delays in hot tracking
   THintAnimationType = (
     hatNone,                 // no animation at all, just display hint/tooltip
     hatFade,                 // fade in the hint/tooltip, like in Windows 2000
@@ -2027,6 +2029,9 @@ type
     FTempNodeCache: TNodeArray;                  // used at various places to hold temporarily a bunch of node refs.
     FTempNodeCount: Cardinal;                    // number of nodes in FTempNodeCache
     FBackground: TPicture;                       // A background image loadable at design and runtime.
+    FBackgroundImageTransparent: Boolean;        // By default, this is off. When switched on, will try to draw the image
+                                                 // transparent by using the color of the component as transparent color
+
     FMargin: Integer;                            // horizontal border distance
     FTextMargin: Integer;                        // space between the node's text and its horizontal bounds
     FBackgroundOffsetX,
@@ -2349,6 +2354,7 @@ type
     procedure SetAlignment(const Value: TAlignment);
     procedure SetAnimationDuration(const Value: Cardinal);
     procedure SetBackground(const Value: TPicture);
+    procedure SetBackGroundImageTransparent(const Value: Boolean);
     procedure SetBackgroundOffset(const Index, Value: Integer);
     procedure SetBorderStyle(Value: TBorderStyle);
     procedure SetBottomNode(Node: PVirtualNode);
@@ -2397,10 +2403,11 @@ type
     procedure SetVerticalAlignment(Node: PVirtualNode; Value: Byte);
     procedure SetVisible(Node: PVirtualNode; Value: Boolean);
     procedure SetVisiblePath(Node: PVirtualNode; Value: Boolean);
-    procedure StaticBackground(Source: TBitmap; Target: TCanvas; OffsetPosition: TPoint; R: TRect);
+    procedure PrepareBackGroundPicture(Source: TPicture; DrawBitmap: TBitmap; DrawBitmapWidth: Integer; DrawBitMapHeight: Integer; ABkgcolor: TColor);
+    procedure StaticBackground(Source: TPicture; Target: TCanvas; OffsetPosition: TPoint; R: TRect; aBkgColor: TColor);
     procedure StopTimer(ID: Integer);
     procedure SetWindowTheme(const Theme: string);
-    procedure TileBackground(Source: TBitmap; Target: TCanvas; Offset: TPoint; R: TRect);
+    procedure TileBackground(Source: TPicture; Target: TCanvas; Offset: TPoint; R: TRect; aBkgColor: TColor);
     function ToggleCallback(Step, StepSize: Integer; Data: Pointer): Boolean;
 
     procedure CMColorChange(var Message: TMessage); message CM_COLORCHANGED;
@@ -2463,7 +2470,7 @@ type
 
   protected
     FFontChanged: Boolean;                       // flag for keeping informed about font changes in the off screen buffer   // [IPK] - private to protected
-    procedure AutoScale(); virtual;
+    procedure AutoScale(isDpiChange: Boolean); virtual;
     procedure AddToSelection(Node: PVirtualNode); overload; virtual;
     procedure AddToSelection(const NewItems: TNodeArray; NewLength: Integer; ForceInsert: Boolean = False); overload; virtual;
     procedure AdjustImageBorder(BidiMode: TBidiMode; VAlign: Integer; var R: TRect; var ImageInfo: TVTImageInfo); virtual;
@@ -2698,6 +2705,7 @@ type
     procedure SelectNodes(StartNode, EndNode: PVirtualNode; AddOnly: Boolean); virtual;
     procedure SetChildCount(Node: PVirtualNode; NewChildCount: Cardinal); virtual;
     procedure SetFocusedNodeAndColumn(Node: PVirtualNode; Column: TColumnIndex); virtual;
+    procedure SetRangeX(value: Cardinal);
     procedure SkipNode(Stream: TStream); virtual;
     procedure StartOperation(OperationKind: TVTOperationKind);
     procedure StartWheelPanning(Position: TPoint); virtual;
@@ -2729,6 +2737,7 @@ type
     property AutoScrollDelay: Cardinal read FAutoScrollDelay write FAutoScrollDelay default 1000;
     property AutoScrollInterval: TAutoScrollInterval read FAutoScrollInterval write FAutoScrollInterval default 1;
     property Background: TPicture read FBackground write SetBackground;
+    property BackGroundImageTransparent: Boolean read FBackGroundImageTransparent write SetBackGroundImageTransparent default False;
     property BackgroundOffsetX: Integer index 0 read FBackgroundOffsetX write SetBackgroundOffset default 0;
     property BackgroundOffsetY: Integer index 1 read FBackgroundOffsetY write SetBackgroundOffset default 0;
     property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
@@ -3087,7 +3096,7 @@ type
     procedure Sort(Node: PVirtualNode; Column: TColumnIndex; Direction: TSortDirection; DoInit: Boolean = True); virtual;
     procedure SortTree(Column: TColumnIndex; Direction: TSortDirection; DoInit: Boolean = True); virtual;
     procedure ToggleNode(Node: PVirtualNode);
-    procedure UpdateHorizontalRange;
+    procedure UpdateHorizontalRange; virtual;
     procedure UpdateHorizontalScrollBar(DoRepaint: Boolean);
     procedure UpdateRanges;
     procedure UpdateScrollBars(DoRepaint: Boolean); virtual;
@@ -3445,6 +3454,7 @@ type
     property AutoScrollDelay;
     property AutoScrollInterval;
     property Background;
+    property BackGroundImageTransparent;
     property BackgroundOffsetX;
     property BackgroundOffsetY;
     property BiDiMode;
@@ -3949,8 +3959,9 @@ uses
   VirtualTrees.Classes,
   VirtualTrees.WorkerThread,
   VirtualTrees.ClipBoard,
-  VirtualTrees.Utils, VTHeaderPopup, VirtualTrees.Export;
-
+  VirtualTrees.Utils, 
+  VirtualTrees.Export,
+  VTHeaderPopup;
 
 resourcestring
   // Localizable strings.
@@ -8179,6 +8190,14 @@ begin
       if coVisible in FOptions then
       begin
         ColumnRight := ColumnLeft + FWidth;
+
+        //fix: in right to left alignment, X can be in the
+        //area on the left of first column which is OUT.
+        if (P.X < ColumnLeft) and (I = 0) then
+        begin
+          Result := InvalidColumn;
+          Exit;
+        end;
         if P.X < ColumnRight then
         begin
           Result := FPositionToIndex[I];
@@ -9347,7 +9366,6 @@ var
                 ColImageInfo.Images := CustomCheckImages
               else
                 ColImageInfo.Images := SystemCheckImages;
-              if not Assigned(ColImageInfo.Images) then
               ColImageInfo.Index := GetCheckImage(nil, FCheckType, FCheckState, IsEnabled);
               ColImageInfo.XPos := GlyphPos.X;
               ColImageInfo.YPos := GlyphPos.Y;
@@ -12164,6 +12182,9 @@ begin
   FAutoScrollInterval := 1;
 
   FBackground := TPicture.Create;
+  // Similar to the Transparent property of TImage,
+  // this flag is Off by default.
+  FBackGroundImageTransparent := False;
 
   FDefaultPasteMode := amAddChildLast;
   FMargin := 4;
@@ -12944,9 +12965,9 @@ begin
         if UseBackground then
         begin
           if toStaticBackground in TreeOptions.PaintOptions then
-            StaticBackground(FBackground.Bitmap, Canvas, Offset, R)
+            StaticBackground(FBackground, Canvas, Offset, R, FColors.BackGroundColor)
           else
-            TileBackground(FBackground.Bitmap, Canvas, Offset, R);
+            TileBackground(FBackground, Canvas, Offset, R, FColors.BackGroundColor);
         end
         else
         begin
@@ -14303,42 +14324,31 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
-
+{ New, Support for transparent background:
+  * Image types: BMP, PNG, GIF, ICO, EMF, TIFF and WMF are automatically identified to support transparent background
+  * Also detects certain third party image classes registered for PNG, GIF and other image types so that the
+    transparency related code is used for them. See the code below.
+  * If some other third party image class is registered that is not detected,
+    set the flag BackgroundTransparentExternalType explicitly in order to properly do
+    transparent painting.
+}
 procedure TBaseVirtualTree.SetBackground(const Value: TPicture);
 
-var
-  bmp: TBitmap;
+begin
+  FBackground.Assign(Value);
+  Invalidate;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+procedure TBaseVirtualTree.SetBackGroundImageTransparent(const Value: Boolean);
 
 begin
-  { Fixes issue #148
-    If it is a regular bitmap or if graphic is nil or empty,
-    perform original code
-    otherwise, make the bitmap from the graphic assigned.
-    Tested with PNG, JPG and GIF files. Note that it doesn't
-    support transparency yet. For example, if you make the
-    background color yellow and then load the PNG, it doesn't
-    show the background color in the transparent parts.
-  }
-  if (value = nil)
-     or (value.Graphic = nil)
-     or (Value.Graphic is TBitmap)
-  then
+  if Value <> FBackGroundImageTransparent then
   begin
-    FBackground.Assign(Value);  //original code was only this
-  end
-  else
-  begin
-    bmp:= TBitmap.Create;
-    try
-      bmp.SetSize(Value.Graphic.Width, Value.Graphic.Height);
-      bmp.Canvas.Draw(0,0, Value.Graphic);
-      Value.assign(bmp);
-      FBackground.Assign(Value);
-    finally
-      bmp.Free;
-    end;
+    FBackGroundImageTransparent := Value;
+    Invalidate;
   end;
-  Invalidate;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -15180,6 +15190,13 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+procedure TBaseVirtualTree.SetRangeX(value: Cardinal);
+begin
+  FRangeX := value;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure TBaseVirtualTree.SetRootNodeCount(Value: Cardinal);
 
 begin
@@ -15444,9 +15461,45 @@ begin
   end;
 end;
 
+// ----------------------------------------------------------------------------------------------------------------------
+procedure TBaseVirtualTree.PrepareBackGroundPicture(Source: TPicture;
+  DrawBitmap: TBitmap; DrawBitmapWidth: Integer; DrawBitMapHeight: Integer; ABkgcolor: TColor);
+const
+  DST = $00AA0029; // Ternary Raster Operation - Destination unchanged
+
+  // fill background will work for transparent images and
+  // will not disturb non-transparent ones
+  procedure FillDrawBitmapWithBackGroundColor;
+  begin
+    DrawBitmap.Canvas.Brush.Color := ABkgcolor;
+    DrawBitmap.Canvas.FillRect(Rect(0, 0, DrawBitmap.Width, DrawBitmap.Height));
+  end;
+
+begin
+  DrawBitmap.SetSize(DrawBitmapWidth, DrawBitMapHeight);
+
+  if (Source.Graphic is TBitmap) and
+     (FBackGroundImageTransparent or Source.Bitmap.TRANSPARENT)
+  then
+  begin
+    FillDrawBitmapWithBackGroundColor;
+    MaskBlt(DrawBitmap.Canvas.Handle, 0, 0, Source.Width, Source.Height,
+        Source.Bitmap.Canvas.Handle, 0, 0, Source.Bitmap.MaskHandle, 0, 0,
+        MakeROP4(DST, SRCCOPY));
+  end
+  else
+  begin
+    // Similar to TImage's Transparent property behavior, we don't want
+    // to draw transparent if the following flag is OFF.
+    if FBackGroundImageTransparent then
+      FillDrawBitmapWithBackGroundColor;
+    DrawBitmap.Canvas.Draw(0, 0, Source.Graphic);
+  end
+end;
+
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.StaticBackground(Source: TBitmap; Target: TCanvas; OffsetPosition: TPoint; R: TRect);
+procedure TBaseVirtualTree.StaticBackground(Source: TPicture; Target: TCanvas; OffsetPosition: TPoint; R: TRect; aBkgColor: TColor);
 
 // Draws the given source graphic so that it stays static in the given rectangle which is relative to the target bitmap.
 // The graphic is aligned so that it always starts at the upper left corner of the target canvas.
@@ -15459,11 +15512,13 @@ var
   PicRect: TRect;
   AreaRect: TRect;
   DrawRect: TRect;
-
+  DrawBitmap: TBitmap;
 begin
-  // clear background
-  Target.Brush.Color := Color;
-  Target.FillRect(R);
+  DrawBitmap := TBitmap.Create;
+  try
+    // clear background
+    Target.Brush.Color := aBkgColor;
+    Target.FillRect(R);
 
   // Picture rect in relation to client viewscreen.
   PicRect := Rect(FBackgroundOffsetX, FBackgroundOffsetY, FBackgroundOffsetX + Source.Width, FBackgroundOffsetY + Source.Height);
@@ -15474,21 +15529,14 @@ begin
   // If picture falls in AreaRect, return intersection (DrawRect).
   if IntersectRect(DrawRect, PicRect, AreaRect) then
   begin
-    // Draw portion of image which falls in canvas area.
-    if Source.Transparent then
-    begin
-      // Leave transparent area as destination unchanged (DST), copy non-transparent areas to canvas (SRCCOPY).
-      MaskBlt(Target.Handle, DrawRect.Left - OffsetPosition.X, DrawRect.Top - OffsetPosition.Y, (DrawRect.Right - OffsetPosition.X) - (DrawRect.Left - OffsetPosition.X),
-        (DrawRect.Bottom - OffsetPosition.Y) - (DrawRect.Top - OffsetPosition.Y), Source.Canvas.Handle, DrawRect.Left - PicRect.Left, DrawRect.Top - PicRect.Top,
-        Source.MaskHandle, DrawRect.Left - PicRect.Left, DrawRect.Top - PicRect.Top, MakeROP4(DST, SRCCOPY));
-    end
-    else
-    begin
+      PrepareBackGroundPicture(Source, DrawBitmap, Source.Width, Source.Height, aBkgColor);
       // copy image to destination
       BitBlt(Target.Handle, DrawRect.Left - OffsetPosition.X, DrawRect.Top - OffsetPosition.Y, (DrawRect.Right - OffsetPosition.X) - (DrawRect.Left - OffsetPosition.X),
-        (DrawRect.Bottom - OffsetPosition.Y) - (DrawRect.Top - OffsetPosition.Y) + R.Top, Source.Canvas.Handle, DrawRect.Left - PicRect.Left, DrawRect.Top - PicRect.Top,
+      (DrawRect.Bottom - OffsetPosition.Y) - (DrawRect.Top - OffsetPosition.Y) + R.Top, DrawBitmap.Canvas.Handle, DrawRect.Left - PicRect.Left, DrawRect.Top - PicRect.Top, 
         SRCCOPY);
     end;
+  finally
+    DrawBitmap.Free;
   end;
 end;
 
@@ -15512,7 +15560,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.TileBackground(Source: TBitmap; Target: TCanvas; Offset: TPoint; R: TRect);
+procedure TBaseVirtualTree.TileBackground(Source: TPicture; Target: TCanvas; Offset: TPoint; R: TRect; aBkgColor: TColor);
 
 // Draws the given source graphic so that it tiles into the given rectangle which is relative to the target bitmap.
 // The graphic is aligned so that it always starts at the upper left corner of the target canvas.
@@ -15523,38 +15571,44 @@ var
   SourceY,
   TargetX,
   DeltaY: Integer;
-
+  DrawBitmap: TBitmap;
 begin
-  with Target do
-  begin
-    SourceY := (R.Top + Offset.Y + FBackgroundOffsetY) mod Source.Height;
-    // Always wrap the source coordinates into positive range.
-    if SourceY < 0 then
-      SourceY := Source.Height + SourceY;
-
-    // Tile image vertically until target rect is filled.
-    while R.Top < R.Bottom do
+  DrawBitmap := TBitmap.Create;
+  try
+    PrepareBackGroundPicture(Source, DrawBitmap, Source.Width, Source.Height, aBkgColor);
+    with Target do
     begin
-      SourceX := (R.Left + Offset.X + FBackgroundOffsetX) mod Source.Width;
-      // always wrap the source coordinates into positive range
-      if SourceX < 0 then
-        SourceX := Source.Width + SourceX;
+      SourceY := (R.Top + Offset.Y + FBackgroundOffsetY) mod Source.Height;
+      // Always wrap the source coordinates into positive range.
+      if SourceY < 0 then
+        SourceY := Source.Height + SourceY;
 
-      TargetX := R.Left;
-      // height of strip to draw
-      DeltaY := Min(R.Bottom - R.Top, Source.Height - SourceY);
-
-      // tile the image horizontally
-      while TargetX < R.Right do
+      // Tile image vertically until target rect is filled.
+      while R.Top < R.Bottom do
       begin
-        BitBlt(Handle, TargetX, R.Top, Min(R.Right - TargetX, Source.Width - SourceX), DeltaY,
-          Source.Canvas.Handle, SourceX, SourceY, SRCCOPY);
-        Inc(TargetX, Source.Width - SourceX);
-        SourceX := 0;
+        SourceX := (R.Left + Offset.X + FBackgroundOffsetX) mod Source.Width;
+        // always wrap the source coordinates into positive range
+        if SourceX < 0 then
+          SourceX := Source.Width + SourceX;
+
+        TargetX := R.Left;
+        // height of strip to draw
+        DeltaY := Min(R.Bottom - R.Top, Source.Height - SourceY);
+
+        // tile the image horizontally
+        while TargetX < R.Right do
+        begin
+          BitBlt(Handle, TargetX, R.Top, Min(R.Right - TargetX, Source.Width - SourceX), DeltaY,
+            DrawBitmap.Canvas.Handle, SourceX, SourceY, SRCCOPY);
+          Inc(TargetX, Source.Width - SourceX);
+          SourceX := 0;
+        end;
+        Inc(R.Top, Source.Height - SourceY);
+        SourceY := 0;
       end;
-      Inc(R.Top, Source.Height - SourceY);
-      SourceY := 0;
     end;
+  finally
+    DrawBitmap.Free;
   end;
 end;
 
@@ -15865,7 +15919,7 @@ begin
   begin
     PrepareBitmaps(True, False);
     if HandleAllocated then begin
-      AutoScale();
+      AutoScale(False);
       Invalidate;
     end
   end;
@@ -16093,6 +16147,16 @@ begin
               if FHintMode = hmHintAndDefault then
               begin
                 FHintData.DefaultHint := GetShortHint(Hint);
+
+                // Fix for the problem: Default Hint once shown stayed even when 
+                // node hint was to be displayed. The reason was that CursorRect
+                // was for the full client area. Now reducing it to remove the
+                // columns from it.
+                if BidiMode = bdLeftToRight then
+                  CursorRect.Left := Header.Columns.TotalWidth
+                else
+                  CursorRect.right := CursorRect.right - Header.Columns.TotalWidth;
+
                 if Length(FHintData.DefaultHint) = 0 then
                   Result := 1
                 else
@@ -18408,7 +18472,7 @@ begin
       if sfHeight in ScalingFlags then
         Indent := MulDiv(Indent, M, D);
     end;// if M<>D
-    AutoScale();
+    AutoScale(M <> D);
   end;//if toAutoChangeScale
   inherited ChangeScale(M, D{$if CompilerVersion >= 31}, isDpiChange{$ifend});
 end;
@@ -20007,7 +20071,8 @@ begin
     FDropTargetNode := nil;
   if Node = FLastStructureChangeNode then
     FLastStructureChangeNode := nil;
-
+  if Node = FFocusedNode then
+    FFocusedNode := nil;
   if Node = FNextNodeToSelect then
     FNextNodeToSelect := Node.Parent;
 
@@ -20063,6 +20128,10 @@ begin
   // Check availability of MMX if fading is requested.
   if not MMXAvailable and (Result = hatFade) then
     Result := hatSlide;
+
+  //Disable animation if hot tracking is ON as it causes problems
+  if (toHotTrack in FOptions.PaintOptions) then
+    Result := hatNone;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -20144,15 +20213,12 @@ begin
     FOnGetImageEx(Self, Node, Kind, Column, Ghosted, Index, Result);
   end
   else begin
-    if Assigned(FOnGetImage) then begin
-      FOnGetImage(Self, Node, Kind, Column, Ghosted, Index);
-      if Kind = ikState then
-        Result := Self.StateImages
-      else
-        Result := Self.Images;
-    end
+    if Kind = ikState then
+      Result := Self.StateImages
     else
-      Result := nil;
+      Result := Self.Images;
+    if Assigned(FOnGetImage) then
+      FOnGetImage(Self, Node, Kind, Column, Ghosted, Index);
   end;
   Assert((Index < 0) or Assigned(Result), 'An image index was supplied for TVTImageKind.' + cTVTImageKind2String[Kind] + ' but no image list was supplied.');
 end;
@@ -20699,7 +20765,7 @@ begin
       if (suoScrollClientArea in Options) and not (tsToggling in FStates) then
       begin
         // Have to invalidate the entire window if there's a background.
-        if (toShowBackground in FOptions.FPaintOptions) and (FBackground.Graphic is TBitmap) then
+        if (toShowBackground in FOptions.FPaintOptions) and Assigned(FBackground.Graphic) then
         begin
           // Since we don't use ScrollWindow here we have to move all client windows ourselves.
           DWPStructure := BeginDeferWindowPos(ControlCount);
@@ -21516,7 +21582,7 @@ begin
         Brush.Color := FColors.UnfocusedSelectionColor;
     end
     else
-    Brush.Color := FColors.BackGroundColor;
+      Brush.Color := FColors.BackGroundColor;
     R := Rect(Left, Min(Top, Bottom), Left + 1, Max(Top, Bottom) + 1);
     Winapi.Windows.FillRect(Handle, R, FDottedBrush);
   end;
@@ -23885,7 +23951,10 @@ begin
           lSize := TSize.Create(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK));
       end;//if
       R := Rect(XPos, YPos, XPos + lSize.cx, YPos + lSize.cy);
+
       StyleServices.DrawElement(Canvas.Handle, Details, R);
+      Canvas.Refresh;
+
       if Index in [21..24] then
         UtilityImages.Draw(Canvas, XPos, YPos, 4);  //Does anyone know what this was good for?
     end
@@ -24359,8 +24428,7 @@ begin
             begin
               Brush.Color := FColors.UnfocusedSelectionColor;
               Pen.Color := FColors.UnfocusedSelectionBorderColor;
-          end;
-
+            end;
             if (toGridExtensions in FOptions.FMiscOptions) or (toFullRowSelect in FOptions.FSelectionOptions) then
               InnerRect := CellRect;
             if not IsRectEmpty(InnerRect) then
@@ -24591,6 +24659,7 @@ begin
     Assert(GetCurrentThreadId = MainThreadId, Self.Classname + '.RemoveFromSelection() must only be called from UI thread.');
     if vsSelected in Node.States then
     begin
+      Assert(FSelectionCount > 0, 'if one node has set the vsSelected flag, SelectionCount must be >0.');
       Exclude(Node.States, vsSelected);
       if FindNodeInSelection(Node, Index, -1, -1) and (Index < FSelectionCount - 1) then
         Move(FSelection[Index + 1], FSelection[Index], (FSelectionCount - Index - 1) * SizeOf(Pointer));
@@ -25891,9 +25960,10 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TBaseVirtualTree.AutoScale();
+procedure TBaseVirtualTree.AutoScale(isDpiChange: Boolean);
 
-// If toAutoChangeScale is set, this method ensures that the defaulz node height is set corectly.
+// If toAutoChangeScale is set, this method ensures that the defaulz node height is set correctly.
+// isDPIChnage isTrue, if the DPI of the form has changes
 
 var
   lTextHeight: Cardinal;
@@ -25902,7 +25972,9 @@ begin
   begin
     Canvas.Font.Assign(Self.Font);
     lTextHeight := Canvas.TextHeight('Tg');
-    if (lTextHeight > Self.DefaultNodeHeight) then
+    // By default, we only ensure that DefaultNodeHeight is large enough.
+    // If the form's dpi has changed, we scale up and down the DefaultNodeHeight, See issue #677.
+    if (lTextHeight > Self.DefaultNodeHeight) or (isDpiChange and (lTextHeight <> Self.DefaultNodeHeight)) then
       Self.DefaultNodeHeight := lTextHeight;
   end;
 end;
@@ -26141,6 +26213,7 @@ var
   Counter: Integer;
 
 begin
+  Assert(GetCurrentThreadId = MainThreadId, Self.Classname + '.ClearSelection() must only be called from UI thread.');
   if not FSelectionLocked and (FSelectionCount > 0) and not (csDestroying in ComponentState) then
   begin
     if (FUpdateCount = 0) and HandleAllocated and (FVisibleCount > 0) then
@@ -27880,6 +27953,18 @@ begin
       Inc(CurrentWidth, DoGetNodeExtraWidth(Run, Column));
       Inc(CurrentWidth, DoGetCellContentMargin(Run, Column).X);
 
+      // Background for fix:
+      // DoGetNodeWidth works correctly to return just the
+      // headerwidth in vsMultiline state of the node. But the
+      // following code was adding TextLeft unnecessarily. This
+      // caused a width increase each time a column splitter
+      // was double-clicked for the option hoDblClickResize that
+      // really does not apply for vsMultiline case.
+      // Fix: If the node is multiline, leave the current width as
+      // it is as returned by DoGetNodeWidth logic above.
+      if (Column > NoColumn) and (vsMultiline in Run.States) then
+        Result := CurrentWidth
+      else
       if Result < (TextLeft + CurrentWidth) then
         Result := TextLeft + CurrentWidth;
 
@@ -30346,7 +30431,7 @@ begin
         R := Rect(0, 0, Max(FRangeX, ClientWidth), 0);
 
         // For quick checks some intermediate variables are used.
-        UseBackground := (toShowBackground in FOptions.FPaintOptions) and (FBackground.Graphic is TBitmap) and
+        UseBackground := (toShowBackground in FOptions.FPaintOptions) and Assigned(FBackground.Graphic) and
           (poBackground in PaintOptions);
         ShowImages := Assigned(FImages) or Assigned(OnGetImageIndexEx);
         ShowStateImages := Assigned(FStateImages) or Assigned(OnGetImageIndexEx);
@@ -30761,9 +30846,9 @@ begin
             begin
               SetCanvasOrigin(PaintInfo.Canvas, 0, 0);
               if toStaticBackground in TreeOptions.PaintOptions then
-                StaticBackground(FBackground.Bitmap, PaintInfo.Canvas, Target, TargetRect)
+                StaticBackground(FBackground, PaintInfo.Canvas, Target, TargetRect, FColors.BackGroundColor)
               else
-                TileBackground(FBackground.Bitmap, PaintInfo.Canvas, Target, TargetRect);
+                TileBackground(FBackground, PaintInfo.Canvas, Target, TargetRect, FColors.BackGroundColor);
             end
             else
             begin
@@ -32446,9 +32531,9 @@ procedure TBaseVirtualTree.UpdateHorizontalRange;
 
 begin
   if FHeader.UseColumns then
-    FRangeX := FHeader.FColumns.TotalWidth
+    SetRangeX(FHeader.FColumns.TotalWidth)
   else
-    FRangeX := GetMaxRightExtend;
+    SetRangeX(GetMaxRightExtend);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -32536,6 +32621,7 @@ begin
   begin
     UpdateVerticalScrollBar(DoRepaint);
     UpdateHorizontalScrollBar(DoRepaint);
+    Perform(CM_UPDATE_VCLSTYLE_SCROLLBARS,0,0);
   end;
 end;
 
@@ -32862,17 +32948,18 @@ begin
 
           // get edit options for column as priority. If column has toDefaultEdit
           // use global edit options for tree
-          Column := Tree.Header.Columns[Tree.FocusedColumn];
-          if Column.EditOptions <> toDefaultEdit then
-            EditOptions := Column.EditOptions
-          else
-            EditOptions := Tree.TreeOptions.EditOptions;
+          EditOptions := Tree.TreeOptions.EditOptions; // default
+          ColumnCandidate := -1;
+          if Tree.Header.Columns.Count > 0 then  // are there any columns?
+          begin
+            Column := Tree.Header.Columns[Tree.FocusedColumn];
+            if Column.EditOptions <> toDefaultEdit then
+              EditOptions := Column.EditOptions;
 
-          // next column candidate for toVerticalEdit and toHorizontalEdit
-          if Column.EditNextColumn <> -1 then
-            ColumnCandidate := Column.EditNextColumn
-          else
-            ColumnCandidate := -1;
+            // next column candidate for toVerticalEdit and toHorizontalEdit
+            if Column.EditNextColumn <> -1 then
+              ColumnCandidate := Column.EditNextColumn;
+          end;
 
           case EditOptions of
             toDefaultEdit: Tree.SetFocus;
@@ -33932,7 +34019,7 @@ begin
     FOnIncrementalSearch(Self, Node, Text, Result)
   else
     // Default behavior is to match the search string with the start of the node text.
-    if Pos(Text, GetText(Node, FocusedColumn)) <> 1 then
+    if not StartsText(Text, GetText(Node, FocusedColumn)) then
       Result := 1;
 end;
 
