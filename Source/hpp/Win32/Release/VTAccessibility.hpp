@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VTAccessibility.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VTAccessibility.pas' rev: 33.00 (Windows)
 
 #ifndef VtaccessibilityHPP
 #define VtaccessibilityHPP
@@ -47,31 +47,31 @@ public:
 	__fastcall TVirtualTreeAccessibility(Virtualtrees::TVirtualStringTree* AVirtualTree);
 	HRESULT __stdcall Get_accParent(/* out */ _di_IDispatch &ppdispParent);
 	HRESULT __stdcall Get_accChildCount(/* out */ int &pcountChildren);
-	HRESULT __stdcall Get_accChild(const System::OleVariant varChild, /* out */ _di_IDispatch &ppdispChild);
-	HRESULT __stdcall Get_accName(const System::OleVariant varChild, /* out */ System::WideString &pszName);
-	HRESULT __stdcall Get_accValue(const System::OleVariant varChild, /* out */ System::WideString &pszValue);
-	HRESULT __stdcall Get_accDescription(const System::OleVariant varChild, /* out */ System::WideString &pszDescription);
-	HRESULT __stdcall Get_accRole(const System::OleVariant varChild, /* out */ System::OleVariant &pvarRole);
-	HRESULT __stdcall Get_accState(const System::OleVariant varChild, /* out */ System::OleVariant &pvarState);
-	HRESULT __stdcall Get_accHelp(const System::OleVariant varChild, /* out */ System::WideString &pszHelp);
-	HRESULT __stdcall Get_accHelpTopic(/* out */ System::WideString &pszHelpFile, const System::OleVariant varChild, /* out */ int &pidTopic);
-	HRESULT __stdcall Get_accKeyboardShortcut(const System::OleVariant varChild, /* out */ System::WideString &pszKeyboardShortcut);
+	HRESULT __stdcall Get_accChild(System::OleVariant varChild, /* out */ _di_IDispatch &ppdispChild);
+	HRESULT __stdcall Get_accName(System::OleVariant varChild, /* out */ System::WideString &pszName);
+	HRESULT __stdcall Get_accValue(System::OleVariant varChild, /* out */ System::WideString &pszValue);
+	HRESULT __stdcall Get_accDescription(System::OleVariant varChild, /* out */ System::WideString &pszDescription);
+	HRESULT __stdcall Get_accRole(System::OleVariant varChild, /* out */ System::OleVariant &pvarRole);
+	HRESULT __stdcall Get_accState(System::OleVariant varChild, /* out */ System::OleVariant &pvarState);
+	HRESULT __stdcall Get_accHelp(System::OleVariant varChild, /* out */ System::WideString &pszHelp);
+	HRESULT __stdcall Get_accHelpTopic(/* out */ System::WideString &pszHelpFile, System::OleVariant varChild, /* out */ int &pidTopic);
+	HRESULT __stdcall Get_accKeyboardShortcut(System::OleVariant varChild, /* out */ System::WideString &pszKeyboardShortcut);
 	HRESULT __stdcall Get_accFocus(/* out */ System::OleVariant &pvarChild);
 	HRESULT __stdcall Get_accSelection(/* out */ System::OleVariant &pvarChildren);
-	HRESULT __stdcall Get_accDefaultAction(const System::OleVariant varChild, /* out */ System::WideString &pszDefaultAction);
-	HRESULT __stdcall accSelect(int flagsSelect, const System::OleVariant varChild);
-	HRESULT __stdcall accLocation(/* out */ int &pxLeft, /* out */ int &pyTop, /* out */ int &pcxWidth, /* out */ int &pcyHeight, const System::OleVariant varChild);
-	HRESULT __stdcall accNavigate(int navDir, const System::OleVariant varStart, /* out */ System::OleVariant &pvarEndUpAt);
+	HRESULT __stdcall Get_accDefaultAction(System::OleVariant varChild, /* out */ System::WideString &pszDefaultAction);
+	HRESULT __stdcall accSelect(int flagsSelect, System::OleVariant varChild);
+	HRESULT __stdcall accLocation(/* out */ int &pxLeft, /* out */ int &pyTop, /* out */ int &pcxWidth, /* out */ int &pcyHeight, System::OleVariant varChild);
+	HRESULT __stdcall accNavigate(int navDir, System::OleVariant varStart, /* out */ System::OleVariant &pvarEndUpAt);
 	HRESULT __stdcall accHitTest(int xLeft, int yTop, /* out */ System::OleVariant &pvarChild);
-	HRESULT __stdcall accDoDefaultAction(const System::OleVariant varChild);
-	HRESULT __stdcall Set_accName(const System::OleVariant varChild, const System::WideString pszName);
-	HRESULT __stdcall Set_accValue(const System::OleVariant varChild, const System::WideString pszValue);
+	HRESULT __stdcall accDoDefaultAction(System::OleVariant varChild);
+	HRESULT __stdcall Set_accName(System::OleVariant varChild, const System::WideString pszName);
+	HRESULT __stdcall Set_accValue(System::OleVariant varChild, const System::WideString pszValue);
 	HRESULT __stdcall GetIDsOfNames(const GUID &IID, void * Names, int NameCount, int LocaleID, void * DispIDs);
 	HRESULT __stdcall GetTypeInfo(int Index, int LocaleID, /* out */ void *TypeInfo);
 	HRESULT __stdcall GetTypeInfoCount(/* out */ int &Count);
 	HRESULT __stdcall Invoke(int DispID, const GUID &IID, int LocaleID, System::Word Flags, void *Params, void * VarResult, void * ExcepInfo, void * ArgErr);
 public:
-	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeAccessibility(void) { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeAccessibility() { }
 	
 private:
 	void *__IAccessible;	// IAccessible 
@@ -112,19 +112,19 @@ class PASCALIMPLEMENTATION TVirtualTreeItemAccessibility : public TVirtualTreeAc
 public:
 	HIDESBASE HRESULT __stdcall Get_accParent(/* out */ _di_IDispatch &ppdispParent);
 	HIDESBASE HRESULT __stdcall Get_accChildCount(/* out */ int &pcountChildren);
-	HIDESBASE HRESULT __stdcall Get_accChild(const System::OleVariant varChild, /* out */ _di_IDispatch &ppdispChild);
-	HIDESBASE HRESULT __stdcall Get_accName(const System::OleVariant varChild, /* out */ System::WideString &pszName);
-	HIDESBASE HRESULT __stdcall Get_accValue(const System::OleVariant varChild, /* out */ System::WideString &pszValue);
-	HIDESBASE HRESULT __stdcall Get_accDescription(const System::OleVariant varChild, /* out */ System::WideString &pszDescription);
-	HIDESBASE HRESULT __stdcall Get_accRole(const System::OleVariant varChild, /* out */ System::OleVariant &pvarRole);
-	HIDESBASE HRESULT __stdcall Get_accState(const System::OleVariant varChild, /* out */ System::OleVariant &pvarState);
-	HIDESBASE HRESULT __stdcall accLocation(/* out */ int &pxLeft, /* out */ int &pyTop, /* out */ int &pcxWidth, /* out */ int &pcyHeight, const System::OleVariant varChild);
+	HIDESBASE HRESULT __stdcall Get_accChild(System::OleVariant varChild, /* out */ _di_IDispatch &ppdispChild);
+	HIDESBASE HRESULT __stdcall Get_accName(System::OleVariant varChild, /* out */ System::WideString &pszName);
+	HIDESBASE HRESULT __stdcall Get_accValue(System::OleVariant varChild, /* out */ System::WideString &pszValue);
+	HIDESBASE HRESULT __stdcall Get_accDescription(System::OleVariant varChild, /* out */ System::WideString &pszDescription);
+	HIDESBASE HRESULT __stdcall Get_accRole(System::OleVariant varChild, /* out */ System::OleVariant &pvarRole);
+	HIDESBASE HRESULT __stdcall Get_accState(System::OleVariant varChild, /* out */ System::OleVariant &pvarState);
+	HIDESBASE HRESULT __stdcall accLocation(/* out */ int &pxLeft, /* out */ int &pyTop, /* out */ int &pcxWidth, /* out */ int &pcyHeight, System::OleVariant varChild);
 	HIDESBASE HRESULT __stdcall Get_accFocus(/* out */ System::OleVariant &pvarChild);
 public:
 	/* TVirtualTreeAccessibility.Create */ inline __fastcall TVirtualTreeItemAccessibility(Virtualtrees::TVirtualStringTree* AVirtualTree) : TVirtualTreeAccessibility(AVirtualTree) { }
 	
 public:
-	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeItemAccessibility(void) { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeItemAccessibility() { }
 	
 private:
 	void *__IAccessible;	// IAccessible 
@@ -152,16 +152,16 @@ class PASCALIMPLEMENTATION TVTMultiColumnItemAccessibility : public TVirtualTree
 	typedef TVirtualTreeItemAccessibility inherited;
 	
 private:
-	HRESULT __stdcall GetItemDescription(const System::OleVariant varChild, /* out */ System::WideString &pszDescription, bool IncludeMainColumn);
+	HRESULT __stdcall GetItemDescription(System::OleVariant varChild, /* out */ System::WideString &pszDescription, bool IncludeMainColumn);
 	
 public:
-	HIDESBASE HRESULT __stdcall Get_accName(const System::OleVariant varChild, /* out */ System::WideString &pszName);
-	HIDESBASE HRESULT __stdcall Get_accDescription(const System::OleVariant varChild, /* out */ System::WideString &pszDescription);
+	HIDESBASE HRESULT __stdcall Get_accName(System::OleVariant varChild, /* out */ System::WideString &pszName);
+	HIDESBASE HRESULT __stdcall Get_accDescription(System::OleVariant varChild, /* out */ System::WideString &pszDescription);
 public:
 	/* TVirtualTreeAccessibility.Create */ inline __fastcall TVTMultiColumnItemAccessibility(Virtualtrees::TVirtualStringTree* AVirtualTree) : TVirtualTreeItemAccessibility(AVirtualTree) { }
 	
 public:
-	/* TObject.Destroy */ inline __fastcall virtual ~TVTMultiColumnItemAccessibility(void) { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVTMultiColumnItemAccessibility() { }
 	
 private:
 	void *__IAccessible;	// IAccessible 
@@ -191,8 +191,8 @@ class PASCALIMPLEMENTATION TVTDefaultAccessibleProvider : public System::TInterf
 public:
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 public:
-	/* TObject.Create */ inline __fastcall TVTDefaultAccessibleProvider(void) : System::TInterfacedObject() { }
-	/* TObject.Destroy */ inline __fastcall virtual ~TVTDefaultAccessibleProvider(void) { }
+	/* TObject.Create */ inline __fastcall TVTDefaultAccessibleProvider() : System::TInterfacedObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVTDefaultAccessibleProvider() { }
 	
 private:
 	void *__IVTAccessibleProvider;	// Vtaccessibilityfactory::IVTAccessibleProvider 
@@ -212,8 +212,8 @@ class PASCALIMPLEMENTATION TVTDefaultAccessibleItemProvider : public System::TIn
 public:
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 public:
-	/* TObject.Create */ inline __fastcall TVTDefaultAccessibleItemProvider(void) : System::TInterfacedObject() { }
-	/* TObject.Destroy */ inline __fastcall virtual ~TVTDefaultAccessibleItemProvider(void) { }
+	/* TObject.Create */ inline __fastcall TVTDefaultAccessibleItemProvider() : System::TInterfacedObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVTDefaultAccessibleItemProvider() { }
 	
 private:
 	void *__IVTAccessibleProvider;	// Vtaccessibilityfactory::IVTAccessibleProvider 
@@ -233,8 +233,8 @@ class PASCALIMPLEMENTATION TVTMultiColumnAccessibleItemProvider : public System:
 public:
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 public:
-	/* TObject.Create */ inline __fastcall TVTMultiColumnAccessibleItemProvider(void) : System::TInterfacedObject() { }
-	/* TObject.Destroy */ inline __fastcall virtual ~TVTMultiColumnAccessibleItemProvider(void) { }
+	/* TObject.Create */ inline __fastcall TVTMultiColumnAccessibleItemProvider() : System::TInterfacedObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVTMultiColumnAccessibleItemProvider() { }
 	
 private:
 	void *__IVTAccessibleProvider;	// Vtaccessibilityfactory::IVTAccessibleProvider 

@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VTAccessibilityFactory.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VTAccessibilityFactory.pas' rev: 33.00 (Windows)
 
 #ifndef VtaccessibilityfactoryHPP
 #define VtaccessibilityfactoryHPP
@@ -23,7 +23,7 @@
 namespace Vtaccessibilityfactory
 {
 //-- forward type declarations -----------------------------------------------
-__interface IVTAccessibleProvider;
+__interface DELPHIINTERFACE IVTAccessibleProvider;
 typedef System::DelphiInterface<IVTAccessibleProvider> _di_IVTAccessibleProvider;
 class DELPHICLASS TVTAccessibilityFactory;
 //-- type declarations -------------------------------------------------------
@@ -46,8 +46,8 @@ private:
 	__classmethod void __fastcall FreeFactory();
 	
 public:
-	__fastcall TVTAccessibilityFactory(void);
-	__fastcall virtual ~TVTAccessibilityFactory(void);
+	__fastcall TVTAccessibilityFactory();
+	__fastcall virtual ~TVTAccessibilityFactory();
 	_di_IAccessible __fastcall CreateIAccessible(Virtualtrees::TBaseVirtualTree* ATree);
 	static TVTAccessibilityFactory* __fastcall GetAccessibilityFactory();
 	void __fastcall RegisterAccessibleProvider(const _di_IVTAccessibleProvider AProvider);

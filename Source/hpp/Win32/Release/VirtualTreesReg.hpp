@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTreesReg.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTreesReg.pas' rev: 33.00 (Windows)
 
 #ifndef VirtualtreesregHPP
 #define VirtualtreesregHPP
@@ -37,19 +37,19 @@ class PASCALIMPLEMENTATION TVirtualTreeEditor : public Designeditors::TDefaultEd
 	typedef Designeditors::TDefaultEditor inherited;
 	
 public:
-	virtual void __fastcall Edit(void);
+	virtual void __fastcall Edit();
 public:
 	/* TComponentEditor.Create */ inline __fastcall virtual TVirtualTreeEditor(System::Classes::TComponent* AComponent, Designintf::_di_IDesigner ADesigner) : Designeditors::TDefaultEditor(AComponent, ADesigner) { }
 	
 public:
-	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeEditor(void) { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TVirtualTreeEditor() { }
 	
 };
 
 #pragma pack(pop)
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE void __fastcall Register(void);
+extern DELPHI_PACKAGE void __fastcall Register();
 }	/* namespace Virtualtreesreg */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_VIRTUALTREESREG)
 using namespace Virtualtreesreg;

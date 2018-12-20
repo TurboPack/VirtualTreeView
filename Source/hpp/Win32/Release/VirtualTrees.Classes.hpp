@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.Classes.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.Classes.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_ClassesHPP
 #define Virtualtrees_ClassesHPP
@@ -36,15 +36,15 @@ private:
 	char *FStart;
 	char *FPosition;
 	char *FEnd;
-	System::RawByteString __fastcall GetAsString(void);
+	System::RawByteString __fastcall GetAsString();
 	
 public:
-	__fastcall virtual ~TBufferedRawByteString(void);
+	__fastcall virtual ~TBufferedRawByteString();
 	void __fastcall Add(const System::RawByteString S);
-	void __fastcall AddNewLine(void);
+	void __fastcall AddNewLine();
 	__property System::RawByteString AsString = {read=GetAsString};
 public:
-	/* TObject.Create */ inline __fastcall TBufferedRawByteString(void) : System::TObject() { }
+	/* TObject.Create */ inline __fastcall TBufferedRawByteString() : System::TObject() { }
 	
 };
 
@@ -59,15 +59,15 @@ private:
 	System::WideChar *FStart;
 	System::WideChar *FPosition;
 	System::WideChar *FEnd;
-	System::UnicodeString __fastcall GetAsString(void);
+	System::UnicodeString __fastcall GetAsString();
 	
 public:
-	__fastcall virtual ~TBufferedString(void);
+	__fastcall virtual ~TBufferedString();
 	void __fastcall Add(const System::UnicodeString S);
-	void __fastcall AddNewLine(void);
+	void __fastcall AddNewLine();
 	__property System::UnicodeString AsString = {read=GetAsString};
 public:
-	/* TObject.Create */ inline __fastcall TBufferedString(void) : System::TObject() { }
+	/* TObject.Create */ inline __fastcall TBufferedString() : System::TObject() { }
 	
 };
 
@@ -82,10 +82,10 @@ protected:
 	_RTL_CRITICAL_SECTION FSection;
 	
 public:
-	__fastcall TCriticalSection(void);
-	__fastcall virtual ~TCriticalSection(void);
-	void __fastcall Enter(void);
-	void __fastcall Leave(void);
+	__fastcall TCriticalSection();
+	__fastcall virtual ~TCriticalSection();
+	void __fastcall Enter();
+	void __fastcall Leave();
 };
 
 #pragma pack(pop)

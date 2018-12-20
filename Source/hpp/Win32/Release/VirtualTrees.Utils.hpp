@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.Utils.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.Utils.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_UtilsHPP
 #define Virtualtrees_UtilsHPP
@@ -42,7 +42,7 @@ extern DELPHI_PACKAGE System::UnicodeString __fastcall WrapString(HDC DC, const 
 extern DELPHI_PACKAGE void __fastcall AlphaBlend(HDC Source, HDC Destination, const System::Types::TRect &R, const System::Types::TPoint &Target, TBlendMode Mode, int ConstantAlpha, int Bias);
 extern DELPHI_PACKAGE unsigned __fastcall GetRGBColor(System::Uitypes::TColor Value);
 extern DELPHI_PACKAGE void __fastcall PrtStretchDrawDIB(Vcl::Graphics::TCanvas* Canvas, const System::Types::TRect &DestRect, Vcl::Graphics::TBitmap* ABitmap);
-extern DELPHI_PACKAGE bool __fastcall HasMMX(void);
+extern DELPHI_PACKAGE bool __fastcall HasMMX();
 extern DELPHI_PACKAGE void __fastcall FillDragRectangles(int DragWidth, int DragHeight, int DeltaX, int DeltaY, System::Types::TRect &RClip, System::Types::TRect &RScroll, System::Types::TRect &RSamp1, System::Types::TRect &RSamp2, System::Types::TRect &RDraw1, System::Types::TRect &RDraw2);
 extern DELPHI_PACKAGE void __fastcall DrawImage(Vcl::Imglist::TCustomImageList* ImageList, int Index, Vcl::Graphics::TCanvas* Canvas, int X, int Y, unsigned Style, bool Enabled);
 }	/* namespace Utils */

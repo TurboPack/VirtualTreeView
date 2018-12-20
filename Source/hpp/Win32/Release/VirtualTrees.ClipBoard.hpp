@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.ClipBoard.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.ClipBoard.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_ClipboardHPP
 #define Virtualtrees_ClipboardHPP
@@ -51,8 +51,8 @@ public:
 	unsigned Priority;
 	tagFORMATETC FormatEtc;
 public:
-	/* TObject.Create */ inline __fastcall TClipboardFormatListEntry(void) : System::TObject() { }
-	/* TObject.Destroy */ inline __fastcall virtual ~TClipboardFormatListEntry(void) { }
+	/* TObject.Create */ inline __fastcall TClipboardFormatListEntry() : System::TObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TClipboardFormatListEntry() { }
 	
 };
 
@@ -79,8 +79,8 @@ public:
 	__classmethod Virtualtrees::TVirtualTreeClass __fastcall FindFormat(const System::UnicodeString FormatString, System::Word &Fmt)/* overload */;
 	__classmethod Virtualtrees::TVirtualTreeClass __fastcall FindFormat(System::Word Fmt, System::UnicodeString &Description)/* overload */;
 public:
-	/* TObject.Create */ inline __fastcall TClipboardFormatList(void) : System::TObject() { }
-	/* TObject.Destroy */ inline __fastcall virtual ~TClipboardFormatList(void) { }
+	/* TObject.Create */ inline __fastcall TClipboardFormatList() : System::TObject() { }
+	/* TObject.Destroy */ inline __fastcall virtual ~TClipboardFormatList() { }
 	
 };
 

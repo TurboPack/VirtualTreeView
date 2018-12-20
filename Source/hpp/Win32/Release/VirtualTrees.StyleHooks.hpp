@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.StyleHooks.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.StyleHooks.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_StylehooksHPP
 #define Virtualtrees_StylehooksHPP
@@ -64,7 +64,7 @@ private:
 		__property bool ScrollBarEnabled = {read=FScrollBarEnabled, write=FScrollBarEnabled, nodefault};
 	public:
 		/* TWinControl.CreateParented */ inline __fastcall TVclStyleScrollBarWindow(HWND ParentWindow) : Vcl::Controls::TWinControl(ParentWindow) { }
-		/* TWinControl.Destroy */ inline __fastcall virtual ~TVclStyleScrollBarWindow(void) { }
+		/* TWinControl.Destroy */ inline __fastcall virtual ~TVclStyleScrollBarWindow() { }
 		
 	};
 	
@@ -112,19 +112,19 @@ private:
 	MESSAGE void __fastcall WMPosChanged(Winapi::Messages::TMessage &Msg);
 	
 protected:
-	virtual void __fastcall CalcScrollBarsRect(void);
+	virtual void __fastcall CalcScrollBarsRect();
 	virtual void __fastcall DrawHorzScrollBar(HDC DC);
 	virtual void __fastcall DrawVertScrollBar(HDC DC);
-	System::Types::TRect __fastcall GetHorzScrollBarSliderRect(void);
-	System::Types::TRect __fastcall GetVertScrollBarSliderRect(void);
-	virtual void __fastcall MouseLeave(void);
-	virtual void __fastcall PaintScrollBars(void);
+	System::Types::TRect __fastcall GetHorzScrollBarSliderRect();
+	System::Types::TRect __fastcall GetVertScrollBarSliderRect();
+	virtual void __fastcall MouseLeave();
+	virtual void __fastcall PaintScrollBars();
 	bool __fastcall PointInTreeHeader(const System::Types::TPoint &P);
-	void __fastcall UpdateScrollBarWindow(void);
+	void __fastcall UpdateScrollBarWindow();
 	
 public:
 	__fastcall virtual TVclStyleScrollBarsHook(Vcl::Controls::TWinControl* AControl);
-	__fastcall virtual ~TVclStyleScrollBarsHook(void);
+	__fastcall virtual ~TVclStyleScrollBarsHook();
 };
 
 #pragma pack(pop)

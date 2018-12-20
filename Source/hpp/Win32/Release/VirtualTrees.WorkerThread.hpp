@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.WorkerThread.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.WorkerThread.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_WorkerthreadHPP
 #define Virtualtrees_WorkerthreadHPP
@@ -37,11 +37,11 @@ private:
 	
 protected:
 	void __fastcall CancelValidation(Virtualtrees::TBaseVirtualTree* Tree);
-	virtual void __fastcall Execute(void);
+	virtual void __fastcall Execute();
 	
 public:
 	__fastcall TWorkerThread(bool CreateSuspended);
-	__fastcall virtual ~TWorkerThread(void);
+	__fastcall virtual ~TWorkerThread();
 	void __fastcall AddTree(Virtualtrees::TBaseVirtualTree* Tree);
 	void __fastcall RemoveTree(Virtualtrees::TBaseVirtualTree* Tree);
 	__property Virtualtrees::TBaseVirtualTree* CurrentTree = {read=FCurrentTree};
@@ -51,7 +51,7 @@ public:
 //-- var, const, procedure ---------------------------------------------------
 extern DELPHI_PACKAGE TWorkerThread* WorkerThread;
 extern DELPHI_PACKAGE NativeUInt WorkEvent;
-extern DELPHI_PACKAGE void __fastcall AddThreadReference(void);
+extern DELPHI_PACKAGE void __fastcall AddThreadReference();
 extern DELPHI_PACKAGE void __fastcall ReleaseThreadReference(Virtualtrees::TBaseVirtualTree* Tree);
 }	/* namespace Workerthread */
 }	/* namespace Virtualtrees */

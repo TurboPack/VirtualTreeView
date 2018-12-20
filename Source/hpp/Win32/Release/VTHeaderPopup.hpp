@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VTHeaderPopup.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VTHeaderPopup.pas' rev: 33.00 (Windows)
 
 #ifndef VtheaderpopupHPP
 #define VtheaderpopupHPP
@@ -60,7 +60,7 @@ __published:
 	__property TColumnChangeEvent OnColumnChange = {read=FOnColumnChange, write=FOnColumnChange};
 public:
 	/* TPopupMenu.Create */ inline __fastcall virtual TVTHeaderPopupMenu(System::Classes::TComponent* AOwner) : Vcl::Menus::TPopupMenu(AOwner) { }
-	/* TPopupMenu.Destroy */ inline __fastcall virtual ~TVTHeaderPopupMenu(void) { }
+	/* TPopupMenu.Destroy */ inline __fastcall virtual ~TVTHeaderPopupMenu() { }
 	
 };
 

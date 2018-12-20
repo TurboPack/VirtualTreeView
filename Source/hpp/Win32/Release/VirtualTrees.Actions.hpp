@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2017 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.Actions.pas' rev: 32.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.Actions.pas' rev: 33.00 (Windows)
 
 #ifndef Virtualtrees_ActionsHPP
 #define Virtualtrees_ActionsHPP
@@ -47,14 +47,14 @@ private:
 	Virtualtrees::TBaseVirtualTree* fTree;
 	bool fTreeAutoDetect;
 	System::Classes::TNotifyEvent fOnAfterExecute;
-	bool __fastcall GetSelectedOnly(void);
+	bool __fastcall GetSelectedOnly();
 	void __fastcall SetSelectedOnly(const bool Value);
 	
 protected:
 	Virtualtrees::TVirtualNodeStates fFilter;
 	void __fastcall SetControl(Virtualtrees::TBaseVirtualTree* Value);
 	virtual void __fastcall Notification(System::Classes::TComponent* AComponent, System::Classes::TOperation Operation);
-	virtual void __fastcall DoAfterExecute(void);
+	virtual void __fastcall DoAfterExecute();
 	__property bool SelectedOnly = {read=GetSelectedOnly, write=SetSelectedOnly, default=0};
 	
 public:
@@ -77,7 +77,7 @@ __published:
 	__property Visible = {default=1};
 	__property OnHint;
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeAction(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeAction() { }
 	
 };
 
@@ -92,8 +92,8 @@ private:
 	
 protected:
 	Virtualtrees::_di_TVTGetNodeProc fToExecute;
-	void __fastcall DoBeforeExecute(void);
-	virtual void __fastcall DoAfterExecute(void);
+	void __fastcall DoBeforeExecute();
+	virtual void __fastcall DoAfterExecute();
 	
 public:
 	__fastcall virtual TVirtualTreePerItemAction(System::Classes::TComponent* AOwner);
@@ -102,7 +102,7 @@ public:
 __published:
 	__property System::Classes::TNotifyEvent OnBeforeExecute = {read=fOnBeforeExecute, write=fOnBeforeExecute};
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreePerItemAction(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreePerItemAction() { }
 	
 };
 
@@ -120,7 +120,7 @@ public:
 __published:
 	__property SelectedOnly = {default=0};
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCheckAll(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCheckAll() { }
 	
 };
 
@@ -132,7 +132,7 @@ class PASCALIMPLEMENTATION TVirtualTreeUncheckAll : public TVirtualTreeCheckAll
 public:
 	__fastcall virtual TVirtualTreeUncheckAll(System::Classes::TComponent* AOwner);
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeUncheckAll(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeUncheckAll() { }
 	
 };
 
@@ -148,7 +148,7 @@ __published:
 	/* TVirtualTreeAction.Create */ inline __fastcall virtual TVirtualTreeSelectAll(System::Classes::TComponent* AOwner) : TVirtualTreeAction(AOwner) { }
 	
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeSelectAll(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeSelectAll() { }
 	
 };
 
@@ -160,7 +160,7 @@ class PASCALIMPLEMENTATION TVirtualTreeForSelectedAction : public TVirtualTreeAc
 public:
 	__fastcall virtual TVirtualTreeForSelectedAction(System::Classes::TComponent* AOwner);
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeForSelectedAction(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeForSelectedAction() { }
 	
 };
 
@@ -175,7 +175,7 @@ public:
 	/* TVirtualTreeForSelectedAction.Create */ inline __fastcall virtual TVirtualTreeCopy(System::Classes::TComponent* AOwner) : TVirtualTreeForSelectedAction(AOwner) { }
 	
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCopy(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCopy() { }
 	
 };
 
@@ -190,7 +190,7 @@ public:
 	/* TVirtualTreeForSelectedAction.Create */ inline __fastcall virtual TVirtualTreeCut(System::Classes::TComponent* AOwner) : TVirtualTreeForSelectedAction(AOwner) { }
 	
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCut(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeCut() { }
 	
 };
 
@@ -205,7 +205,7 @@ public:
 	/* TVirtualTreeForSelectedAction.Create */ inline __fastcall virtual TVirtualTreePaste(System::Classes::TComponent* AOwner) : TVirtualTreeForSelectedAction(AOwner) { }
 	
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreePaste(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreePaste() { }
 	
 };
 
@@ -220,13 +220,13 @@ public:
 	/* TVirtualTreeForSelectedAction.Create */ inline __fastcall virtual TVirtualTreeDelete(System::Classes::TComponent* AOwner) : TVirtualTreeForSelectedAction(AOwner) { }
 	
 public:
-	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeDelete(void) { }
+	/* TCustomAction.Destroy */ inline __fastcall virtual ~TVirtualTreeDelete() { }
 	
 };
 
 
 //-- var, const, procedure ---------------------------------------------------
-extern DELPHI_PACKAGE void __fastcall Register(void);
+extern DELPHI_PACKAGE void __fastcall Register();
 }	/* namespace Actions */
 }	/* namespace Virtualtrees */
 #if !defined(DELPHIHEADER_NO_IMPLICIT_NAMESPACE_USE) && !defined(NO_USING_NAMESPACE_VIRTUALTREES_ACTIONS)
