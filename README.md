@@ -30,15 +30,17 @@ designtime and runtime packages for Delphi and CBuilder and supports Win32 and W
 
 TurboPack VirtualTree package names have the following form:
 
-VirtualTreeDR.bpl   (Delphi Runtime)
-VirtualTreeDD.bpl   (Delphi Designtime)
-VirtualTreeDBDR.bpl (Delphi data aware Runtime)
-VirtualTreeDBDD.bpl (Delphi data aware Designtime)
+### Delphi
+* VirtualTreeDR.bpl   (Delphi Runtime)
+* VirtualTreeDD.bpl   (Delphi Designtime)
+* VirtualTreeDBDR.bpl (Delphi data aware Runtime)
+* VirtualTreeDBDD.bpl (Delphi data aware Designtime)
 
-VirtualTreeCR.bpl   (C++Builder Runtime)
-VirtualTreeCD.bpl   (C++Builder Designtime)
-VirtualTreeDBCR.bpl (C++Builder data aware Runtime)
-VirtualTreeDBCD.bpl (C++Builder data aware Designtime)
+### C++Builder
+* VirtualTreeCR.bpl   (C++Builder Runtime)
+* VirtualTreeCD.bpl   (C++Builder Designtime)
+* VirtualTreeDBCR.bpl (C++Builder data aware Runtime)
+* VirtualTreeDBCD.bpl (C++Builder data aware Designtime)
 
 
 ---------
