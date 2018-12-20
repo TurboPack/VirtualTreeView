@@ -2,7 +2,7 @@
 // Copyright (c) 1995, 2016 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'VirtualTrees.pas' rev: 31.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'VirtualTrees.pas' rev: 32.00 (Windows)
 
 #ifndef VirtualtreesHPP
 #define VirtualtreesHPP
@@ -239,7 +239,7 @@ public:
 	__fastcall virtual TCustomVirtualTreeOptions(TBaseVirtualTree* AOwner);
 	virtual void __fastcall AssignTo(System::Classes::TPersistent* Dest);
 	__property TVTAnimationOptions AnimationOptions = {read=FAnimationOptions, write=SetAnimationOptions, default=0};
-	__property TVTAutoOptions AutoOptions = {read=FAutoOptions, write=SetAutoOptions, default=1369};
+	__property TVTAutoOptions AutoOptions = {read=FAutoOptions, write=SetAutoOptions, default=1881};
 	__property TVTExportMode ExportMode = {read=FExportMode, write=FExportMode, default=0};
 	__property TVTMiscOptions MiscOptions = {read=FMiscOptions, write=SetMiscOptions, default=16809};
 	__property TVTPaintOptions PaintOptions = {read=FPaintOptions, write=SetPaintOptions, default=7008};
@@ -260,7 +260,7 @@ class PASCALIMPLEMENTATION TVirtualTreeOptions : public TCustomVirtualTreeOption
 	
 __published:
 	__property AnimationOptions = {default=0};
-	__property AutoOptions = {default=1369};
+	__property AutoOptions = {default=1881};
 	__property ExportMode = {default=0};
 	__property MiscOptions = {default=16809};
 	__property PaintOptions = {default=7008};
@@ -669,7 +669,6 @@ class PASCALIMPLEMENTATION TVirtualTreeColumn : public System::Classes::TCollect
 private:
 	System::UnicodeString FText;
 	System::UnicodeString FHint;
-	int FLeft;
 	int FWidth;
 	TColumnPosition FPosition;
 	int FMinWidth;
@@ -721,6 +720,7 @@ private:
 	void __fastcall SetWidth(int Value);
 	
 protected:
+	int FLeft;
 	void __fastcall ComputeHeaderLayout(HDC DC, const System::Types::TRect &Client, bool UseHeaderGlyph, bool UseSortGlyph, System::Types::TPoint &HeaderGlyphPos, System::Types::TPoint &SortGlyphPos, System::Types::TSize &SortGlyphSize, System::Types::TRect &TextBounds, unsigned DrawFormat, bool CalculateTextRect = false);
 	virtual void __fastcall DefineProperties(System::Classes::TFiler* Filer);
 	void __fastcall GetAbsoluteBounds(int &Left, int &Right);
@@ -1093,8 +1093,8 @@ enum DECLSPEC_DENUM Virtualtrees__51 : unsigned char { hpeBackground, hpeDropMar
 
 typedef System::Set<Virtualtrees__51, Virtualtrees__51::hpeBackground, Virtualtrees__51::hpeText> THeaderPaintElements;
 
-enum DECLSPEC_DENUM Virtualtrees__61 : unsigned char { tsCancelHintAnimation, tsChangePending, tsCheckPropagation, tsCollapsing, tsToggleFocusedSelection, tsClearPending, tsClipboardFlushing, tsCopyPending, tsCutPending, tsDrawSelPending, tsDrawSelecting, tsEditing, tsEditPending, tsExpanding, tsNodeHeightTracking, tsNodeHeightTrackPending, tsHint, tsInAnimation, tsIncrementalSearching, tsIncrementalSearchPending, tsIterating, tsKeyCheckPending, tsLeftButtonDown, tsLeftDblClick, tsMouseCheckPending, tsMiddleButtonDown, tsMiddleDblClick, tsNeedRootCountUpdate, tsOLEDragging, tsOLEDragPending, tsPainting, tsRightButtonDown, tsRightDblClick, tsPopupMenuShown, tsScrolling, tsScrollPending, tsSizing, tsStopValidation, tsStructureChangePending, tsSynchMode, 
-	tsThumbTracking, tsToggling, tsUpdateHiddenChildrenNeeded, tsUpdating, tsUseCache, tsUserDragObject, tsUseThemes, tsValidating, tsPreviouslySelectedLocked, tsValidationNeeded, tsVCLDragging, tsVCLDragPending, tsVCLDragFinished, tsWheelPanning, tsWheelScrolling, tsWindowCreating, tsUseExplorerTheme };
+enum DECLSPEC_DENUM Virtualtrees__61 : unsigned char { tsCancelHintAnimation, tsChangePending, tsCheckPropagation, tsCollapsing, tsToggleFocusedSelection, tsClearPending, tsClearOnNewSelection, tsClipboardFlushing, tsCopyPending, tsCutPending, tsDrawSelPending, tsDrawSelecting, tsEditing, tsEditPending, tsExpanding, tsNodeHeightTracking, tsNodeHeightTrackPending, tsHint, tsInAnimation, tsIncrementalSearching, tsIncrementalSearchPending, tsIterating, tsKeyCheckPending, tsLeftButtonDown, tsLeftDblClick, tsMouseCheckPending, tsMiddleButtonDown, tsMiddleDblClick, tsNeedRootCountUpdate, tsOLEDragging, tsOLEDragPending, tsPainting, tsRightButtonDown, tsRightDblClick, tsPopupMenuShown, tsScrolling, tsScrollPending, tsSizing, tsStopValidation, 
+	tsStructureChangePending, tsSynchMode, tsThumbTracking, tsToggling, tsUpdateHiddenChildrenNeeded, tsUpdating, tsUseCache, tsUserDragObject, tsUseThemes, tsValidating, tsPreviouslySelectedLocked, tsValidationNeeded, tsVCLDragging, tsVCLDragPending, tsVCLDragFinished, tsWheelPanning, tsWheelScrolling, tsWindowCreating, tsUseExplorerTheme };
 
 typedef System::Set<Virtualtrees__61, Virtualtrees__61::tsCancelHintAnimation, Virtualtrees__61::tsUseExplorerTheme> TVirtualTreeStates;
 
@@ -1488,7 +1488,7 @@ struct DECLSPEC_DRECORD TVTVirtualNodeEnumerator
 {
 private:
 	TVirtualNode *FNode;
-	bool FCanModeNext;
+	bool FCanMoveNext;
 	TVTVirtualNodeEnumeration *FEnumeration;
 	PVirtualNode __fastcall GetCurrent(void);
 	
@@ -1550,6 +1550,7 @@ private:
 	System::Types::TRect FLastSelRect;
 	System::Types::TRect FNewSelRect;
 	System::Uitypes::TCursor FHotCursor;
+	THitInfo FLastHitInfo;
 	THintAnimationType FAnimationType;
 	TVTHintMode FHintMode;
 	TVTHintData FHintData;
@@ -1812,7 +1813,6 @@ private:
 	System::Byte __fastcall GetVerticalAlignment(PVirtualNode Node);
 	bool __fastcall GetVisible(PVirtualNode Node);
 	bool __fastcall GetVisiblePath(PVirtualNode Node);
-	void __fastcall HandleClickSelection(PVirtualNode LastFocused, PVirtualNode NewNode, System::Classes::TShiftState Shift, bool DragPending);
 	bool __fastcall HandleDrawSelection(int X, int Y);
 	bool __fastcall HasVisibleNextSibling(PVirtualNode Node);
 	bool __fastcall HasVisiblePreviousSibling(PVirtualNode Node);
@@ -1824,6 +1824,7 @@ private:
 	PVirtualNode __fastcall MakeNewNode(void);
 	int __fastcall PackArray(const TNodeArray TheArray, int Count);
 	void __fastcall PrepareBitmaps(bool NeedButtons, bool NeedLines);
+	void __fastcall FakeReadImageKind(System::Classes::TReader* Reader);
 	void __fastcall ReadOldOptions(System::Classes::TReader* Reader);
 	void __fastcall SetAlignment(const System::Classes::TAlignment Value);
 	void __fastcall SetAnimationDuration(const unsigned Value);
@@ -2117,6 +2118,7 @@ protected:
 	virtual void __fastcall HandleMouseDblClick(Winapi::Messages::TWMMouse &Message, const THitInfo &HitInfo);
 	virtual void __fastcall HandleMouseDown(Winapi::Messages::TWMMouse &Message, THitInfo &HitInfo);
 	virtual void __fastcall HandleMouseUp(Winapi::Messages::TWMMouse &Message, const THitInfo &HitInfo);
+	void __fastcall HandleClickSelection(PVirtualNode LastFocused, PVirtualNode NewNode, System::Classes::TShiftState Shift, bool DragPending);
 	virtual bool __fastcall HasImage _DEPRECATED_ATTRIBUTE1("Use GetImageWidth instead") (PVirtualNode Node, TVTImageKind Kind, TColumnIndex Column);
 	virtual bool __fastcall HasPopupMenu(PVirtualNode Node, TColumnIndex Column, System::Types::TPoint Pos);
 	virtual void __fastcall InitChildren(PVirtualNode Node);
@@ -2393,6 +2395,7 @@ public:
 	virtual void __fastcall CutToClipboard(void);
 	void __fastcall DeleteChildren(PVirtualNode Node, bool ResetHasChildren = false);
 	void __fastcall DeleteNode(PVirtualNode Node)/* overload */;
+	void __fastcall DeleteNodes(const TNodeArray pNodes);
 	virtual void __fastcall DeleteSelectedNodes(void);
 	HIDESBASE bool __fastcall Dragging(void);
 	virtual bool __fastcall EditNode(PVirtualNode Node, TColumnIndex Column);
@@ -2630,7 +2633,7 @@ class PASCALIMPLEMENTATION TStringTreeOptions : public TCustomStringTreeOptions
 	
 __published:
 	__property AnimationOptions = {default=0};
-	__property AutoOptions = {default=1369};
+	__property AutoOptions = {default=1881};
 	__property ExportMode = {default=0};
 	__property MiscOptions = {default=16809};
 	__property PaintOptions = {default=7008};
@@ -2894,6 +2897,7 @@ public:
 	__property Canvas;
 	__property RangeX;
 	__property LastDragEffect;
+	__property CheckImageKind = {default=1};
 	
 __published:
 	__property AccessibleName = {default=0};
@@ -2921,7 +2925,6 @@ __published:
 	__property ButtonStyle = {default=0};
 	__property BorderWidth = {default=0};
 	__property ChangeDelay = {default=0};
-	__property CheckImageKind = {default=1};
 	__property ClipboardFormats;
 	__property Color = {default=-16777211};
 	__property Colors;
@@ -3183,6 +3186,7 @@ protected:
 public:
 	__property Canvas;
 	__property LastDragEffect;
+	__property CheckImageKind = {default=1};
 	
 __published:
 	__property Action;
@@ -3208,7 +3212,6 @@ __published:
 	__property ButtonStyle = {default=0};
 	__property BorderWidth = {default=0};
 	__property ChangeDelay = {default=0};
-	__property CheckImageKind = {default=1};
 	__property ClipboardFormats;
 	__property Color = {default=-16777211};
 	__property Colors;
@@ -3411,7 +3414,7 @@ public:
 
 
 //-- var, const, procedure ---------------------------------------------------
-#define VTVersion L"6.4.1"
+#define VTVersion L"6.6.0"
 static const System::Int8 VTTreeStreamVersion = System::Int8(0x2);
 static const System::Int8 VTHeaderStreamVersion = System::Int8(0x6);
 static const System::Word CacheThreshold = System::Word(0x7d0);
@@ -3487,7 +3490,7 @@ extern DELPHI_PACKAGE bool MMXAvailable;
 extern DELPHI_PACKAGE bool IsWinVistaOrAbove;
 #define DefaultPaintOptions (System::Set<TVTPaintOption, TVTPaintOption::toHideFocusRect, TVTPaintOption::toShowFilteredNodes>() << TVTPaintOption::toShowButtons << TVTPaintOption::toShowDropmark << TVTPaintOption::toShowRoot << TVTPaintOption::toShowTreeLines << TVTPaintOption::toThemeAware << TVTPaintOption::toUseBlendedImages )
 #define DefaultAnimationOptions System::Set<System::Byte>()
-#define DefaultAutoOptions (System::Set<TVTAutoOption, TVTAutoOption::toAutoDropExpand, TVTAutoOption::toAutoBidiColumnOrdering>() << TVTAutoOption::toAutoDropExpand << TVTAutoOption::toAutoScrollOnExpand << TVTAutoOption::toAutoSort << TVTAutoOption::toAutoTristateTracking << TVTAutoOption::toAutoDeleteMovedNodes << TVTAutoOption::toAutoChangeScale )
+#define DefaultAutoOptions (System::Set<TVTAutoOption, TVTAutoOption::toAutoDropExpand, TVTAutoOption::toAutoBidiColumnOrdering>() << TVTAutoOption::toAutoDropExpand << TVTAutoOption::toAutoScrollOnExpand << TVTAutoOption::toAutoSort << TVTAutoOption::toAutoTristateTracking << TVTAutoOption::toAutoDeleteMovedNodes << TVTAutoOption::toDisableAutoscrollOnFocus << TVTAutoOption::toAutoChangeScale )
 #define DefaultSelectionOptions System::Set<System::Byte>()
 #define DefaultMiscOptions (System::Set<TVTMiscOption, TVTMiscOption::toAcceptOLEDrop, TVTMiscOption::toReverseFullExpandHotKey>() << TVTMiscOption::toAcceptOLEDrop << TVTMiscOption::toFullRepaintOnResize << TVTMiscOption::toInitOnSave << TVTMiscOption::toToggleOnDblClick << TVTMiscOption::toWheelPanning << TVTMiscOption::toEditOnClick )
 #define DefaultColumnOptions (System::Set<TVTColumnOption, TVTColumnOption::coAllowClick, TVTColumnOption::coStyleColor>() << TVTColumnOption::coAllowClick << TVTColumnOption::coDraggable << TVTColumnOption::coEnabled << TVTColumnOption::coParentBidiMode << TVTColumnOption::coParentColor << TVTColumnOption::coResizable << TVTColumnOption::coShowDropMark << TVTColumnOption::coVisible << TVTColumnOption::coAllowFocus << TVTColumnOption::coEditable )
