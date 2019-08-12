@@ -189,10 +189,6 @@
         <Defines>NDEBUG;$(Defines)</Defines>
     </PropertyGroup>
     <ItemGroup>
-        <LibFiles Include="C:\Program Files (x86)\Embarcadero\Delphi10Seattle\lib\win32\release\psdk\shell32.lib" Condition="'$(Platform)'=='Win32'">
-            <BuildOrder>20</BuildOrder>
-            <IgnorePath>true</IgnorePath>
-        </LibFiles>
         <DelphiCompile Include="..\..\Design\VirtualTreesReg.pas">
             <BuildOrder>3</BuildOrder>
         </DelphiCompile>
@@ -217,42 +213,12 @@
         <CppCompile Include="VirtualTreesCD.cpp">
             <BuildOrder>0</BuildOrder>
         </CppCompile>
+        <PackageImport Include="VirtualTreesCR.bpi">
+            <BuildOrder>21</BuildOrder>
+        </PackageImport>
         <PackageImport Include="xmlrtl.bpi">
             <BuildOrder>6</BuildOrder>
         </PackageImport>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.Actions.pas">
-            <BuildOrder>9</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.Classes.pas">
-            <BuildOrder>10</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.ClipBoard.pas">
-            <BuildOrder>11</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.Export.pas">
-            <BuildOrder>12</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.pas">
-            <BuildOrder>13</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.StyleHooks.pas">
-            <BuildOrder>14</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.Utils.pas">
-            <BuildOrder>15</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VirtualTrees.WorkerThread.pas">
-            <BuildOrder>16</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VTAccessibility.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\source\VTAccessibilityFactory.pas">
-            <BuildOrder>18</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VTHeaderPopup.pas">
-            <BuildOrder>19</BuildOrder>
-        </DelphiCompile>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -391,12 +357,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\17.0\BPL\VirtualTreesCD230.tds" Configuration="Debug" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>VirtualTreesCD.tds</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32250mt.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
@@ -414,6 +374,12 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64240mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\20.0\BPL\VirtualTreesCD260.bpl" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>VirtualTreesCD.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

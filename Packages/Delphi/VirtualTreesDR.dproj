@@ -96,17 +96,17 @@
         </DelphiCompile>
         <DCCReference Include="vcl.dcp"/>
         <DCCReference Include="vclx.dcp"/>
+        <DCCReference Include="..\..\Source\VirtualTrees.pas"/>
+        <DCCReference Include="..\..\Source\VirtualTrees.Accessibility.pas"/>
+        <DCCReference Include="..\..\Source\VirtualTrees.AccessibilityFactory.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.Actions.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.Classes.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.ClipBoard.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.Export.pas"/>
-        <DCCReference Include="..\..\Source\VirtualTrees.pas"/>
+        <DCCReference Include="..\..\Source\VirtualTrees.HeaderPopup.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.StyleHooks.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.Utils.pas"/>
         <DCCReference Include="..\..\Source\VirtualTrees.WorkerThread.pas"/>
-        <DCCReference Include="..\..\Source\VTAccessibility.pas"/>
-        <DCCReference Include="..\..\Source\VTAccessibilityFactory.pas"/>
-        <DCCReference Include="..\..\Source\VTHeaderPopup.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -157,7 +157,7 @@
                 </VersionInfoKeys>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\16.0\Bpl\VirtualTreesDR.bpl" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\20.0\Bpl\VirtualTreesDR260.bpl" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>VirtualTreesDR.bpl</RemoteName>
                         <Overwrite>true</Overwrite>

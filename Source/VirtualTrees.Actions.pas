@@ -29,6 +29,7 @@ type
     procedure ExecuteTarget(Target: TObject); override;
   published
     constructor Create(AOwner: TComponent); override;
+    function Update: Boolean; override;
     property Control: TBaseVirtualTree read fTree write SetControl;
     property OnAfterExecute: TNotifyEvent read fOnAfterExecute write fOnAfterExecute; // Executed after the action was performed
     property Caption;
@@ -66,6 +67,7 @@ type
     constructor Create(AOwner: TComponent); override;
   published
     property SelectedOnly;
+    property OnUpdate;
   end;
 
   // A standard action which unchecks nodes in a virtual treeview
@@ -112,6 +114,7 @@ procedure Register;
 implementation
 
 uses
+  WinApi.Windows,
   Vcl.Forms;
 
 procedure Register;
@@ -152,6 +155,15 @@ end;
 function TVirtualTreeAction.HandlesTarget(Target: TObject): Boolean;
 begin
   Result := (Target is TBaseVirtualTree);
+end;
+
+function TVirtualTreeAction.Update(): Boolean;
+begin
+  Result := inherited;
+  // If an OnUpdate event handler is assigned, TBasicAction.Update() will return True and so TBasicAction.UpdateTarget() will not be called.
+  // We would then end up with Control == nil. So trigger update of action manually.
+  if Result and Assigned(OnUpdate) then
+    SendAppMessage(CM_ACTIONUPDATE, 0, LPARAM(Self))
 end;
 
 procedure TVirtualTreeAction.UpdateTarget(Target: TObject);
@@ -199,7 +211,6 @@ end;
 procedure TVirtualTreePerItemAction.DoAfterExecute;
 begin
   inherited;
-  Control.EndUpdate;
   if fOldCursor <> crNone then
     Screen.Cursor := fOldCursor;
 end;
@@ -212,15 +223,16 @@ begin
   end;//if
   if Assigned(fOnBeforeExecute) then
     fOnBeforeExecute(Self);
-  Control.BeginUpdate();
 end;
 
 procedure TVirtualTreePerItemAction.ExecuteTarget(Target: TObject);
 begin
   DoBeforeExecute();
+  Control.BeginUpdate();
   try
     Control.IterateSubtree(nil, Self.fToExecute, nil, fFilter, true);
   finally
+    Control.EndUpdate();
     DoAfterExecute();
   end;
 end;

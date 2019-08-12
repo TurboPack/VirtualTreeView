@@ -1,3 +1,87 @@
+﻿V7.2.1: (07 Mar 2019)
+See: https://github.com/Virtual-TreeView/Virtual-TreeView/milestone/14?closed=1
+
+V7.2: (18 Feb 2019)
+See: https://github.com/Virtual-TreeView/Virtual-TreeView/milestone/12?closed=1
+
+V7.1: (27 Dec 2018)
+See: https://github.com/Virtual-TreeView/Virtual-TreeView/milestone/11?closed=1
+
+V7.0: (22 Jul 2018)
+  * The support for Windows XP/2003 has been dropped (issue #707). This means:
+    - We did not intentionally break XP support.
+	- We do no longer test on Windows XP/2003
+	- We may accept pull request for XP support if the code quality is sufficient.
+	- We recommend to use the V6 branch on Windows XP
+  * BREAKING CHANGE: Removed property TBaseVirtualTree.HintAnimation. Issue #730.
+  * BREAKING CHANGE: Renamed unit "VTHeaderPopup" to "VirtualTrees.HeaderPopup"
+                     Renamed unit "VTAccessibility" to "VirtualTrees.Accessibility"
+					 Renamed unit "VTAccessibilityFactory" to "VirtualTrees.AccessibilityFactory"
+  * Fixed issue #804: Remove MMXAvailable and related stuff
+  * Fixed issue #736: TVTDragManager.GetDataObject() should not use TVTDataObject in case the OnCreateDataObject event handler returned nil
+  * Fixed issue #756: OnMeasureItem called before data is assigned to node
+  * Fixed issue #745: Pressing SPACE should change the check-state of all selected nodes
+  * Fixed Issue #369: Centralize Left Content Margin calculation
+  * Pull Request #800: Fixed an incorrect calculation of the string edit link height. 
+  * Pull request #796: Fixed a bug where hints of type hmTooltip had incorrect (random) position when when HitPosition was not hiOnItemLabel.
+  * Fixed issue #796: Utility images are not DPI Scaled
+  * Fixed issue #794: ScrollIntoView() by column centers column also when center is false
+  * Fixed issue #789: Issues with toHideSelection
+  * Fixed issue #792: "Invalid window handle" when using styles
+  * Fixed issue #788: Wrong logic in GetEffectiveColor. coStyleColor has been added to DefaultColumnOptions.
+  * Fixed issue #783: TVirtualTreeColumns.HandleClick() may trigger sorting twice
+  * Fixed issue #781: "~" not working on German keyboard
+  * Fixed issue #779: Overlay Images with Index < 15 not drawn when OnGetImageIndexEx is used
+  * Fixed issue #777: Margin is applied right of tree lines, but should be applied left of them.
+  * Pull request #776: ScrollIntoView centers horizontally enen without Columns defined
+  * Fixed issue #764: When toAlwaysSelectNode is on, no node is auto-selected after the tree is cleared.
+  * Fixed issue #769: GetImageSize Fails if kind ikState and not assigned(StateImages)
+  * Fixed issue #766: Incorrect HotTrack with Touch-Scrolling
+  * Pull request #761: Add TBaseVirtualTree.OnAddHeaderPopupItem event and 'Size Column to Fit' menu item to TVTHeaderPopupMenu.
+  * Fixed issue #760: TVirtualTreeColumns.GetFirstVisibleColumn() cause AV if called between BeginUpdate() and EndUpdate()
+  * Fixed issue #759: TBaseVirtualTree.InitNode() overrides check state of top level nodes set in OnInitNode event handler
+  * Fixed issue #757: Header popup menu opens twice
+  * Fixed issue #758: The OnColumnVisibilityChanged event is not always fired
+  * Fixed issue #754: TBaseVirtualTree.InternalAddToSelection() may cause access violation. Thx@nminkov for the patch.
+  * Fixed issue #753: TVirtualTreeColumns.EndUpdate() resets column order 
+  * Fixed issue #752: HandleDrawSelection() does not correctly take horizontal scroll position into account
+  * Fixed issue #750: Plus/Minus sizes are not scaled in DPI aware applications
+  * Fixed issue #748: Per Monitor Dpi Scaling - Scrollbar Not Correct after Dpi Change
+  * Enhancement #735: Add event that is fired when a check state is needed.
+  * Fixed issue #743: Ugly drawing of selection in report mode when VCL Styles are used
+  * Fixed issue #742: TVTHeader.ParentFont should be True by default
+  * Fixed issue #740: TVTHeaderPopupMenu should not delete menu items added at designtime 
+  * Fixed issue #739: TVTHeader should use a popup menu if assigned 
+  * Fixed issue #738: Deadlock on application close in ReleaseThreadReference
+  * Fixed issue #737: Export problem when OnBeforeNodeExport is not assigned 
+  * Fixed issue #723: Turn event OnAfterNodeExport into a procedure. This is a BREAKING CHNAGE.
+  * Fixed issue #734: DefaultText property ignored
+  * Fixed issue #724: Error when reading "old" streams
+  * Fixed issue #397: Horizontal autoscroll on focus does not properly scroll node into view if column width is larger than client width  
+  * Fixed issue #727: Header not repainted after loading from stream
+  * Fixed issue #726: Incorrect header hot painting
+  * Fixed issue #722: Simplify custom header drawing while keeping default drawing
+  * Fixed issue #467: Multi level checkboxes and BeginUpdate/EndUpdate issue
+  * Fixed issue #391: Change property HotNode: Add a setter 
+  * Fixed issue #767: Remove type TOldVTOption and ReadOldOptions()
+  * Removed flag toDisableAutoscrollOnFocus from default configuration of a new Virtual TreeView to achieve a more common behavior with default properties.
+  * poResizeToFitItem is now set by default in TVTHeaderPopupMenu.Options
+
+V6.7: (29 May 2017)
+  * Fixed issue #714: Integer overflow in TBaseVirtualTree's InternalAddFromStream
+  * Fixed issue #500: Issue with node selection "from code" for disabled nodes with toLevelSelectConstraint option  
+  * Fixed issue #499: Incorrect behavior with toLevelSelectConstraint and ctrl+A 
+  * Fixed issue #649: Cell navigation problems with toAutoSpanColumns for left and right keys
+  * Fixed issue #712: Strange behaviour of AutoFitColumns
+  * Fixed issue #718: Shift + Right-Click should not extend selection
+  * Fixed issue #706: Integer overflow in DetermineScrollDirections when timeGetTime wraps
+  * Fixed issue #407: TVirtualDrawTree.InvalidateNode does not clear vsHeightMeasured
+  * Enhancement #669: Create sample project for C++ Builder
+  * Enhancement #708: New option toSyncCheckboxesWithSelection improves multi-selection for touch UI that synchonizes selection and check-state  
+  * Fixed issue #717: The option toUseExplorerTheme does not draw lines in place of buttons removed by toAutoHideButtons
+  * Fixed issue #716: Tab key navigation does not work properly with Auto Span Columns
+  * Fixed issue #720: A review of all Demos is needed to fix GetText, GetHint, etc to assign in DFM instead of assigning in FormCreate
+  
 V6.6 (04 Apr 2017)
   * Fixed issue #705: Added support for RAD Studio 10.2 Tokyo
   * Fixed issue #702: Access Violation at designtime when RootNodeCount is >0

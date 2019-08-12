@@ -221,6 +221,12 @@
         <PackageImport Include="xmlrtl.bpi">
             <BuildOrder>6</BuildOrder>
         </PackageImport>
+        <DelphiCompile Include="..\..\Source\VirtualTrees.Accessibility.pas">
+            <BuildOrder>15</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\Source\VirtualTrees.AccessibilityFactory.pas">
+            <BuildOrder>16</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\..\Source\VirtualTrees.Actions.pas">
             <BuildOrder>16</BuildOrder>
         </DelphiCompile>
@@ -233,6 +239,9 @@
         <DelphiCompile Include="..\..\Source\VirtualTrees.Export.pas">
             <BuildOrder>17</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\..\Source\VirtualTrees.HeaderPopup.pas">
+            <BuildOrder>17</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\..\Source\VirtualTrees.pas">
             <BuildOrder>17</BuildOrder>
         </DelphiCompile>
@@ -243,15 +252,6 @@
             <BuildOrder>17</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\..\Source\VirtualTrees.WorkerThread.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VTAccessibility.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VTAccessibilityFactory.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\..\Source\VTHeaderPopup.pas">
             <BuildOrder>17</BuildOrder>
         </DelphiCompile>
         <BuildConfiguration Include="Release">
@@ -417,12 +417,6 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\16.0\BPL\VirtualTreesCR.bpl" Configuration="Release" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>VirtualTreesCR.bpl</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64240mt.dll" Class="DependencyModule">
                     <Platform Name="Win64">
                         <Overwrite>true</Overwrite>
@@ -535,6 +529,12 @@
                 </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32220.dll" Class="DependencyModule">
                     <Platform Name="Win32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\20.0\BPL\VirtualTreesCR260.bpl" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>VirtualTreesCR.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

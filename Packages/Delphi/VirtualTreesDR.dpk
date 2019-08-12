@@ -35,17 +35,17 @@ requires
   vclx;
 
 contains
+  VirtualTrees in '..\..\Source\VirtualTrees.pas',
+  VirtualTrees.Accessibility in '..\..\Source\VirtualTrees.Accessibility.pas',
+  VirtualTrees.AccessibilityFactory in '..\..\Source\VirtualTrees.AccessibilityFactory.pas',
   VirtualTrees.Actions in '..\..\Source\VirtualTrees.Actions.pas',
   VirtualTrees.Classes in '..\..\Source\VirtualTrees.Classes.pas',
   VirtualTrees.ClipBoard in '..\..\Source\VirtualTrees.ClipBoard.pas',
   VirtualTrees.Export in '..\..\Source\VirtualTrees.Export.pas',
-  VirtualTrees in '..\..\Source\VirtualTrees.pas',
+  VirtualTrees.HeaderPopup in '..\..\Source\VirtualTrees.HeaderPopup.pas',
   VirtualTrees.StyleHooks in '..\..\Source\VirtualTrees.StyleHooks.pas',
   VirtualTrees.Utils in '..\..\Source\VirtualTrees.Utils.pas',
-  VirtualTrees.WorkerThread in '..\..\Source\VirtualTrees.WorkerThread.pas',
-  VTAccessibility in '..\..\Source\VTAccessibility.pas',
-  VTAccessibilityFactory in '..\..\Source\VTAccessibilityFactory.pas',
-  VTHeaderPopup in '..\..\Source\VTHeaderPopup.pas';
+  VirtualTrees.WorkerThread in '..\..\Source\VirtualTrees.WorkerThread.pas';
 
 end.
 
