@@ -43,3 +43,4 @@ VirtualTreeView.zip
 *.#00
 *.pch
 *.skincfg
+*.lib
