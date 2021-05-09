@@ -1,4 +1,4 @@
-unit VirtualTrees.StyleHooks;
+﻿unit VirtualTrees.StyleHooks;
 
 // The contents of this file are subject to the Mozilla Public License
 // Version 1.1 (the "License"); you may not use this file except in compliance
@@ -33,8 +33,9 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Winapi.UxTheme,
-
   System.Classes,
+  System.UITypes,
+  Vcl.Graphics,
   Vcl.Themes,
   Vcl.Forms,
   Vcl.Controls;
@@ -86,6 +87,8 @@ type
     procedure WMSize(var Msg: TMessage); message WM_SIZE;
     procedure WMMove(var Msg: TMessage); message WM_MOVE;
     procedure WMPosChanged(var Msg: TMessage); message WM_WINDOWPOSCHANGED;
+
+    procedure InitScrollBars;
   protected
     procedure CalcScrollBarsRect; virtual;
     procedure DrawHorzScrollBar(DC: HDC); virtual;
@@ -97,9 +100,23 @@ type
   public
     constructor Create(AControl: TWinControl); override;
     destructor Destroy; override;
+    /// Draws an expand arrow like used in the RAD Studio IDE.
+    /// The code is not yet dpi-aware.
+    class procedure DrawExpandArrow(pBitmap: TBitmap; pExpanded: Boolean; pColor: TColor = clNone);
     property HorzScrollRect;
     property VertScrollRect;
   end;
+
+type
+  /// prototype for the global callback VTStyleServicesFunc.
+  TVTStyleServicesFunc = function (AControl: TControl = nil): TCustomStyleServices;
+
+
+var
+  /// Callback that can be used to assign an alternative function to supply style services.
+  /// Needed for IDE plugins. See pull request #1011
+  VTStyleServicesFunc: TVTStyleServicesFunc = nil;
+
 
 implementation
 
@@ -107,7 +124,6 @@ uses
   System.SysUtils,
   System.Math,
   System.Types,
-  Vcl.Graphics,
   VirtualTrees;
 
 type
@@ -118,7 +134,7 @@ type
 // XE2+ VCL Style
 { TVclStyleScrollBarsHook }
 
-procedure TVclStyleScrollBarsHook.CalcScrollBarsRect;
+procedure TVclStyleScrollBarsHook.CalcScrollBarsRect();
 
   procedure CalcVerticalRects;
   var
@@ -143,6 +159,17 @@ procedure TVclStyleScrollBarsHook.CalcScrollBarsRect;
   end;
 
 begin
+  if ((FVertScrollWnd <> nil) and not FVertScrollWnd.HandleAllocated) or
+     ((FHorzScrollWnd <> nil) and not FHorzScrollWnd.HandleAllocated) then
+  begin  // Fixes issue #390
+    if FVertScrollWnd <> nil then
+      FreeAndNil(FVertScrollWnd);
+    if FHorzScrollWnd <> nil then
+      FreeAndNil(FHorzScrollWnd);
+
+    InitScrollBars;
+  end;
+
   CalcVerticalRects;
   CalcHorizontalRects;
 end;
@@ -150,12 +177,7 @@ end;
 constructor TVclStyleScrollBarsHook.Create(AControl: TWinControl);
 begin
   inherited;
-  FVertScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
-  FVertScrollWnd.StyleHook := Self;
-  FVertScrollWnd.Vertical := True;
-
-  FHorzScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
-  FHorzScrollWnd.StyleHook := Self;
+  InitScrollBars;
 
   VertSliderState := tsThumbBtnVertNormal;
   VertUpState := tsArrowBtnUpNormal;
@@ -165,6 +187,16 @@ begin
   HorzDownState := tsArrowBtnRightNormal;
 end;
 
+procedure TVclStyleScrollBarsHook.InitScrollBars;
+begin
+  FVertScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
+  FVertScrollWnd.StyleHook := Self;
+  FVertScrollWnd.Vertical := True;
+
+  FHorzScrollWnd := TScrollWindow.CreateParented(GetParent(Control.Handle));
+  FHorzScrollWnd.StyleHook := Self;
+end;
+
 destructor TVclStyleScrollBarsHook.Destroy;
 begin
   FVertScrollWnd.StyleHook := nil;
@@ -172,6 +204,32 @@ begin
   FHorzScrollWnd.StyleHook := nil;
   FreeAndNil(FHorzScrollWnd);
   inherited;
+end;
+
+class procedure TVclStyleScrollBarsHook.DrawExpandArrow(pBitmap: TBitmap; pExpanded: Boolean; pColor: TColor);
+const
+  Size: TRect = (Left: 0; Top: 0; Right: 12; Bottom: 12);
+  ArrowPoints: array[Boolean, 0..5] of TPoint = (
+    ((X:3; Y:1), (X:8; Y:6), (X:3; Y:11), (X:4; Y:11), (X:9; Y:6), (X:3; Y:0)),
+    ((X:1; Y:3), (X:6; Y:8), (X:11; Y:3), (X:11; Y:4), (X:6; Y:9), (X:0; Y:3))
+  );
+var
+  canvas: TCanvas;
+begin
+  pBitmap.SetSize(Size.Width, Size.Height);
+  canvas := pBitmap.Canvas;
+  canvas.FillRect(Size);
+  if pColor = clNone then
+  begin
+    if Assigned(VTStyleServicesFunc) then
+      canvas.Pen.Color := VTStyleServicesFunc.GetSystemColor(clGrayText)
+    else
+      canvas.Pen.Color := Vcl.Themes.StyleServices.GetSystemColor(clGrayText)
+  end
+  else
+    canvas.Pen.Color := pColor;
+  canvas.Pen.Width := 1;
+  canvas.Polyline(ArrowPoints[pExpanded]);
 end;
 
 procedure TVclStyleScrollBarsHook.DrawHorzScrollBar(DC: HDC);
@@ -195,23 +253,23 @@ begin
       R.Left := HorzUpButtonRect.Right;
       R.Right := HorzDownButtonRect.Left;
       Details := StyleServices.GetElementDetails(tsUpperTrackHorzNormal);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, R);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, R{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FHorzScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(HorzSliderState);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzSliderRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzSliderRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FHorzScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(HorzUpState)
       else
         Details := StyleServices.GetElementDetails(tsArrowBtnLeftDisabled);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzUpButtonRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzUpButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FHorzScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(HorzDownState)
       else
         Details := StyleServices.GetElementDetails(tsArrowBtnRightDisabled);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzDownButtonRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, HorzDownButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       R := HorzScrollRect;
       MoveWindowOrg(B.Canvas.Handle, R.Left, R.Top);
@@ -242,28 +300,28 @@ begin
 
       R.Bottom := B.Height + R.Top;
       Details := StyleServices.GetElementDetails(tsUpperTrackVertNormal);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, R);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, R {$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       R.Top := VertUpButtonRect.Bottom;
       R.Bottom := VertDownButtonRect.Top;
       Details := StyleServices.GetElementDetails(tsUpperTrackVertNormal);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, R);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, R{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FVertScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(VertSliderState);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, VertSliderRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, VertSliderRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FVertScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(VertUpState)
       else
         Details := StyleServices.GetElementDetails(tsArrowBtnUpDisabled);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, VertUpButtonRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, VertUpButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FVertScrollWnd.Enabled then
         Details := StyleServices.GetElementDetails(VertDownState)
       else
         Details := StyleServices.GetElementDetails(tsArrowBtnDownDisabled);
-      StyleServices.DrawElement(B.Canvas.Handle, Details, VertDownButtonRect);
+      StyleServices.DrawElement(B.Canvas.Handle, Details, VertDownButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       R := VertScrollRect;
       MoveWindowOrg(B.Canvas.Handle, R.Left, R.Top);
@@ -358,36 +416,42 @@ begin
     Inc(BorderSize, GetSystemMetrics(SM_CYEDGE));
 
   // VertScrollBarWindow
-  if FVertScrollWnd.Visible then
+  if Control.HandleAllocated then
   begin
-    R := VertScrollRect;
-    if Control.UseRightToLeftScrollBar then
-      OffsetRect(R, -R.Left + BorderSize, 0);
+    if FVertScrollWnd.Visible then
+    begin
+      R := VertScrollRect;
+      if Control.UseRightToLeftScrollBar then
+        OffsetRect(R, -R.Left + BorderSize, 0);
 
-    ShowWindow(FVertScrollWnd.Handle, SW_SHOW);
-    SetWindowPos(FVertScrollWnd.Handle, HWND_TOP,
-      Control.Left + R.Left + PaddingSize,
-      Control.Top + R.Top + HeaderHeight + PaddingSize,
-      R.Width,
-      Control.Height - HeaderHeight - ((PaddingSize + BorderSize) * 2), // <> R.Height
-      SWP_SHOWWINDOW);
-  end else
-    ShowWindow(FVertScrollWnd.Handle, SW_HIDE);
+      ShowWindow(FVertScrollWnd.Handle, SW_SHOW);
+      SetWindowPos(FVertScrollWnd.Handle, HWND_TOP,
+        Control.Left + R.Left + PaddingSize,
+        Control.Top + R.Top + HeaderHeight + PaddingSize,
+        R.Width,
+        Control.Height - HeaderHeight - ((PaddingSize + BorderSize) * 2), // <> R.Height
+        SWP_SHOWWINDOW);
+    end else
+      ShowWindow(FVertScrollWnd.Handle, SW_HIDE);
+  end;// if FVertScrollWnd
 
   // HorzScrollBarWindow
-  if FHorzScrollWnd.Visible then
+  if Control.HandleAllocated then
   begin
-    R := HorzScrollRect;
-    if Control.UseRightToLeftScrollBar then
-      OffsetRect(R, VertScrollRect.Width, 0);
+    if FHorzScrollWnd.Visible then
+    begin
+      R := HorzScrollRect;
+      if Control.UseRightToLeftScrollBar then
+        OffsetRect(R, VertScrollRect.Width, 0);
 
-    ShowWindow(FHorzScrollWnd.Handle, SW_SHOW);
-    SetWindowPos(FHorzScrollWnd.Handle, HWND_TOP,
-      Control.Left + R.Left + PaddingSize,
-      Control.Top + R.Top + HeaderHeight + PaddingSize,
-      R.Width, R.Height, SWP_SHOWWINDOW);
-  end else
-    ShowWindow(FHorzScrollWnd.Handle, SW_HIDE);
+      ShowWindow(FHorzScrollWnd.Handle, SW_SHOW);
+      SetWindowPos(FHorzScrollWnd.Handle, HWND_TOP,
+        Control.Left + R.Left + PaddingSize,
+        Control.Top + R.Top + HeaderHeight + PaddingSize,
+        R.Width, R.Height, SWP_SHOWWINDOW);
+    end else
+      ShowWindow(FHorzScrollWnd.Handle, SW_HIDE);
+  end;// if FHorzScrollWnd
 end;
 
 procedure TVclStyleScrollBarsHook.WMCaptureChanged(var Msg: TMessage);
@@ -480,7 +544,7 @@ begin
     begin
       if VertSliderState = tsThumbBtnVertPressed then
       begin
-        PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_ENDSCROLL, 0)), 0);
+        PostMessage(Handle, WM_VSCROLL, WPARAM(UInt32(SmallPoint(SB_ENDSCROLL, 0))), 0);
         FLeftMouseButtonDown := False;
         VertSliderState := tsThumbBtnVertNormal;
         PaintScroll;
@@ -498,7 +562,7 @@ begin
     begin
       if HorzSliderState = tsThumbBtnHorzPressed then
       begin
-        PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_ENDSCROLL, 0)), 0);
+        PostMessage(Handle, WM_HSCROLL, WPARAM(UInt32(SmallPoint(SB_ENDSCROLL, 0))), 0);
         FLeftMouseButtonDown := False;
         HorzSliderState := tsThumbBtnHorzNormal;
         PaintScroll;
@@ -535,7 +599,7 @@ begin
     SF.fMask := SIF_POS;
     SF.nPos := Round(ScrollPos);
     SetScrollInfo(Handle, SB_VERT, SF, False);
-    PostMessage(Handle, WM_VSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Min(SF.nPos, High(SmallInt)))), 0);
+    PostMessage(Handle, WM_VSCROLL, WPARAM(UInt32(SmallPoint(SB_THUMBPOSITION, Min(SF.nPos, High(SmallInt))))), 0);
 
     PaintScroll;
     Handled := True;
@@ -561,7 +625,7 @@ begin
     SF.fMask := SIF_POS;
     SF.nPos := Round(ScrollPos);
     SetScrollInfo(Handle, SB_HORZ, SF, False);
-    PostMessage(Handle, WM_HSCROLL, Integer(SmallPoint(SB_THUMBPOSITION, Min(SF.nPos, High(SmallInt)))), 0);
+    PostMessage(Handle, WM_HSCROLL, WPARAM(UInt32(SmallPoint(SB_THUMBPOSITION, Min(SF.nPos, High(SmallInt))))), 0);
 
     PaintScroll;
     Handled := True;

@@ -1,10 +1,10 @@
-unit VirtualTreeTests;
+﻿unit VirtualTreeTests;
 
 interface
 
 uses
   DUnitX.TestFramework,
-  Windows,
+  WinApi.Windows,
   VirtualTrees,
   VirtualTrees.Utils, Vcl.Graphics;
 

@@ -1,4 +1,4 @@
-unit VirtualStringTreeTests;
+﻿unit VirtualStringTreeTests;
 
 interface
 
