@@ -104,9 +104,17 @@
         <DCCReference Include="..\..\..\Source\VirtualTrees.Actions.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Classes.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.ClipBoard.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.Colors.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.DataObject.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.DragImage.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.DragnDrop.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.DrawTree.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.EditLink.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Export.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.Header.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.HeaderPopup.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.StyleHooks.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.Types.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Utils.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.WorkerThread.pas"/>
         <BuildConfiguration Include="Base">
@@ -159,14 +167,10 @@
                 </VersionInfoKeys>
             </Delphi.Personality>
             <Platforms>
-                <Platform value="Android">False</Platform>
-                <Platform value="Android64">False</Platform>
                 <Platform value="Linux64">False</Platform>
                 <Platform value="OSX64">False</Platform>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">True</Platform>
-                <Platform value="iOSDevice64">False</Platform>
-                <Platform value="iOSSimulator">False</Platform>
             </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>

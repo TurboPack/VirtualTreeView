@@ -217,8 +217,29 @@
         <DelphiCompile Include="..\..\..\Source\VirtualTrees.ClipBoard.pas">
             <BuildOrder>16</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.Colors.pas">
+            <BuildOrder>22</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.DataObject.pas">
+            <BuildOrder>26</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.DragImage.pas">
+            <BuildOrder>25</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.DragnDrop.pas">
+            <BuildOrder>24</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.DrawTree.pas">
+            <BuildOrder>23</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.EditLink.pas">
+            <BuildOrder>20</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\..\..\Source\VirtualTrees.Export.pas">
             <BuildOrder>17</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.Header.pas">
+            <BuildOrder>21</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\..\..\Source\VirtualTrees.HeaderPopup.pas">
             <BuildOrder>17</BuildOrder>
@@ -228,6 +249,9 @@
         </DelphiCompile>
         <DelphiCompile Include="..\..\..\Source\VirtualTrees.StyleHooks.pas">
             <BuildOrder>17</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\..\..\Source\VirtualTrees.Types.pas">
+            <BuildOrder>27</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\..\..\Source\VirtualTrees.Utils.pas">
             <BuildOrder>17</BuildOrder>
