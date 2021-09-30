@@ -65,14 +65,6 @@ interface
 {$HPPEMIT '#include <objidl.h>'}
 {$HPPEMIT '#include <oleidl.h>'}
 {$HPPEMIT '#include <oleacc.h>'}
-{$ifdef BCB}
-  {$HPPEMIT '#pragma comment(lib, "VirtualTreesCR")'}
-{$else}
-  {$HPPEMIT '#pragma comment(lib, "VirtualTreesDR")'}
-{$endif}
-{$HPPEMIT '#pragma comment(lib, "Shell32")'}
-{$HPPEMIT '#pragma comment(lib, "uxtheme")'}
-{$HPPEMIT '#pragma link "VirtualTrees.Accessibility"'}
 
 uses
   Winapi.Windows, Winapi.oleacc, Winapi.Messages, System.SysUtils, Vcl.Graphics,
