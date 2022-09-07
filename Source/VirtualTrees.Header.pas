@@ -826,7 +826,7 @@ end;
 procedure TVTHeader.SetMainColumn(Value : TColumnIndex);
 
 begin
-  if csLoading in Tree.ComponentState then
+  if (csLoading in Tree.ComponentState) or (csDestroying in Tree.ComponentState) then
     FMainColumn := Value
   else
   begin
@@ -837,13 +837,10 @@ begin
     if Value <> FMainColumn then
     begin
       FMainColumn := Value;
-      if not (csLoading in Tree.ComponentState) then
-      begin
-        Tree.MainColumnChanged;
-        if not (toExtendedFocus in Tree.TreeOptions.SelectionOptions) then
-          Tree.FocusedColumn := FMainColumn;
-        Tree.Invalidate;
-      end;
+      Tree.MainColumnChanged;
+      if not (toExtendedFocus in Tree.TreeOptions.SelectionOptions) then
+        Tree.FocusedColumn := FMainColumn;
+      Tree.Invalidate;
     end;
   end;
 end;
@@ -1490,16 +1487,14 @@ var
   //--------------- local function --------------------------------------------
 
   function HSplitterHit : Boolean;
-
-  var
-    NextCol : TColumnIndex;
-
   begin
     Result := (hoColumnResize in FOptions) and DetermineSplitterIndex(P);
     if Result and not InHeader(P) then
     begin
-      NextCol := FColumns.GetNextVisibleColumn(FColumns.TrackIndex);
-      if not (coFixed in FColumns[FColumns.TrackIndex].Options) or (NextCol <= NoColumn) or (coFixed in FColumns[NextCol].Options) or (P.Y > Integer(Tree.RangeY)) then
+      // Code commented due to issue #1067. What was the orginal inention of this code? It does not make much sense unless you allow column resize outside the header.
+      //NextCol := FColumns.GetNextVisibleColumn(FColumns.TrackIndex);
+      //if not (coFixed in FColumns[FColumns.TrackIndex].Options) or (NextCol <= NoColumn) or
+      //   (coFixed in FColumns[NextCol].Options) or (P.Y > Integer(Treeview.FRangeY)) then
         Result := False;
     end;
   end;
@@ -1778,7 +1773,7 @@ begin
             with TWMNCLButtonUp(Message) do
             begin
               P := FOwner.ScreenToClient(Point(XCursor, YCursor));
-              TVirtualTreeColumnsCracker(FColumns).HandleClick(P, mbLeft, False, False);
+              TVirtualTreeColumnsCracker(FColumns).HandleClick(P, mbLeft, True, False);
               TBaseVirtualTreeCracker(FOwner).DoHeaderMouseUp(mbLeft, GetShiftState, P.X, P.Y + Integer(FHeight));
             end;
         end;
@@ -1869,9 +1864,9 @@ begin
         begin
           NewCursor := Screen.Cursors[Tree.Cursor];
           if IsVSplitterHit and ((hoHeightResize in FOptions) or (csDesigning in Tree.ComponentState)) then
-            NewCursor := Screen.Cursors[crVertSplit]
+            NewCursor := Screen.Cursors[crVSplit]
           else if IsHSplitterHit then
-            NewCursor := Screen.Cursors[crHeaderSplit];
+            NewCursor := Screen.Cursors[crHSplit];
 
           if not (csDesigning in Tree.ComponentState) then
             Tree.DoGetHeaderCursor(NewCursor);
@@ -5388,10 +5383,7 @@ var
 
 begin
   // Adjust size of the header bitmap
-  with TWithSafeRect(TreeViewControl.HeaderRect) do
-  begin
-    FHeaderBitmap.SetSize(Max(Right, R.Right - R.Left), Bottom);
-  end;
+  FHeaderBitmap.SetSize(Max(TreeViewControl.HeaderRect.Right, R.Right - R.Left), TreeViewControl.HeaderRect.Bottom);
 
   VisibleFixedWidth := GetVisibleFixedWidth;
 
@@ -5414,8 +5406,7 @@ begin
     PaintFixedArea;
 
   // Blit the result to target.
-  with TWithSafeRect(R) do
-    BitBlt(DC, Left, Top, Right - Left, Bottom - Top, FHeaderBitmap.Canvas.Handle, Left, Top, SRCCOPY);
+  BitBlt(DC, R.Left, R.Top, R.Right - R.Left, R.Bottom - R.Top, FHeaderBitmap.Canvas.Handle, R.Left, R.Top, SRCCOPY);
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -5702,13 +5693,10 @@ var
           end;
 
           FHasImage := True;
-          with TWithSafeRect(FImageRect) do
-          begin
-            Left := GlyphPos.X;
-            Top := GlyphPos.Y;
-            Right := Left + ColImageInfo.Images.Width;
-            Bottom := Top + ColImageInfo.Images.Height;
-          end;
+          FImageRect.Left := GlyphPos.X;
+          FImageRect.Top := GlyphPos.Y;
+          FImageRect.Right := FImageRect.Left + ColImageInfo.Images.Width;
+          FImageRect.Bottom := FImageRect.Top + ColImageInfo.Images.Height;
         end;
 
         // caption

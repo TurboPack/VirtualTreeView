@@ -2020,6 +2020,7 @@ type
     function GetLastNoInit(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetLastChild(Node: PVirtualNode): PVirtualNode;
     function GetLastChildNoInit(Node: PVirtualNode): PVirtualNode;
+    function GetLastSelected(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
     function GetLastVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
       IncludeFiltered: Boolean = False): PVirtualNode;
     function GetLastVisibleChild(Node: PVirtualNode; IncludeFiltered: Boolean = False): PVirtualNode;
@@ -3023,11 +3024,6 @@ begin
 
   // Register the tree reference clipboard format. Others will be handled in InternalClipboarFormats.
   CF_VTREFERENCE := RegisterClipboardFormat(CFSTR_VTREFERENCE);
-
-  // Delphi (at least version 6 and lower) does not provide a standard split cursor.
-  // Hence we have to load our own.
-  Screen.Cursors[crHeaderSplit] := LoadCursor(HInstance, 'VT_HEADERSPLIT');
-  Screen.Cursors[crVertSplit] := LoadCursor(HInstance, 'VT_VERTSPLIT');
 
   // Clipboard format registration.
   // Native clipboard format. Needs a new identifier and has an average priority to allow other formats to take over.
@@ -4435,8 +4431,7 @@ begin
               Pen.Color := FColors.UnfocusedSelectionBorderColor;
             end;
 
-            with TWithSafeRect(R) do
-              RoundRect(Left, Top, Right, Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
+            RoundRect(R.Left, R.Top, R.Right, R.Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
           end
           else
           begin
@@ -7806,7 +7801,10 @@ begin
         else
         begin
           SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, @ScrollLines, 0);
-          ScrollAmount := Trunc(WheelFactor * ScrollLines * FHeader.Columns.GetScrollWidth);
+          if ScrollLines = WHEEL_PAGESCROLL then
+            ScrollAmount := Trunc(WheelFactor * (ClientWidth - FHeader.Columns.GetVisibleFixedWidth))
+          else
+            ScrollAmount := Integer(Trunc(WheelFactor * ScrollLines * FHeader.Columns.GetScrollWidth));
         end;
         SetOffsetX(FOffsetX + RTLFactor * ScrollAmount);
       end;
@@ -7883,8 +7881,8 @@ begin
       if vsExpanded in Node.States then
         Item.state := Item.state or TVIS_EXPANDED;
 
-      // Construct state image and overlay image indices. They are one based, btw.
-      // and zero means there is no image.
+      // Construct state image and overlay image indices. They are zero based, btw.
+      // and -1 means there is no image.
       ImageIndex := -1;
       DoGetImageIndex(Node, ikState, -1, Ghosted, ImageIndex);
       Item.state := Item.state or Byte(IndexToStateImageMask(ImageIndex + 1));
@@ -9408,7 +9406,7 @@ begin
                   Node := HitInfo.HitNode;
 
                 if CanSplitterResizeNode(P, Node, HitInfo.HitColumn) then
-                  NewCursor := crVertSplit;
+                  NewCursor := crVSplit;
               end;
             end;
 
@@ -10062,7 +10060,7 @@ begin
         Run.NodeHeight := MulDiv(Run.NodeHeight, M, D);
         // The next three lines fix issue #1000
         lNewNodeTotalHeight := MulDiv(Run.TotalHeight, M, D);
-        FRoot.TotalHeight := FRoot.TotalHeight + lNewNodeTotalHeight - Run.TotalHeight; // 1 EIntOverflow exception seen here in debug build in 01/2021
+        FRoot.TotalHeight := Cardinal(Int64(FRoot.TotalHeight) + Int64(lNewNodeTotalHeight) - Int64(Run.TotalHeight)); // Avoiding EIntOverflow exception.
         Run.TotalHeight := lNewNodeTotalHeight;
       end;
       Run := GetNextNoInit(Run);
@@ -14089,8 +14087,6 @@ var
   //--------------- end local functions ---------------------------------------
 
 begin
-  if IsEmpty then
-    Exit; // Nothing to do
   if [tsWheelPanning, tsWheelScrolling] * FStates <> [] then
   begin
     StopWheelPanning;
@@ -14118,6 +14114,9 @@ begin
     // Repeat the hit test as an OnExit event might got triggered that could modify the tree.
     GetHitTestInfoAt(Message.XPos, Message.YPos, True, HitInfo);
   end;
+
+  if IsEmpty then
+    Exit; // Nothing to do
 
   // Keep clicked column in case the application needs it.
   FHeader.Columns.ClickIndex := HitInfo.HitColumn;
@@ -14164,7 +14163,7 @@ begin
   IsLabelHit := not AltPressed and not (toSimpleDrawSelection in FOptions.SelectionOptions) and
     ((hiOnItemLabel in HitInfo.HitPositions) or (hiOnNormalIcon in HitInfo.HitPositions));
 
-  IsCellHit := not AltPressed and not IsLabelHit and Assigned(HitInfo.HitNode) and
+  IsCellHit := not IsLabelHit and Assigned(HitInfo.HitNode) and
     ([hiOnItemButton, hiOnItemCheckBox, hiNoWhere] * HitInfo.HitPositions = []) and
     ((toFullRowSelect in FOptions.SelectionOptions) or
     ((toGridExtensions in FOptions.MiscOptions) and (HitInfo.HitColumn > NoColumn)));
@@ -14784,19 +14783,19 @@ begin
     Inc(FSelectionCount, AddedNodesSize);
 
     // post process added nodes
+    // First set vsSelected flag for all newly selected nodes, then fire event
+    for I := 0 to AddedNodesSize - 1 do
+      Include(NewItems[I].States, vsSelected);
+
     for I := 0 to AddedNodesSize - 1 do
     begin
       PTmpNode := NewItems[I];
-      //sync path note: on click, multi-select ctrl-click and draw selection
-      Include(PTmpNode.States, vsSelected);
       // call on add event callbackevent
       if Assigned(FOnAddToSelection) then
         FOnAddToSelection(Self, PTmpNode);
       if SyncCheckstateWithSelection[PTmpNode] then
         checkstate[PTmpNode] := csCheckedNormal;
     end;
-
-    Assert(FSelectionCount = (lPreviousSelectedCount + NewLength), 'Fixing issue #487 seems to ahve caused a problem here.')
   end;
 end;
 
@@ -15425,17 +15424,14 @@ begin
         Inc(EdgeSize, BevelWidth);
       if BevelOuter <> bvNone then
         Inc(EdgeSize, BevelWidth);
-      with TWithSafeRect(RC) do
-      begin
-        if beLeft in BevelEdges then
-          Inc(Left, EdgeSize);
-        if beTop in BevelEdges then
-          Inc(Top, EdgeSize);
-        if beRight in BevelEdges then
-          Dec(Right, EdgeSize);
-        if beBottom in BevelEdges then
-          Dec(Bottom, EdgeSize);
-      end;
+      if beLeft in BevelEdges then
+        Inc(RC.Left, EdgeSize);
+      if beTop in BevelEdges then
+        Inc(RC.Top, EdgeSize);
+      if beRight in BevelEdges then
+        Dec(RC.Right, EdgeSize);
+      if beBottom in BevelEdges then
+        Dec(RC.Bottom, EdgeSize);
     end;
 
     // Repaint only the part in the original clipping region and not yet drawn parts.
@@ -16007,20 +16003,17 @@ begin
     begin
       case Alignment of
         taLeftJustify:
-          with TWithSafeRect(InnerRect) do
-            if Left + NodeWidth < Right then
-              Right := Left + NodeWidth;
+          if InnerRect.Left + NodeWidth < InnerRect.Right then
+            InnerRect.Right := InnerRect.Left + NodeWidth;
         taCenter:
-          with TWithSafeRect(InnerRect) do
-            if (Right - Left) > NodeWidth then
-            begin
-              Left := (Left + Right - NodeWidth) div 2;
-              Right := Left + NodeWidth;
-            end;
+          if (InnerRect.Right - InnerRect.Left) > NodeWidth then
+          begin
+            InnerRect.Left := (InnerRect.Left + InnerRect.Right - NodeWidth) div 2;
+            InnerRect.Right := InnerRect.Left + NodeWidth;
+          end;
         taRightJustify:
-          with TWithSafeRect(InnerRect) do
-            if (Right - Left) > NodeWidth then
-              Left := Right - NodeWidth;
+          if (InnerRect.Right - InnerRect.Left) > NodeWidth then
+            InnerRect.Left := InnerRect.Right - NodeWidth;
       end;
     end;
 
@@ -16046,8 +16039,7 @@ begin
                 if (toUseBlendedSelection in FOptions.PaintOptions) then
                   AlphaBlendSelection(Brush.Color)
                 else
-                  with TWithSafeRect(InnerRect) do
-                    RoundRect(Left, Top, Right, Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
+                  RoundRect(InnerRect.Left, InnerRect.Top, InnerRect.Right, InnerRect.Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
           end
           else
           begin
@@ -16081,8 +16073,7 @@ begin
                 if (toUseBlendedSelection in FOptions.PaintOptions) then
                   AlphaBlendSelection(Brush.Color)
                 else
-                  with TWithSafeRect(InnerRect) do
-                    RoundRect(Left, Top, Right, Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
+                  RoundRect(InnerRect.Left, InnerRect.Top, InnerRect.Right, InnerRect.Bottom, FSelectionCurveRadius, FSelectionCurveRadius);
           end;
       end;
     end;
@@ -17298,7 +17289,7 @@ procedure TBaseVirtualTree.VclStyleChanged();
   // Updates the member FVclStyleEnabled, should be called initially and when the VCL style changes
 
 begin
-  FVclStyleEnabled := StyleServices.Enabled and not StyleServices.IsSystemStyle and not (csDesigning in ComponentState);
+  FVclStyleEnabled := StyleServices.Enabled and not StyleServices.IsSystemStyle {$IF CompilerVersion < 35} and not (csDesigning in ComponentState) {$ifend};
   Header.StyleChanged();
 end;
 
@@ -17745,7 +17736,12 @@ begin
       DoUpdating(usUpdate);
   end;
   Inc(FUpdateCount);
-  DoStateChange([tsUpdating]);
+  try
+    DoStateChange([tsUpdating]);
+  except
+    EndUpdate();
+    raise;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -19463,6 +19459,16 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+function TBaseVirtualTree.GetLastSelected(ConsiderChildrenAbove: Boolean = False): PVirtualNode;
+
+// Returns the last node in the current selection while optionally considering toChildrenAbove.
+
+begin
+  Result := GetPreviousSelected(nil, ConsiderChildrenAbove);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 function TBaseVirtualTree.GetLastVisible(Node: PVirtualNode = nil; ConsiderChildrenAbove: Boolean = True;
   IncludeFiltered: Boolean = False): PVirtualNode;
 
@@ -20681,7 +20687,7 @@ begin
   if FSelectionCount > 0 then
   begin
     if (Node = nil) or (Node = FRoot) then
-      Result := FRoot.LastChild
+      Result := GetLastNoInit(nil, ConsiderChildrenAbove)
     else
       Result := GetPreviousNoInit(Node, ConsiderChildrenAbove);
     while Assigned(Result) and not (vsSelected in Result.States) do
@@ -22048,6 +22054,7 @@ var
   PaintWidth: Integer;
   CurrentNodeHeight: Integer;
   lUseSelectedBkColor: Boolean; // determines if the dotted grid lines need to be painted in selection color of background color
+  lEmptyListTextMargin: Integer;
 
   CellIsTouchingClientRight: Boolean;
   CellIsInLastColumn: Boolean;
@@ -22311,13 +22318,11 @@ begin
                             begin
                               if BidiMode = bdLeftToRight then
                               begin
-                                DrawDottedHLine(PaintInfo, CellRect.Left + IfThen(toFixedIndent in FOptions.PaintOptions, 1, IndentSize) * Integer(FIndent), CellRect.Right - 1,
-                                  CellRect.Bottom - 1);
+                                DrawDottedHLine(PaintInfo, CellRect.Left + PaintInfo.Offsets[ofsCheckBox] - fImagesMargin, CellRect.Right - 1, CellRect.Bottom - 1);
                               end
                               else
                               begin
-                                DrawDottedHLine(PaintInfo, CellRect.Left, CellRect.Right - IfThen(toFixedIndent in FOptions.PaintOptions, 1, IndentSize) * Integer(FIndent) - 1,
-                                  CellRect.Bottom - 1);
+                                DrawDottedHLine(PaintInfo, CellRect.Left, CellRect.Right - IfThen(toFixedIndent in FOptions.PaintOptions, 1, IndentSize) * Integer(FIndent) - 1, CellRect.Bottom - 1);
                               end;
                             end
                             else
@@ -22454,8 +22459,8 @@ begin
 
                 // Put the constructed node image onto the target canvas.
                 if not (poUnbuffered in PaintOptions) then
-                  with TWithSafeRect(TargetRect), NodeBitmap do
-                    BitBlt(TargetCanvas.Handle, Left, Top, Width, Height, Canvas.Handle, Window.Left, 0, SRCCOPY);
+                  with NodeBitmap do
+                    BitBlt(TargetCanvas.Handle, TargetRect.Left, TargetRect.Top, TargetRect.Width, TargetRect.Height, Canvas.Handle, Window.Left, 0, SRCCOPY);
               end;
             end;
 
@@ -22617,12 +22622,14 @@ begin
       begin
         // output a message if no items are to display
         Canvas.Font := Self.Font;
+        Canvas.Font.Size := Round(Canvas.Font.Size * 1.25);
         SetBkMode(TargetCanvas.Handle, TRANSPARENT);
-        R.Left := OffSetX + 2;
-        R.Top := 2;
-        R.Right := R.Left + Width - 2;
-        R.Bottom := Height -2;
-        TargetCanvas.Font.Color := clGrayText;
+        lEmptyListTextMargin := ScaledPixels(Max(cDefaultTextMargin, Self.TextMargin) * 2);
+        R.Left := OffSetX + lEmptyListTextMargin;
+        R.Top := lEmptyListTextMargin;
+        R.Right := R.Left + Width - lEmptyListTextMargin;
+        R.Bottom := Height - lEmptyListTextMargin;
+        TargetCanvas.Font.Color := StyleServices.GetStyleFontColor(TStyleFont.sfTreeItemTextDisabled);//clGrayText;
         TargetCanvas.TextRect(R, FEmptyListMessage, [tfNoClip, tfLeft, tfWordBreak, tfExpandTabs]);
       end;
 
@@ -22695,23 +22702,20 @@ begin
 
     // Check that we have a valid rectangle.
     PaintRect := TreeRect;
-    with TWithSafeRect(TreeRect) do
+    if TreeRect.Left < 0 then
     begin
-      if Left < 0 then
-      begin
-        PaintTarget.X := -Left;
-        PaintRect.Left := 0;
-      end
-      else
-        PaintTarget.X := 0;
-      if Top < 0 then
-      begin
-        PaintTarget.Y := -Top;
-        PaintRect.Top := 0;
-      end
-      else
-        PaintTarget.Y := 0;
-    end;
+      PaintTarget.X := -TreeRect.Left;
+      PaintRect.Left := 0;
+    end
+    else
+      PaintTarget.X := 0;
+    if TreeRect.Top < 0 then
+    begin
+      PaintTarget.Y := -TreeRect.Top;
+      PaintRect.Top := 0;
+    end
+    else
+      PaintTarget.Y := 0;
 
     Image := TBitmap.Create;
     with Image do
@@ -24613,7 +24617,7 @@ begin
         if Node = FDropTargetNode then
         begin
           if ((FLastDropMode = dmOnNode) or (vsSelected in Node.States)) then
-            Canvas.Font.Color := FColors.GetSelectedNodeFontColor(Focused or (toPopupMode in FOptions.PaintOptions));
+            Canvas.Font.Color := FColors.GetSelectedNodeFontColor(True); // See #1083, since drop highlight color is chosen independent of the focus state, we need to choose Font color also independent of it.
         end
         else
           if vsSelected in Node.States then
@@ -24639,9 +24643,8 @@ var
   TripleWidth: Integer;
   R: TRect;
   DrawFormat: Cardinal;
-  Size: TSize;
   Height: Integer;
-
+  lNewNodeWidth: Integer;
 begin
   InitializeTextProperties(PaintInfo);
   with PaintInfo do
@@ -24682,9 +24685,13 @@ begin
         // If the font has been changed then the ellipsis width must be recalculated.
         TripleWidth := 0;
         // Recalculate also the width of the normal text.
-        GetTextExtentPoint32W(Canvas.Handle, PWideChar(Text), Length(Text), Size);
-        NodeWidth := Size.cx + 2 * FTextMargin;
-      end;
+        lNewNodeWidth := DoTextMeasuring(Canvas, Node, Column, Text).cx + 2 * FTextMargin;
+        if lNewNodeWidth <> NodeWidth then
+        begin
+          NodeWidth := lNewNodeWidth;
+          InvalidateNode(Node); // repaint node and selection as the font chnaged, see #1084
+        end;//if
+      end;// if FFontChanged
 
       DrawFormat := DT_NOPREFIX or DT_VCENTER or DT_SINGLELINE;
       if BidiMode <> bdLeftToRight then
@@ -25912,3 +25919,4 @@ finalization
   FinalizeGlobalStructures();
 
 end.
+
