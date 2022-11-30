@@ -11695,7 +11695,10 @@ begin
       IntfData._Release();
   end;
 
-  FreeMem(Node);
+  try
+    FreeMem(Node);
+  except
+  end;
   if Self.UpdateCount = 0 then
     EnsureNodeSelected();
 end;
