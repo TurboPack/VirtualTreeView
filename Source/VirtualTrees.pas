@@ -1475,6 +1475,7 @@ type
     function GetDoubleBuffered: Boolean;
     procedure SetDoubleBuffered(const Value: Boolean);
     function GetVclStyleEnabled: Boolean; inline;
+    function NotIsZombie(const ANode: PVirtualNode): Boolean;
     procedure SetOnPrepareButtonImages(const Value: TVTPrepareButtonImagesEvent);
 
   protected
@@ -20915,7 +20916,7 @@ begin
         begin
           repeat
             // Is there a previous sibling node?
-            if Assigned(Result.PrevSibling) then
+            if NotIsZombie(Result.PrevSibling) then
             begin
               Result := Result.PrevSibling;
               if vsVisible in Result.States then
@@ -23005,6 +23006,19 @@ function TBaseVirtualTree.GetDefaultHintKind: TVTHintKind;
 
 begin
   Result := vhkText;
+end;
+
+function TBaseVirtualTree.NotIsZombie(const ANode: PVirtualNode): Boolean;
+begin
+  Result := Assigned(ANode);
+  if Result then
+  begin
+    try
+      if vsVisible in ANode.States then;
+    except
+      Result := False;
+    end;
+  end;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
