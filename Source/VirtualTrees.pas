@@ -9114,7 +9114,10 @@ begin
   StopTimer(StructureChangeTimer);
 
   if not (csDesigning in ComponentState) and (toAcceptOLEDrop in FOptions.MiscOptions) then
-    RevokeDragDrop(Handle);
+  begin
+    if WindowHandle <> 0 then
+      RevokeDragDrop(WindowHandle);
+  end;
 
   // Clean up other stuff.
   DeleteObject(FDottedBrush);
