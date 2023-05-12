@@ -24986,7 +24986,10 @@ begin
     Canvas.Font := Font;
     DoPaintText(Node, Canvas, Column, ttNormal);
 
-    Inc(Result, DoTextMeasuring(Canvas, Node, Column, Text).cx);
+    try
+      Inc(Result, DoTextMeasuring(Canvas, Node, Column, Text).cx);
+    except
+    end;
   end;
 end;
 
