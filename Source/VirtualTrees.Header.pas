@@ -1,5 +1,11 @@
 ﻿unit VirtualTrees.Header;
 
+{$IF COMPILERVERSION = 36}
+  {$IF DECLARED(RTLVersion122)}
+    {$WARN OVERLOADING_ARRAY_PROPERTY OFF}
+  {$IFEND}
+{$IFEND}
+
 interface
 
 uses
