@@ -1,5 +1,11 @@
 # TurboPack VirtualTree
 
+Please refer to [https://github.com/JAM-Software/Virtual-TreeView](https://github.com/JAM-Software/Virtual-TreeView) for the most up to date version.
+
+This repository is currently set to archive state.
+---------
+
+
 Updated for **10.3 Rio** / VER330 / PKG 260
 
 You can still access [10.2 Tokyo](https://github.com/TurboPack/VirtualTreeView/releases/tag/102Tokyo) and [10.1 Berlin](https://github.com/TurboPack/VirtualTreeView/releases/tag/101Berlin) versions too.
