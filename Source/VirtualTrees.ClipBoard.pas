@@ -32,8 +32,7 @@ uses
   Winapi.Windows,
   Winapi.ActiveX,
   System.Classes,
-  VirtualTrees,
-  VirtualTrees.Types;
+  VirtualTrees.BaseTree;
 
 type
   TClipboardFormatEntry = record
@@ -102,7 +101,8 @@ type
 var
   // Clipboard format IDs used in OLE drag'n drop and clipboard transfers.
   CF_VIRTUALTREE,
-  CF_VTREFERENCE,
+  CF_VTREFERENCE,       // Reference to a virtual tree
+  CF_VTHEADERREFERENCE, // A drag and drop of the column header took place
   CF_VRTF,
   CF_VRTFNOOBJS,   // Unfortunately CF_RTF* is already defined as being
                    // registration strings so I have to use different identifiers.
@@ -416,3 +416,4 @@ finalization
   FreeAndNil(_List);
 
 end.
+

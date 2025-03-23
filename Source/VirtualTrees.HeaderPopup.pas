@@ -68,8 +68,8 @@ interface
 uses
   System.Classes,
   Vcl.Menus,
-  VirtualTrees,
-  VirtualTrees.Types;
+  VirtualTrees.Types,
+  VirtualTrees.BaseTree;
 
 type
   TVTHeaderPopupOption = (
@@ -95,7 +95,7 @@ type
     procedure OnMenuItemClick(Sender: TObject); virtual;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure Popup(x, y: Integer); override;
+    procedure Popup(x, y: TDimension); override;
   published
     property Options: TVTHeaderPopupOptions read FOptions write FOptions default [poResizeToFitItem];
 
@@ -108,7 +108,8 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Types,
+  Winapi.Windows,
+  System.Types,
   VirtualTrees.Header;
 
 resourcestring
@@ -165,7 +166,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-procedure TVTHeaderPopupMenu.Popup(x, y: Integer);
+procedure TVTHeaderPopupMenu.Popup(x, y: TDimension);
 var
   ColPos: TColumnPosition;
   ColIdx: TColumnIndex;
@@ -214,7 +215,7 @@ begin
         with Columns[ColIdx] do
         begin
           if coVisible in Options then
-            Inc(VisibleCounter);
+            System.Inc(VisibleCounter);
           DoAddHeaderPopupItem(ColIdx, Cmd);
           if Cmd <> apHidden then
           begin
@@ -272,4 +273,3 @@ begin
 end;
 
 end.
-

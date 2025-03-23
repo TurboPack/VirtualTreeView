@@ -9,7 +9,7 @@
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectGuid>{B62F3689-96E1-47D5-9FB2-2A2718281FDB}</ProjectGuid>
         <ProjectName Condition="'$(ProjectName)'==''">VirtualTreesDR</ProjectName>
-        <ProjectVersion>20.2</ProjectVersion>
+        <ProjectVersion>20.3</ProjectVersion>
         <TargetedPlatforms>3</TargetedPlatforms>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -103,6 +103,9 @@
         <DCCReference Include="..\..\..\Source\VirtualTrees.Accessibility.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.AccessibilityFactory.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Actions.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.AncestorVCL.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.BaseAncestorVCL.pas"/>
+        <DCCReference Include="..\..\..\Source\VirtualTrees.BaseTree.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Classes.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.ClipBoard.pas"/>
         <DCCReference Include="..\..\..\Source\VirtualTrees.Colors.pas"/>
