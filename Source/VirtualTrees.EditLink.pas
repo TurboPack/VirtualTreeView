@@ -1,4 +1,4 @@
-﻿unit VirtualTrees.EditLink;
+unit VirtualTrees.EditLink;
 
 // Base class for inplace node editors implementing IVTEditLink interface
 // and default node editor.
@@ -12,7 +12,8 @@ uses
   Vcl.Controls,
   Vcl.StdCtrls,
   VirtualTrees,
-  VirtualTrees.Types;
+  VirtualTrees.Types,
+  VirtualTrees.BaseTree;
 
 type
   //Edit support Classes.
@@ -147,6 +148,8 @@ type
     FTextBounds : TRect;                      //Smallest rectangle around the text.
     function GetEdit: TVTEdit;                //Getter for the FEdit member;
     procedure SetEdit(const Value : TVTEdit); //Setter for the FEdit member;
+
+    procedure InitializeSelection; virtual;
   public
     constructor Create;
 
@@ -196,6 +199,7 @@ begin
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
+
 procedure TVTEdit.ClearRefLink;
 begin
   FRefLink := nil
@@ -508,6 +512,7 @@ begin
   end;
 end;
 
+//----------------------------------------------------------------------------------------------------------------------
 procedure TVTEdit.KeyPress(var Key : Char);
 begin
   if (Key = #13) and Assigned(FLink) and not (vsMultiline in FLink.Node.States) then
@@ -523,7 +528,7 @@ begin
     PostMessage(Handle, CM_RELEASE, 0, 0);
 end;
 
-//----------------- TBaseEditLink ------------------------------------------------------------------------------------
+//----------------- TBaseEditLink --------------------------------------------------------------------------------------
 
 procedure TBaseEditLink.SetEdit(const Value : TControl);
 begin
@@ -737,6 +742,13 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
+procedure TStringEditLink.InitializeSelection;
+begin
+  Edit.SelectAll;
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 procedure TStringEditLink.SetEdit(const Value : TVTEdit);
 begin
   inherited SetEdit(Value);
@@ -749,7 +761,7 @@ begin
   Result := inherited;
   if Result then
   begin
-    Edit.SelectAll;
+    InitializeSelection;
     Edit.AutoAdjustSize;
   end;
 end;
@@ -815,7 +827,7 @@ procedure TStringEditLink.SetBounds(R : TRect);
 //Sets the outer bounds of the edit control and the actual edit area in the control.
 
 var
-  lOffset, tOffset, Height : Integer;
+  lOffset, tOffset, Height : TDimension;
   offsets : TVTOffsets;
 begin
   if not FStopping then

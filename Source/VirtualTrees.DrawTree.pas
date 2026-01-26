@@ -5,13 +5,25 @@ interface
 uses
   System.Types,
   System.Classes,
+  Vcl.Themes,
   VirtualTrees.Types,
-  VirtualTrees;
-
+  VirtualTrees.BaseTree,
+{$IFDEF VT_FMX}
+  VirtualTrees.AncestorFMX,
+{$ELSE}
+  VirtualTrees.AncestorVCL
+{$ENDIF}
+  ;
 
 type
+{$IFDEF VT_FMX}
+  TVTAncestor = TVTAncestorFMX;
+{$ELSE}
+  TVTAncestor = TVTAncestorVcl;
+{$ENDIF}
+
   // Tree descendant to let an application draw its stuff itself.
-  TCustomVirtualDrawTree = class(TBaseVirtualTree)
+  TCustomVirtualDrawTree = class(TVTAncestor)
   private
     FOnDrawNode: TVTDrawNodeEvent;
     FOnGetCellContentMargin: TVTGetCellContentMarginEvent;
@@ -19,7 +31,7 @@ type
   protected
     function DoGetCellContentMargin(Node: PVirtualNode; Column: TColumnIndex;
       CellContentMarginType: TVTCellContentMarginType = ccmtAllSides; Canvas: TCanvas = nil): TPoint; override;
-    function DoGetNodeWidth(Node: PVirtualNode; Column: TColumnIndex; Canvas: TCanvas = nil): Integer; override;
+    function DoGetNodeWidth(Node: PVirtualNode; Column: TColumnIndex; Canvas: TCanvas = nil): TDimension; override;
     procedure DoPaintNode(var PaintInfo: TVTPaintInfo); override;
     function GetDefaultHintKind: TVTHintKind; override;
 
@@ -155,6 +167,8 @@ type
     property OnClick;
     property OnCollapsed;
     property OnCollapsing;
+    property OnColumnChecked;
+    property OnColumnChecking;
     property OnColumnClick;
     property OnColumnDblClick;
     property OnColumnExport;
@@ -260,6 +274,9 @@ type
 
 implementation
 
+uses
+  VirtualTrees.StyleHooks;
+
 //----------------------------------------------------------------------------------------------------------------------
 
 function TCustomVirtualDrawTree.DoGetCellContentMargin(Node: PVirtualNode; Column: TColumnIndex;
@@ -276,7 +293,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TCustomVirtualDrawTree.DoGetNodeWidth(Node: PVirtualNode; Column: TColumnIndex; Canvas: TCanvas = nil): Integer;
+function TCustomVirtualDrawTree.DoGetNodeWidth(Node: PVirtualNode; Column: TColumnIndex; Canvas: TCanvas = nil): TDimension;
 
 begin
   Result := 2 * TextMargin;
@@ -326,6 +343,10 @@ begin
   Result := TVirtualTreeOptions;
 end;
 
+initialization
+  TCustomStyleEngine.RegisterStyleHook(TVirtualDrawTree, TVclStyleScrollBarsHook);
 
+finalization
+  TCustomStyleEngine.UnRegisterStyleHook(TVirtualDrawTree, TVclStyleScrollBarsHook);
 
 end.

@@ -5,10 +5,13 @@ interface
 uses
   WinApi.ActiveX,
   WinApi.Windows,
-  VirtualTrees.Types,
-  Vcl.Controls;
+  System.Classes,
+  Vcl.Controls,
+  VirtualTrees.Types;
 
 type
+  IDataObject = WinApi.ActiveX.IDataObject;
+
   // IDataObject.SetData support
   TInternalStgMedium = packed record
     Format : TClipFormat;
@@ -21,6 +24,7 @@ type
   TVTDataObject = class(TInterfacedObject, IDataObject)
   private
     FOwner                  : TCustomControl;          // The tree which provides clipboard or drag data.
+    FHeader                 : TPersistent;             // The tree which provides clipboard or drag data.
     FForClipboard           : Boolean;                 // Determines which data to render with GetData.
     FFormatEtcArray         : TFormatEtcArray;
     FInternalStgMediumArray : TInternalStgMediumArray; // The available formats in the DataObject
@@ -28,7 +32,7 @@ type
   protected
     function CanonicalIUnknown(const TestUnknown : IUnknown) : IUnknown;
     function EqualFormatEtc(FormatEtc1, FormatEtc2 : TFormatEtc) : Boolean;
-    function FindFormatEtc(TestFormatEtc : TFormatEtc; const FormatEtcArray : TFormatEtcArray) : integer;
+    function FindFormatEtc(TestFormatEtc : TFormatEtc; const FormatEtcArray : TFormatEtcArray) : Integer;
     function FindInternalStgMedium(Format : TClipFormat) : PStgMedium;
     function HGlobalClone(HGlobal : THandle) : THandle;
     function RenderInternalOLEData(const FormatEtcIn : TFormatEtc; var Medium : TStgMedium; var OLEResult : HResult) : Boolean;
@@ -39,13 +43,14 @@ type
     property InternalStgMediumArray : TInternalStgMediumArray read FInternalStgMediumArray write FInternalStgMediumArray;
     property Owner : TCustomControl read FOwner;
   public
-    constructor Create(AOwner : TCustomControl; ForClipboard : Boolean); virtual;
+    constructor Create(AOwner : TCustomControl; ForClipboard : Boolean); overload;
+    constructor Create(AHeader : TPersistent; AOwner : TCustomControl); overload;
     destructor Destroy; override;
 
-    function DAdvise(const FormatEtc : TFormatEtc; advf : integer; const advSink : IAdviseSink; out dwConnection : integer) : HResult; virtual; stdcall;
-    function DUnadvise(dwConnection : integer) : HResult; virtual; stdcall;
+    function DAdvise(const FormatEtc : TFormatEtc; advf : Integer; const advSink : IAdviseSink; out dwConnection : Integer) : HResult; virtual; stdcall;
+    function DUnadvise(dwConnection : Integer) : HResult; virtual; stdcall;
     function EnumDAdvise(out enumAdvise : IEnumStatData) : HResult; virtual; stdcall;
-    function EnumFormatEtc(Direction : integer; out EnumFormatEtc : IEnumFormatEtc) : HResult; virtual; stdcall;
+    function EnumFormatEtc(Direction : Integer; out EnumFormatEtc : IEnumFormatEtc) : HResult; virtual; stdcall;
     function GetCanonicalFormatEtc(const FormatEtc : TFormatEtc; out FormatEtcOut : TFormatEtc) : HResult; virtual; stdcall;
     function GetData(const FormatEtcIn : TFormatEtc; out Medium : TStgMedium) : HResult; virtual; stdcall;
     function GetDataHere(const FormatEtc : TFormatEtc; out Medium : TStgMedium) : HResult; virtual; stdcall;
@@ -56,9 +61,9 @@ type
 implementation
 
 uses
-  VirtualTrees,
   VirtualTrees.ClipBoard,
-  VirtualTrees.DragnDrop;
+  VirtualTrees.DragnDrop,
+  VirtualTrees.BaseTree;
 
 type
   TVTCracker = class(TBaseVirtualTree);
@@ -71,14 +76,23 @@ begin
 
   FOwner := AOwner;
   FForClipboard := ForClipboard;
-  TVTCracker(FOwner).GetNativeClipboardFormats(FFormatEtcArray);
+  if Assigned(FOWner) then
+    TVTCracker(FOwner).GetNativeClipboardFormats(FFormatEtcArray);
+end;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+constructor TVTDataObject.Create(AHeader: TPersistent; AOwner : TCustomControl);
+begin
+  Create(AOwner, False);
+  FHeader := AHeader;
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 destructor TVTDataObject.Destroy;
 var
-  I         : integer;
+  I         : Integer;
   StgMedium : PStgMedium;
 begin
   // Cancel a pending clipboard operation if this data object was created for the clipboard and
@@ -125,9 +139,9 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TVTDataObject.FindFormatEtc(TestFormatEtc : TFormatEtc; const FormatEtcArray : TFormatEtcArray) : integer;
+function TVTDataObject.FindFormatEtc(TestFormatEtc : TFormatEtc; const FormatEtcArray : TFormatEtcArray) : Integer;
 var
-  I : integer;
+  I : Integer;
 begin
   Result := - 1;
   for I := 0 to High(FormatEtcArray) do
@@ -144,7 +158,7 @@ end;
 
 function TVTDataObject.FindInternalStgMedium(Format : TClipFormat) : PStgMedium;
 var
-  I : integer;
+  I : Integer;
 begin
   Result := nil;
   for I := 0 to High(InternalStgMediumArray) do
@@ -209,7 +223,7 @@ function TVTDataObject.StgMediumIncRef(const InStgMedium : TStgMedium; var OutSt
 // This way when the caller frees the structure it sees the unkForRelease is not nil and calls Release on the object
 // instead of destroying the actual data.
 var
-  Len : integer;
+  Len : Integer;
 begin
   Result := S_OK;
 
@@ -270,7 +284,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TVTDataObject.DAdvise(const FormatEtc : TFormatEtc; advf : integer; const advSink : IAdviseSink; out dwConnection : integer) : HResult;
+function TVTDataObject.DAdvise(const FormatEtc : TFormatEtc; advf : Integer; const advSink : IAdviseSink; out dwConnection : Integer) : HResult;
 // Advise sink management is greatly simplified by the IDataAdviseHolder interface.
 // We use this interface and forward all concerning calls to it.
 begin
@@ -283,7 +297,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TVTDataObject.DUnadvise(dwConnection : integer) : HResult;
+function TVTDataObject.DUnadvise(dwConnection : Integer) : HResult;
 begin
   if FAdviseHolder = nil then
     Result := E_NOTIMPL
@@ -303,7 +317,7 @@ end;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-function TVTDataObject.EnumFormatEtc(Direction : integer; out EnumFormatEtc : IEnumFormatEtc) : HResult;
+function TVTDataObject.EnumFormatEtc(Direction : Integer; out EnumFormatEtc : IEnumFormatEtc) : HResult;
 var
   NewList : TEnumFormatEtc;
 begin
@@ -333,11 +347,25 @@ function TVTDataObject.GetData(const FormatEtcIn : TFormatEtc; out Medium : TStg
 // Data is requested by clipboard or drop target. This method dispatchs the call
 // depending on the data being requested.
 var
-  I    : integer;
+  I    : Integer;
   Data : PVTReference;
 begin
+  // See if this is a header column drag and drop
+  if (FormatEtcIn.cfFormat = CF_VTHEADERREFERENCE) and Assigned(FHeader) then
+  begin
+    Medium.HGlobal := GlobalAlloc(GHND or GMEM_SHARE, SizeOf(TVTReference));
+    Data := GlobalLock(Medium.HGlobal);
+    Data.Process := GetCurrentProcessID;
+    Data.Tree := TBaseVirtualTree(FOwner);
+    GlobalUnLock(Medium.HGlobal);
+    Medium.tymed := TYMED_HGLOBAL;
+    Medium.unkForRelease := nil;
+    Exit(S_OK);
+  end; // if CF_VTHEADERREFERENCE
+
+
   // The tree reference format is always supported and returned from here.
-  if FormatEtcIn.cfFormat = CF_VTREFERENCE then
+  if (FormatEtcIn.cfFormat = CF_VTREFERENCE) and Assigned(FOWner) then
   begin
     // Note: this format is not used while flushing the clipboard to avoid a dangling reference
     //       when the owner tree is destroyed before the clipboard data is replaced with something else.
@@ -352,31 +380,29 @@ begin
       GlobalUnLock(Medium.HGlobal);
       Medium.tymed := TYMED_HGLOBAL;
       Medium.unkForRelease := nil;
-      Result := S_OK;
+      Exit(S_OK);
     end;
-  end
-  else
-  begin
-    try
-      // See if we accept this type and if not get the correct return value.
-      Result := QueryGetData(FormatEtcIn);
-      if Result = S_OK then
+  end; // if CF_VTREFERENCE
+
+  try
+    // See if we accept this type and if not get the correct return value.
+    Result := QueryGetData(FormatEtcIn);
+    if Result = S_OK then
+    begin
+      for I := 0 to High(FormatEtcArray) do
       begin
-        for I := 0 to High(FormatEtcArray) do
+        if EqualFormatEtc(FormatEtcIn, FormatEtcArray[I]) then
         begin
-          if EqualFormatEtc(FormatEtcIn, FormatEtcArray[I]) then
-          begin
-            if not RenderInternalOLEData(FormatEtcIn, Medium, Result) then
-              Result := TVTCracker(FOwner).RenderOLEData(FormatEtcIn, Medium, FForClipboard);
-            Break;
-          end;
+          if not RenderInternalOLEData(FormatEtcIn, Medium, Result) then
+            Result := TVTCracker(FOwner).RenderOLEData(FormatEtcIn, Medium, FForClipboard);
+          Break;
         end;
       end;
-    except
-      ZeroMemory(@Medium, SizeOf(Medium));
-      Result := E_FAIL;
     end;
-  end;
+  except
+    ZeroMemory(@Medium, SizeOf(Medium));
+    Result := E_FAIL;
+  end; // try..except
 end;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -390,7 +416,7 @@ end;
 
 function TVTDataObject.QueryGetData(const FormatEtc : TFormatEtc) : HResult;
 var
-  I : integer;
+  I : Integer;
 begin
   Result := DV_E_CLIPFORMAT;
   for I := 0 to High(FFormatEtcArray) do
@@ -424,7 +450,7 @@ function TVTDataObject.SetData(const FormatEtc : TFormatEtc; var Medium : TStgMe
 // Allows dynamic adding to the IDataObject during its existance. Most noteably it is used to implement
 // IDropSourceHelper and allows to set a special format for optimized moves during a shell transfer.
 var
-  Index          : integer;
+  Index          : Integer;
   LocalStgMedium : PStgMedium;
 begin
   // See if we already have a format of that type available.
