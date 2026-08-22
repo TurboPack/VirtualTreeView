@@ -1,4 +1,4 @@
-﻿unit VirtualTreeTests;
+unit VirtualTreeTests;
 
 interface
 
