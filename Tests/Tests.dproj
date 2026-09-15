@@ -7,8 +7,9 @@
         <MainSource>Tests.dpr</MainSource>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectGuid>{D37CFA56-3B13-4C93-91F7-DDC227C20116}</ProjectGuid>
-        <ProjectVersion>19.2</ProjectVersion>
+        <ProjectVersion>20.3</ProjectVersion>
         <TargetedPlatforms>3</TargetedPlatforms>
+        <ProjectName Condition="'$(ProjectName)'==''">Tests</ProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -83,6 +84,8 @@
         <DCC_Define>madExcept;$(DCC_Define)</DCC_Define>
         <DCC_MapFile>3</DCC_MapFile>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
+        <VerInfo_Locale>1033</VerInfo_Locale>
+        <AppDPIAwarenessMode>none</AppDPIAwarenessMode>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <DCC_MapFile>3</DCC_MapFile>
@@ -100,6 +103,18 @@
         <DCCReference Include="VirtualTreeTests.pas"/>
         <DCCReference Include="VirtualStringTreeTests.pas"/>
         <DCCReference Include="VTWorkerThreadIssue1001Tests.pas"/>
+        <DCCReference Include="VTOnEditCancelledTests.pas"/>
+        <DCCReference Include="VTOnDrawTextTests.pas"/>
+        <DCCReference Include="VTCellSelectionTests.pas"/>
+        <DCCReference Include="VirtualTrees.MouseUtils.pas"/>
+        <DCCReference Include="VTCellSelectionTests.VisibilityForm.pas">
+            <Form>VisibilityForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="VTCellSelectionTests.VTSelectionTestForm.pas">
+            <Form>SelectionTestForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

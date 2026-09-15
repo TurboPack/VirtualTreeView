@@ -22,8 +22,6 @@
 // (C) 1999-2001 digital publishing AG. All Rights Reserved.
 //----------------------------------------------------------------------------------------------------------------------
 //
-// For a list of recent changes please see file CHANGES.TXT
-//
 // Credits for their valuable assistance and code donations go to:
 //   Freddy Ertl, Marian Aldenhoevel, Thomas Bogenrieder, Jim Kuenemann, Werner Lehmann, Jens Treichler,
 //   Paul Gallagher (IBO tree), Ondrej Kelle, Ronaldo Melo Ferraz, Heri Bender, Roland Beduerftig (BCB)
@@ -111,6 +109,8 @@ type
   TVTOperationKind         = VirtualTrees.Types.TVTOperationKind;
   TVTUpdateState           = VirtualTrees.Types.TVTUpdateState;
   TVTCellPaintMode         = VirtualTrees.Types.TVTCellPaintMode;
+  TVTCell                  = VirtualTrees.Types.TVTCell;
+  TVTCellArray             = VirtualTrees.Types.TVTCellArray;
   TVirtualNodeState        = VirtualTrees.Types.TVirtualNodeState;
   TVirtualNodeInitState    = VirtualTrees.Types.TVirtualNodeInitState;
   TVirtualNodeInitStates   = VirtualTrees.Types.TVirtualNodeInitStates;
@@ -125,6 +125,7 @@ type
   TVTSelectionOption       = VirtualTrees.Types.TVTSelectionOption;
   TVSTTextType             = VirtualTrees.Types.TVSTTextType;
   TVTHintMode              = VirtualTrees.Types.TVTHintMode;
+  TItemEraseAction         = VirtualTrees.Types.TItemEraseAction;
   TBaseVirtualTree         = VirtualTrees.BaseTree.TBaseVirtualTree;
   IVTEditLink              = VirtualTrees.BaseTree.IVTEditLink;
   TVTHeaderNotifyEvent     = VirtualTrees.BaseTree.TVTHeaderNotifyEvent;
@@ -218,6 +219,9 @@ type
     Column: TColumnIndex; const Text: string; var Extent: TDimension) of object;
   TVTDrawTextEvent = procedure(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
     Column: TColumnIndex; const Text: string; const CellRect: TRect; var DefaultDraw: Boolean) of object;
+  TVTDrawTextExEvent = procedure(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+    Column: TColumnIndex; const Text: string; const CellRect: TRect;
+    var DefaultDraw: Boolean; var DrawFormat: Cardinal) of object;
 
   /// Event arguments of the OnGetCellText event
   TVSTGetCellTextEventArgs = record
@@ -248,6 +252,7 @@ type
     FOnMeasureTextWidth: TVTMeasureTextEvent;      // used to adjust the width of the cells
     FOnMeasureTextHeight: TVTMeasureTextEvent;
     FOnDrawText: TVTDrawTextEvent;                 // used to custom draw the node text
+    FOnDrawTextEx: TVTDrawTextExEvent;             // a more advanced version, with all parameters
     /// Returns True if the property DefaultText has a value that differs from the default value, False otherwise.
     function IsDefaultTextStored(): Boolean;
     function GetImageText(Node: PVirtualNode; Kind: TVTImageKind;
@@ -314,6 +319,7 @@ type
     property OnMeasureTextWidth: TVTMeasureTextEvent read FOnMeasureTextWidth write FOnMeasureTextWidth;
     property OnMeasureTextHeight: TVTMeasureTextEvent read FOnMeasureTextHeight write FOnMeasureTextHeight;
     property OnDrawText: TVTDrawTextEvent read FOnDrawText write FOnDrawText;
+    property OnDrawTextEx: TVTDrawTextExEvent read FOnDrawTextEx write FOnDrawTextEx;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy(); override;
@@ -340,7 +346,9 @@ type
     property Text[Node: PVirtualNode; Column: TColumnIndex]: string read GetText write SetText;
   end;
 
-  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
+  {$if CompilerVersion >= 33}
+  [ComponentPlatformsAttribute(pfidWindows)]
+  {$ifend}
   TVirtualStringTree = class(TCustomVirtualStringTree)
   private
     function GetOptions: TStringTreeOptions;
@@ -469,6 +477,7 @@ type
     property OnCanSplitterResizeHeader;
     property OnCanSplitterResizeNode;
     property OnChange;
+    property OnChangeCell;
     property OnChecked;
     property OnChecking;
     property OnClick;
@@ -494,6 +503,7 @@ type
     property OnDragDrop;
     property OnDrawHint;
     property OnDrawText;
+    property OnDrawTextEx;
     property OnEditCancelled;
     property OnEdited;
     property OnEditing;
@@ -811,11 +821,11 @@ begin
       begin
         if Node = DropTargetNode then
         begin
-          if ((LastDropMode = dmOnNode) or (vsSelected in Node.States)) then
+          if (LastDropMode = dmOnNode) or (vsSelected in Node.States) or InternalIsCellSelected(Node, Column) then
             Canvas.Font.Color := Colors.GetSelectedNodeFontColor(True); // See #1083, since drop highlight color is chosen independent of the focus state, we need to choose Font color also independent of it.
         end
         else
-          if vsSelected in Node.States then
+          if (vsSelected in Node.States) or InternalIsCellSelected(Node, Column) then
           begin
             Canvas.Font.Color := Colors.GetSelectedNodeFontColor(Focused or (toPopupMode in TreeOptions.PaintOptions));
           end;
@@ -931,13 +941,13 @@ begin
     begin
       if Node = DropTargetNode then
       begin
-        if (LastDropMode = dmOnNode) or (vsSelected in Node.States) then
+        if (LastDropMode = dmOnNode) or (vsSelected in Node.States) or InternalIsCellSelected(Node, Column) then
           Canvas.Font.Color := Colors.GetSelectedNodeFontColor(Focused or (toPopupMode in TreeOptions.PaintOptions))
         else
           Canvas.Font.Color := Colors.NodeFontColor;
       end
       else
-        if vsSelected in Node.States then
+        if (vsSelected in Node.States) or InternalIsCellSelected(Node, Column) then
         begin
           if Focused or (toPopupMode in TreeOptions.PaintOptions) then
             Canvas.Font.Color := Colors.GetSelectedNodeFontColor(Focused or (toPopupMode in TreeOptions.PaintOptions))
@@ -1427,12 +1437,14 @@ var
   lText: string;
 begin
   DefaultDraw := True;
-  if Assigned(FOnDrawText) then
+  if not Assigned(FOnDrawTextEx) and Assigned(FOnDrawText) then
     FOnDrawText(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, Text, CellRect, DefaultDraw);
   if ((DrawFormat and DT_RIGHT) > 0) and (TFontStyle.fsItalic in PaintInfo.Canvas.Font.Style) then
     lText := Text + ' '
   else
     lText := Text;
+  if Assigned(FOnDrawTextEx) then
+    FOnDrawTextEx(Self, PaintInfo.Canvas, PaintInfo.Node, PaintInfo.Column, lText, CellRect, DefaultDraw, DrawFormat);
   if DefaultDraw then
     Winapi.Windows.DrawTextW(PaintInfo.Canvas.Handle, PWideChar(lText), Length(lText), CellRect, DrawFormat);
 end;
